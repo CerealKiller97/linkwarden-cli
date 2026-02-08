@@ -4,7 +4,7 @@ A command-line interface for the [Linkwarden](https://linkwarden.app) platform. 
 
 ## ✨ Prerequisites
 
-- **Go 1.24+** (for building from source)
+- **Go 1.25+** (for building from source)
 - A Linkwarden account and API token
 
 ## 🚀 Installation
@@ -21,10 +21,10 @@ go build -o linkwarden-cli .
 
 The CLI requires two environment variables:
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `LINKWARDEN_TOKEN` | Yes | — | Your Linkwarden API token (generate via `tokens generate` or your Linkwarden settings) |
-| `LINKWARDEN_URL` | No | `https://cloud.linkwarden.app` | Your Linkwarden instance URL (use for self-hosted instances) |
+| Variable           | Required | Default                        | Description                                                                            |
+| ------------------ | -------- | ------------------------------ | -------------------------------------------------------------------------------------- |
+| `LINKWARDEN_TOKEN` | Yes      | —                              | Your Linkwarden API token (generate via `tokens generate` or your Linkwarden settings) |
+| `LINKWARDEN_URL`   | No       | `https://cloud.linkwarden.app` | Your Linkwarden instance URL (use for self-hosted instances)                           |
 
 Configure before running any command:
 
