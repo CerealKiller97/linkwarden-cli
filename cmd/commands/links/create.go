@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"strconv"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/dto"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/services/collection"
@@ -31,6 +32,7 @@ func Create() *cobra.Command {
 	// cmd.SetHelpTemplate()
 
 	cmd.Flags().String("file", "", "File to upload.")
+	cmd.Flags().String("collection", "", "Collection to upload to.")
 
 	if err := cmd.MarkFlagRequired("file"); err != nil {
 		return nil
@@ -45,38 +47,6 @@ type item struct {
 }
 
 func execute(cmd *cobra.Command, _ []string) error {
-	collectionService := collection.New(
-		utils.GetInstanceURL(),
-		utils.GetLinkwardenToken(),
-		zerolog.New(os.Stdout),
-	)
-
-	collections, err := collectionService.Get(cmd.Context())
-	if err != nil {
-		log.Err(err).Msg("Failed to get collections")
-		return err
-	}
-
-	collectionMap := make(map[string]int, len(collections))
-
-	collectionNames := make([]string, 0, len(collections))
-
-	for _, item := range collections {
-		collectionMap[item.Name] = item.ID
-		collectionNames = append(collectionNames, item.Name)
-	}
-
-	prompt := promptui.Select{
-		Label: "Select Collection where you want to upload links to:",
-		Items: collectionNames,
-	}
-
-	_, collection, err := prompt.Run()
-	if err != nil {
-		log.Err(err).Msg("Prompt Failed")
-		return err
-	}
-
 	filePath := cmd.Flag("file").Value.String()
 	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
@@ -96,6 +66,45 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return errFileEmpty
 	}
 
+	collectionService := collection.New(
+		utils.GetInstanceURL(),
+		utils.GetLinkwardenToken(),
+		zerolog.New(os.Stdout),
+	)
+
+	collections, err := collectionService.Get(cmd.Context())
+	if err != nil {
+		log.Err(err).Msg("Failed to get collections")
+		return err
+	}
+
+	collectionMap := make(map[string]int, len(collections))
+	collectionIDTONameMap := make(map[int]string, len(collections))
+	collectionNames := make([]string, 0, len(collections))
+
+	for _, item := range collections {
+		collectionMap[item.Name] = item.ID
+		collectionIDTONameMap[item.ID] = item.Name
+		collectionNames = append(collectionNames, item.Name)
+	}
+
+	collectionID := cmd.Flag("collection").Value.String()
+	collection := ""
+
+	// Show interactive prompt if a collection is not specified
+	if collectionID == "" {
+		prompt := promptui.Select{
+			Label: "Select Collection where you want to upload links to:",
+			Items: collectionNames,
+		}
+
+		_, collection, err = prompt.Run()
+		if err != nil {
+			log.Err(err).Msg("Prompt Failed")
+			return err
+		}
+	}
+
 	success := 0
 	failed := 0
 
@@ -110,9 +119,21 @@ func execute(cmd *cobra.Command, _ []string) error {
 	stepSize := 100.0 / float64(len(data))
 
 	for _, item := range data {
-		coll := dto.Collection{
-			ID:   collectionMap[collection],
-			Name: collection,
+		var coll dto.Collection
+		if collection == "" {
+			collectionIDInt, err := strconv.Atoi(collectionID)
+			if err != nil {
+				return err
+			}
+			coll = dto.Collection{
+				ID:   collectionIDInt,
+				Name: collectionIDTONameMap[collectionIDInt],
+			}
+		} else {
+			coll = dto.Collection{
+				ID:   collectionMap[collection],
+				Name: collection,
+			}
 		}
 
 		_, err = linkService.Create(cmd.Context(), dto.CreateLinkRequest{
