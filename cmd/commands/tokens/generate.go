@@ -6,10 +6,8 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/services/token"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/manifoldco/promptui"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -65,18 +63,16 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	tokenService := token.New(
-		utils.GetInstanceURL(),
-		utils.GetLinkwardenToken(),
-		zerolog.New(os.Stdout),
-	)
+	client := utils.NewLinkwardenClient()
 
-	token, err := tokenService.Create(cmd.Context(), promptResult, int(stringToInt(expirationResult)))
+	created, err := client.Tokens.Create(cmd.Context(), promptResult, int(stringToInt(expirationResult)))
 	if err != nil {
 		log.Err(err).Msg("tokens create prompt failed")
 
 		return err
 	}
+
+	token := created.SecretKey
 
 	fmt.Println(os.Getenv("SHELL"))
 

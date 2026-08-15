@@ -5,10 +5,8 @@ import (
 	"path"
 	"strconv"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/dto"
-	"github.com/CerealKiller97/linkwarden-cli/pkg/services/collection"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -69,11 +67,7 @@ func Create() *cobra.Command {
 }
 
 func executeCreate(cmd *cobra.Command, _ []string) error {
-	collectionService := collection.New(
-		utils.GetInstanceURL(),
-		utils.GetLinkwardenToken(),
-		zerolog.New(os.Stdout),
-	)
+	client := utils.NewLinkwardenClient()
 
 	name := cmd.Flag("name").Value.String()
 	description := cmd.Flag("description").Value.String()
@@ -90,7 +84,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 
 	// When unorganized collection ID is 0, find Unorganized collection
 	if unorganizedCollectionID == 0 {
-		collections, err := collectionService.Get(cmd.Context())
+		collections, err := client.Collections.List(cmd.Context())
 		if err != nil {
 			log.Err(err).Msg("Failed to get collections")
 			return err
@@ -117,7 +111,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		}
 	}
 
-	request := dto.CreateCollectionRequest{
+	request := linkwarden.CreateCollectionRequest{
 		Name:        name,
 		Description: description,
 		Color:       color,
@@ -130,14 +124,14 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		request.ParentID = unorganizedCollectionID
 	}
 
-	collection, err := collectionService.Create(cmd.Context(), request)
+	collection, err := client.Collections.Create(cmd.Context(), request)
 	if err != nil {
 		log.Err(err).Msg("Failed to create collection")
 		return err
 	}
 
 	log.Info().
-		Int("id", collection.Response.ID).
+		Int("id", collection.ID).
 		Msg("Collection created successfully")
 
 	return nil

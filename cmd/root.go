@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/links"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tags"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tokens"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
@@ -18,6 +19,7 @@ func registerCommands(root *cobra.Command) {
 	root.AddCommand(tokens.Command())
 	root.AddCommand(collections.Command())
 	root.AddCommand(migrations.Command())
+	root.AddCommand(tags.Command())
 
 	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		utils.ConfigureDefaultLogger("info")

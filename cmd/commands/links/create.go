@@ -4,15 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"strconv"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/dto"
-	"github.com/CerealKiller97/linkwarden-cli/pkg/services/collection"
-	"github.com/CerealKiller97/linkwarden-cli/pkg/services/link"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/manifoldco/promptui"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
@@ -26,13 +21,8 @@ func Create() *cobra.Command {
 		RunE: execute,
 	}
 
-	// TODO: Help
-	// cmd.SetHelpFunc(func(c *cobra.Command, e []string) {})
-	// cmd.SetHelpTemplate()
-	// cmd.SetHelpTemplate()
-
 	cmd.Flags().String("file", "", "File to upload.")
-	cmd.Flags().String("collection", "", "Collection to upload to.")
+	cmd.Flags().String("collection", "", "Collection ID to upload to.")
 
 	if err := cmd.MarkFlagRequired("file"); err != nil {
 		return nil
@@ -66,83 +56,47 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return errFileEmpty
 	}
 
-	collectionService := collection.New(
-		utils.GetInstanceURL(),
-		utils.GetLinkwardenToken(),
-		zerolog.New(os.Stdout),
-	)
+	client := utils.NewLinkwardenClient()
 
-	collections, err := collectionService.Get(cmd.Context())
+	collections, err := client.Collections.List(cmd.Context())
 	if err != nil {
 		log.Err(err).Msg("Failed to get collections")
 		return err
 	}
 
-	collectionMap := make(map[string]int, len(collections))
-	collectionIDTONameMap := make(map[int]string, len(collections))
-	collectionNames := make([]string, 0, len(collections))
-
-	for _, item := range collections {
-		collectionMap[item.Name] = item.ID
-		collectionIDTONameMap[item.ID] = item.Name
-		collectionNames = append(collectionNames, item.Name)
+	collectionByID := make(map[int]linkwarden.Collection, len(collections))
+	items := make([]utils.PickerItem, len(collections))
+	for i, c := range collections {
+		collectionByID[c.ID] = c
+		items[i] = utils.PickerItem{Label: c.Name, Value: c.ID}
 	}
 
-	collectionID := cmd.Flag("collection").Value.String()
-	collection := ""
-
-	// Show interactive prompt if a collection is not specified
-	if collectionID == "" {
-		prompt := promptui.Select{
-			Label: "Select Collection where you want to upload links to:",
-			Items: collectionNames,
-		}
-
-		_, collection, err = prompt.Run()
-		if err != nil {
-			log.Err(err).Msg("Prompt Failed")
-			return err
-		}
+	collectionID, err := utils.ResolveID(
+		cmd.Flag("collection").Value.String(),
+		"Select Collection where you want to upload links to:",
+		func() ([]utils.PickerItem, error) { return items, nil },
+	)
+	if err != nil {
+		log.Err(err).Msg("Failed to resolve collection")
+		return err
 	}
+
+	collection := collectionByID[collectionID]
 
 	success := 0
 	failed := 0
-
-	linkService := link.New(
-		utils.GetInstanceURL(),
-		utils.GetLinkwardenToken(),
-		zerolog.New(os.Stdout),
-	)
 
 	bar := progressbar.Default(100)
 
 	stepSize := 100.0 / float64(len(data))
 
 	for _, item := range data {
-		var coll dto.Collection
-		if collection == "" {
-			collectionIDInt, err := strconv.Atoi(collectionID)
-			if err != nil {
-				return err
-			}
-			coll = dto.Collection{
-				ID:   collectionIDInt,
-				Name: collectionIDTONameMap[collectionIDInt],
-			}
-		} else {
-			coll = dto.Collection{
-				ID:   collectionMap[collection],
-				Name: collection,
-			}
-		}
-
-		_, err = linkService.Create(cmd.Context(), dto.CreateLinkRequest{
-			Name:        item.Title,
-			URL:         item.URL,
-			Type:        "url",
-			Description: "",
-			Collection:  coll,
-			Tags:        []dto.Tag{},
+		_, err = client.Links.Create(cmd.Context(), linkwarden.CreateLinkRequest{
+			Name:       item.Title,
+			URL:        item.URL,
+			Type:       "url",
+			Collection: linkwarden.Collection{ID: collection.ID, Name: collection.Name},
+			Tags:       []linkwarden.Tag{},
 		})
 		if err != nil {
 			log.Err(err).
