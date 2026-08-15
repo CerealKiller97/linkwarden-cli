@@ -3,7 +3,11 @@ package cmd
 import (
 	"errors"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/collections"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/dashboard"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/highlights"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/migrations"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/rss"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/search"
 	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/links"
@@ -20,6 +24,10 @@ func registerCommands(root *cobra.Command) {
 	root.AddCommand(collections.Command())
 	root.AddCommand(migrations.Command())
 	root.AddCommand(tags.Command())
+	root.AddCommand(rss.Command())
+	root.AddCommand(search.Command())
+	root.AddCommand(dashboard.Command())
+	root.AddCommand(highlights.Command())
 
 	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		utils.ConfigureDefaultLogger("info")
