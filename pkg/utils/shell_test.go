@@ -1,33 +1,70 @@
 package utils
 
 import (
-	"github.com/stretchr/testify/require"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-func TestName(t *testing.T) {
-	// Arrange
+func TestAppendTokenToShellFile_AppendsToExistingFile(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("SHELL", "/bin/zsh")
 	t.Setenv("HOME", t.TempDir())
-	create, err := os.Create(path.Join(os.Getenv("HOME"), ".zshrc"))
-	assert.NoError(err)
-	writeString, err := create.WriteString("#!/bin/zsh\n")
-	assert.NoError(err)
-	assert.GreaterOrEqual(writeString, 1)
-	err = create.Close()
-	assert.NoError(err)
 
-	// Act
-	err = AppendTokenToShellFile("TOKEN1")
+	rcPath := filepath.Join(os.Getenv("HOME"), ".zshenv")
+	assert.NoError(os.WriteFile(rcPath, []byte("#!/bin/zsh\n"), 0o644))
 
-	file, err := os.ReadFile(path.Join(os.Getenv("HOME"), ".zshrc"))
-	assert.NoError(err)
-	assert.Contains(string(file), "export LINKWARDEN_TOKEN=\"TOKEN1\"")
+	assert.NoError(AppendTokenToShellFile("TOKEN1"))
 
-	// Assert
+	contents, err := os.ReadFile(rcPath)
 	assert.NoError(err)
+	assert.Contains(string(contents), "#!/bin/zsh\n")
+	assert.Contains(string(contents), `export LINKWARDEN_TOKEN="TOKEN1"`)
+}
+
+func TestAppendTokenToShellFile_CreatesMissingFile(t *testing.T) {
+	assert := require.New(t)
+
+	t.Setenv("SHELL", "/bin/bash")
+	t.Setenv("HOME", t.TempDir())
+
+	assert.NoError(AppendTokenToShellFile("TOKEN2"))
+
+	contents, err := os.ReadFile(filepath.Join(os.Getenv("HOME"), ".bashrc"))
+	assert.NoError(err)
+	assert.Contains(string(contents), `export LINKWARDEN_TOKEN="TOKEN2"`)
+}
+
+func TestAppendTokenToShellFile_CreatesFishConfigDir(t *testing.T) {
+	assert := require.New(t)
+
+	t.Setenv("SHELL", "/usr/local/bin/fish")
+	t.Setenv("HOME", t.TempDir())
+
+	assert.NoError(AppendTokenToShellFile("TOKEN3"))
+
+	contents, err := os.ReadFile(filepath.Join(os.Getenv("HOME"), ".config", "fish", "config.fish"))
+	assert.NoError(err)
+	assert.Contains(string(contents), `export LINKWARDEN_TOKEN="TOKEN3"`)
+}
+
+func TestAppendTokenToShellFile_UnrecognizedShellErrors(t *testing.T) {
+	assert := require.New(t)
+
+	t.Setenv("SHELL", "/bin/tcsh")
+	t.Setenv("HOME", t.TempDir())
+
+	assert.Error(AppendTokenToShellFile("TOKEN4"))
+}
+
+func TestShellConfigPath_ResolvesNonStandardShellPaths(t *testing.T) {
+	assert := require.New(t)
+
+	t.Setenv("SHELL", "/opt/homebrew/bin/zsh")
+	t.Setenv("HOME", "/home/example")
+
+	assert.Equal("/home/example/.zshenv", ShellConfigPath())
 }

@@ -139,7 +139,7 @@ linkwarden-cli tokens generate
 1. Prompts for a token name
 2. Prompts for expiration (7, 30, 60, 90 days, or no expiration)
 3. Creates the token and prints it
-4. On Linux/macOS: optionally adds the token to your shell config (`~/.zshrc`, `~/.bashrc`, etc.)
+4. On Linux/macOS: optionally adds the token to your shell config (`~/.zshenv`, `~/.bashrc`, `~/.config/fish/config.fish`)
 
 #### `tokens list`
 

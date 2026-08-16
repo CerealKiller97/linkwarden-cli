@@ -2,8 +2,6 @@ package tokens
 
 import (
 	"errors"
-	"fmt"
-	"os"
 	"runtime"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -36,7 +34,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		Label: "Token name",
 		Validate: func(s string) error {
 			if len(s) == 0 {
-				return errors.New("Token name is required")
+				return errors.New("token name is required")
 			}
 
 			return nil
@@ -74,8 +72,6 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	token := created.SecretKey
 
-	fmt.Println(os.Getenv("SHELL"))
-
 	log.Info().Str("token", token).Msg("Token created")
 
 	// Prompt do you want app to set ENV Variable on your system?
@@ -92,16 +88,14 @@ func execute(cmd *cobra.Command, _ []string) error {
 		}
 
 		if result == "Yes" {
-			log.Info().Str("token", token).Msg("Token set")
 			if err := utils.AppendTokenToShellFile(token); err != nil {
 				log.Err(err).Msg("Failed to append token to shell file")
 				return err
 			}
 
-			if err := utils.Reload(); err != nil {
-				log.Err(err).Msg("Failed to reload shell file")
-				return err
-			}
+			log.Info().
+				Str("path", utils.ShellConfigPath()).
+				Msg("Token added to shell config. Run `source` on it or restart your terminal to use it.")
 		}
 	}
 
