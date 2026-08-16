@@ -1,0 +1,23 @@
+name: gosec
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gosec:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Run gosec
+        uses: securego/gosec@v2
+        with:
+          # G304/G703 flag file paths built from CLI flags or env vars (e.g.
+          # --file/--output, XDG_STATE_HOME) as "path traversal" - reading/writing
+          # a user-specified local file is the whole point of this CLI's
+          # import/upload/export commands, not a real vulnerability here.
+          args: -exclude=G304,G703 ./...
