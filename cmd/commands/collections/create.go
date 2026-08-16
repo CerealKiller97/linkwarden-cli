@@ -145,7 +145,7 @@ func persistUnorganizedCollectionID(unorganizedCollectionID int) error {
 		xdgStateHome = os.Getenv("HOME") + "/.local/state"
 	}
 
-	if err := os.MkdirAll(path.Join(xdgStateHome, "/linkwarden"), 0755); err != nil {
+	if err := os.MkdirAll(path.Join(xdgStateHome, "/linkwarden"), 0o750); err != nil {
 		log.Err(err).Msg("Failed to create XDG_STATE_HOME/linkwarden/unorganized directory")
 		return err
 	}
@@ -153,7 +153,7 @@ func persistUnorganizedCollectionID(unorganizedCollectionID int) error {
 	err := os.WriteFile(
 		path.Join(xdgStateHome, "linkwarden", "unorganized"),
 		[]byte(strconv.Itoa(unorganizedCollectionID)),
-		0644,
+		0o600,
 	)
 	if err != nil {
 		return err

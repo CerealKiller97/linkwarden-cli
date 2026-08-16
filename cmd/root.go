@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"errors"
+	"os"
+
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/archives"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/collections"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/config"
@@ -11,7 +13,6 @@ import (
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/migrations"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/rss"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/search"
-	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/links"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tags"
@@ -41,7 +42,7 @@ func registerCommands(root *cobra.Command) {
 		linkwardenToken, exists := os.LookupEnv("LINKWARDEN_TOKEN")
 
 		if !exists {
-			return errors.New("Environment variable LINKWARDEN_TOKEN is not set")
+			return errors.New("environment variable LINKWARDEN_TOKEN is not set")
 		}
 
 		// TODO: Trim / if present from URL
