@@ -14,7 +14,7 @@ A command-line interface and Go SDK for the [Linkwarden](https://linkwarden.app)
 ```bash
 git clone https://github.com/CerealKiller97/linkwarden-cli.git
 cd linkwarden-cli
-go build -o linkwarden-cli .
+go build -o linkwarden .
 ```
 
 ### ⚙️ Configuration
@@ -64,7 +64,7 @@ Commands not listed with a full walkthrough below follow the same shape: flags m
 | `config`     | `get`                                                                                              |
 | `favicon`    | `get`                                                                                              |
 
-Run `linkwarden-cli <command> --help` or `linkwarden-cli <command> <subcommand> --help` for the full flag list of any command.
+Run `linkwarden <command> --help` or `linkwarden <command> <subcommand> --help` for the full flag list of any command.
 
 ### `links`
 
@@ -77,7 +77,7 @@ Bulk import links from a JSON file into a collection.
 **Usage:**
 
 ```bash
-linkwarden-cli links create --file <path-to-json>
+linkwarden links create --file <path-to-json>
 ```
 
 **File format**
@@ -107,15 +107,15 @@ The JSON file must be an array of objects with `url` and `title` fields:
 #### Other `links` subcommands
 
 ```bash
-linkwarden-cli links list [--collection-id ID] [--tag-id ID] [--pinned-only] [--search QUERY] [--cursor N]
-linkwarden-cli links get [--id ID]
-linkwarden-cli links update [--id ID] [--name NAME] [--url URL] ...
-linkwarden-cli links delete [--id ID]
-linkwarden-cli links archive [--id ID]
-linkwarden-cli links delete-archive --ids 1,2,3
-linkwarden-cli links bulk-update --ids 1,2,3 [--collection-id ID] [--remove-previous-tags]
-linkwarden-cli links bulk-delete --ids 1,2,3
-linkwarden-cli links get-highlights [--id ID]
+linkwarden links list [--collection-id ID] [--tag-id ID] [--pinned-only] [--search QUERY] [--cursor N]
+linkwarden links get [--id ID]
+linkwarden links update [--id ID] [--name NAME] [--url URL] ...
+linkwarden links delete [--id ID]
+linkwarden links archive [--id ID]
+linkwarden links delete-archive --ids 1,2,3
+linkwarden links bulk-update --ids 1,2,3 [--collection-id ID] [--remove-previous-tags]
+linkwarden links bulk-delete --ids 1,2,3
+linkwarden links get-highlights [--id ID]
 ```
 
 ---
@@ -131,7 +131,7 @@ Create a new API token interactively.
 **Usage:**
 
 ```bash
-linkwarden-cli tokens generate
+linkwarden tokens generate
 ```
 
 **Flow**
@@ -144,13 +144,13 @@ linkwarden-cli tokens generate
 #### `tokens list`
 
 ```bash
-linkwarden-cli tokens list
+linkwarden tokens list
 ```
 
 #### `tokens revoke`
 
 ```bash
-linkwarden-cli tokens revoke
+linkwarden tokens revoke
 ```
 
 ---
@@ -160,11 +160,11 @@ linkwarden-cli tokens revoke
 Manage collections (groups of links).
 
 ```bash
-linkwarden-cli collections create [--name NAME] ...
-linkwarden-cli collections list
-linkwarden-cli collections get [--id ID]
-linkwarden-cli collections update [--id ID] ...
-linkwarden-cli collections delete [--id ID]
+linkwarden collections create [--name NAME] ...
+linkwarden collections list
+linkwarden collections get [--id ID]
+linkwarden collections update [--id ID] ...
+linkwarden collections delete [--id ID]
 ```
 
 ---
@@ -174,12 +174,12 @@ linkwarden-cli collections delete [--id ID]
 Manage tags.
 
 ```bash
-linkwarden-cli tags list [--search QUERY] [--cursor N]
-linkwarden-cli tags get [--id ID]
-linkwarden-cli tags create --label LABEL [--label LABEL ...]
-linkwarden-cli tags update [--id ID] --name NAME
-linkwarden-cli tags delete [--id ID]
-linkwarden-cli tags bulk-delete --ids 1,2,3
+linkwarden tags list [--search QUERY] [--cursor N]
+linkwarden tags get [--id ID]
+linkwarden tags create --label LABEL [--label LABEL ...]
+linkwarden tags update [--id ID] --name NAME
+linkwarden tags delete [--id ID]
+linkwarden tags bulk-delete --ids 1,2,3
 ```
 
 ---
@@ -189,9 +189,9 @@ linkwarden-cli tags bulk-delete --ids 1,2,3
 Manage RSS subscriptions that feed links into a collection.
 
 ```bash
-linkwarden-cli rss list
-linkwarden-cli rss create --name NAME --url FEED_URL [--collection-id ID | --collection-name NAME]
-linkwarden-cli rss delete [--id ID]
+linkwarden rss list
+linkwarden rss create --name NAME --url FEED_URL [--collection-id ID | --collection-name NAME]
+linkwarden rss delete [--id ID]
 ```
 
 ---
@@ -202,8 +202,8 @@ Manage highlighted passages on a link. There's no list-all endpoint, so `delete`
 you through a link picker, then a highlight picker, when `--id` isn't given.
 
 ```bash
-linkwarden-cli highlights create --link-id ID --text "..." --color yellow --start-offset 0 --end-offset 42
-linkwarden-cli highlights delete [--id ID] [--link-id ID]
+linkwarden highlights create --link-id ID --text "..." --color yellow --start-offset 0 --end-offset 42
+linkwarden highlights delete [--id ID] [--link-id ID]
 ```
 
 ---
@@ -213,9 +213,9 @@ linkwarden-cli highlights delete [--id ID] [--link-id ID]
 View dashboard data and configure the v2 dashboard layout.
 
 ```bash
-linkwarden-cli dashboard get
-linkwarden-cli dashboard get-v2
-linkwarden-cli dashboard update-v2 --file layout.json
+linkwarden dashboard get
+linkwarden dashboard get-v2
+linkwarden dashboard update-v2 --file layout.json
 ```
 
 `layout.json` is an array of widgets, e.g.:
@@ -235,9 +235,9 @@ linkwarden-cli dashboard update-v2 --file layout.json
 Retrieve or upload a link's archived formats (screenshot, PDF, readability text, monolith HTML).
 
 ```bash
-linkwarden-cli archives get --link-id ID --format 2 --output archive.pdf
-linkwarden-cli archives upload --link-id ID --file screenshot.png --format 0
-linkwarden-cli archives upload-standalone --file page.html --url https://example.com --format 4
+linkwarden archives get --link-id ID --format 2 --output archive.pdf
+linkwarden archives upload --link-id ID --file screenshot.png --format 0
+linkwarden archives upload-standalone --file page.html --url https://example.com --format 4
 ```
 
 Format values: `0`=PNG, `1`=JPEG, `2`=PDF, `3`=Readability JSON (get only), `4`=Monolith HTML.
@@ -251,7 +251,7 @@ Import and export Linkwarden data.
 #### `migrations export`
 
 ```bash
-linkwarden-cli migrations export [--output path.json]
+linkwarden migrations export [--output path.json]
 ```
 
 Defaults to `./linkwarden-export-<timestamp>.json` in the current directory.
@@ -259,7 +259,7 @@ Defaults to `./linkwarden-export-<timestamp>.json` in the current directory.
 #### `migrations import`
 
 ```bash
-linkwarden-cli migrations import --file backup.json --format 0
+linkwarden migrations import --file backup.json --format 0
 ```
 
 Format values: `0`=Linkwarden JSON, `1`=Bookmarks HTML, `2`=Wallabag JSON, `3`=Omnivore JSON, `4`=Pocket JSON.
@@ -269,7 +269,7 @@ Format values: `0`=Linkwarden JSON, `1`=Bookmarks HTML, `2`=Wallabag JSON, `3`=O
 ### `search`
 
 ```bash
-linkwarden-cli search --query "some text" [--sort N] [--cursor N]
+linkwarden search --query "some text" [--sort N] [--cursor N]
 ```
 
 ---
@@ -277,7 +277,7 @@ linkwarden-cli search --query "some text" [--sort N] [--cursor N]
 ### `config`
 
 ```bash
-linkwarden-cli config get
+linkwarden config get
 ```
 
 Prints the instance's public runtime configuration.
@@ -287,7 +287,7 @@ Prints the instance's public runtime configuration.
 ### `favicon`
 
 ```bash
-linkwarden-cli favicon get --url https://example.com [--output favicon.ico]
+linkwarden favicon get --url https://example.com [--output favicon.ico]
 ```
 
 ---
@@ -298,26 +298,26 @@ linkwarden-cli favicon get --url https://example.com [--output favicon.ico]
 
 ```bash
 export LINKWARDEN_TOKEN="your-token"
-linkwarden-cli links create --file ./bookmarks.json
+linkwarden links create --file ./bookmarks.json
 ```
 
 **Generate a token and optionally persist it:**
 
 ```bash
-linkwarden-cli tokens generate
+linkwarden tokens generate
 ```
 
 **Export your Linkwarden data:**
 
 ```bash
-linkwarden-cli migrations export
+linkwarden migrations export
 ```
 
 **Search and download a link's PDF archive:**
 
 ```bash
-linkwarden-cli search --query "kubernetes"
-linkwarden-cli archives get --link-id 42 --format 2 --output kubernetes.pdf
+linkwarden search --query "kubernetes"
+linkwarden archives get --link-id 42 --format 2 --output kubernetes.pdf
 ```
 
 ---

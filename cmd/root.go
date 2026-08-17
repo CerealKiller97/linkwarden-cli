@@ -76,9 +76,9 @@ func registerCommands(root *cobra.Command) {
 
 func Root() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "linkwarden-cli",
-		Short: "LinkwardenCLI is CLI SDK for the Linkwarden platform",
-		Long:  `LinkwardenCLI is CLI SDK for the Linkwarden platform`,
+		Use:   "linkwarden",
+		Short: "Linkwarden is a CLI and SDK for the Linkwarden platform",
+		Long:  `Linkwarden is a CLI and SDK for the Linkwarden platform`,
 	}
 
 	registerCommands(rootCmd)
