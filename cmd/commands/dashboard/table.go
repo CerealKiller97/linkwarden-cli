@@ -2,17 +2,15 @@ package dashboard
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 func renderLinksTable(title string, links []linkwarden.Link) {
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.SetTitle(title)
+	t := utils.NewTable(title)
 	t.AppendHeader(table.Row{"ID", "Name", "URL", "Collection", "Tags"})
 
 	for _, l := range links {
@@ -24,7 +22,6 @@ func renderLinksTable(title string, links []linkwarden.Link) {
 		t.AppendRow(table.Row{l.ID, l.Name, l.URL, l.Collection.Name, strings.Join(tagNames, ", ")})
 	}
 
-	t.SetStyle(table.StyleColoredBlackOnCyanWhite)
 	t.AppendSeparator()
 	t.Render()
 }

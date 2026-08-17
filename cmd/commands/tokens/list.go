@@ -1,8 +1,6 @@
 package tokens
 
 import (
-	"os"
-
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/rs/zerolog/log"
@@ -26,16 +24,13 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.SetTitle("Tokens")
+	t := utils.NewTable("Tokens")
 	t.AppendHeader(table.Row{"ID", "Name", "Is Session", "Expires", "Created At"})
 
 	for _, token := range tokenList {
 		t.AppendRow(table.Row{token.ID, token.Name, token.IsSession, token.Expires, token.CreatedAt})
 	}
 
-	t.SetStyle(table.StyleColoredBlackOnCyanWhite)
 	t.AppendSeparator()
 	t.Render()
 

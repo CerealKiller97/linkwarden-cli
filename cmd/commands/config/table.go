@@ -1,17 +1,15 @@
 package config
 
 import (
-	"os"
 	"strconv"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 func renderConfigTable(cfg *linkwarden.PublicConfig) {
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.SetTitle("Instance Configuration")
+	t := utils.NewTable("Instance Configuration")
 	t.AppendHeader(table.Row{"Key", "Value"})
 
 	t.AppendRow(table.Row{"DISABLE_REGISTRATION", boolValue(cfg.DisableRegistration)})
@@ -23,7 +21,6 @@ func renderConfigTable(cfg *linkwarden.PublicConfig) {
 	t.AppendRow(table.Row{"AI_ENABLED", boolValue(cfg.AIEnabled)})
 	t.AppendRow(table.Row{"INSTANCE_VERSION", stringValue(cfg.InstanceVersion)})
 
-	t.SetStyle(table.StyleColoredBlackOnCyanWhite)
 	t.AppendSeparator()
 	t.Render()
 }

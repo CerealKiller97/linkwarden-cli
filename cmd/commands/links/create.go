@@ -121,14 +121,11 @@ func execute(cmd *cobra.Command, _ []string) error {
 }
 
 func displayResults(total int, success int, failed int) {
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.SetTitle("Linkwarden")
+	t := utils.NewTable("Linkwarden")
 	t.AppendHeader(table.Row{"Total", "Success", "Failed"})
 	t.AppendRows([]table.Row{
 		{total, success, failed},
 	})
-	t.SetStyle(table.StyleColoredBlackOnCyanWhite)
 	t.AppendSeparator()
 	t.Render()
 }
