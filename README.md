@@ -49,6 +49,21 @@ Every resource is exposed as a service on `*linkwarden.Client` (`Links`, `Collec
 
 Commands not listed with a full walkthrough below follow the same shape: flags map directly to the underlying API parameters, and any command that takes a resource ID shows an interactive picker (via `--flag ""`) when the ID isn't passed explicitly and stdin is a terminal. In scripts, CI, or anywhere else stdin isn't interactive, omitting the ID flag fails fast with an error naming the flag to pass instead of hanging on a prompt nobody can answer — always pass IDs explicitly for non-interactive use.
 
+### Interactive vs. non-interactive
+
+By default, whether a picker prompt is shown is auto-detected from stdin: a real
+terminal gets the interactive picker, anything else (a script, CI, a pipe) fails
+fast instead. The global `--non-interactive` flag forces the fail-fast behavior
+even when stdin happens to be a real terminal — useful for testing scripts locally,
+or for CI systems that allocate a pty:
+
+```bash
+linkwarden --non-interactive collections get --id 42   # never prompts, ever
+linkwarden collections get --id 42                      # same result, both modes
+linkwarden collections get                               # interactive picker (real terminal)
+linkwarden collections get < /dev/null                   # fails fast (no terminal)
+```
+
 | Group        | Subcommands                                                                                     |
 | ------------ | ------------------------------------------------------------------------------------------------ |
 | `links`      | `create`, `list`, `get`, `update`, `delete`, `archive`, `bulk-update`, `bulk-delete`, `delete-archive`, `get-highlights` |

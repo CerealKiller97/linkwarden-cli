@@ -60,5 +60,16 @@ func ResolveID(flagValue, flagHint, label string, fetch func() ([]PickerItem, er
 }
 
 func isInteractive() bool {
-	return isatty.IsTerminal(os.Stdin.Fd())
+	return isInteractiveFor(GetNonInteractive(), isatty.IsTerminal(os.Stdin.Fd()))
+}
+
+// isInteractiveFor is the pure decision behind isInteractive: the
+// --non-interactive override always wins; otherwise it's whatever stdin
+// actually is.
+func isInteractiveFor(forcedNonInteractive, isTerminal bool) bool {
+	if forcedNonInteractive {
+		return false
+	}
+
+	return isTerminal
 }

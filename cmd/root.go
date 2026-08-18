@@ -36,8 +36,17 @@ func registerCommands(root *cobra.Command) {
 	root.AddCommand(config.Command())
 	root.AddCommand(favicon.Command())
 
+	root.PersistentFlags().Bool("non-interactive", false, "Never prompt (e.g. for a picker); fail fast instead. "+
+		"On by default when stdin isn't a terminal.")
+
 	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		utils.ConfigureDefaultLogger("info")
+
+		nonInteractive, err := cmd.Flags().GetBool("non-interactive")
+		if err != nil {
+			return err
+		}
+		utils.SetNonInteractive(nonInteractive)
 
 		linkwardenToken, exists := os.LookupEnv("LINKWARDEN_TOKEN")
 
