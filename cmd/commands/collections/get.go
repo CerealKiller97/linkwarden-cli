@@ -24,6 +24,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 
 	id, err := utils.ResolveID(
 		cmd.Flag("id").Value.String(),
+		"--id",
 		"Select Collection:",
 		collectionsPickerFetch(cmd.Context(), client),
 	)

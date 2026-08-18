@@ -73,6 +73,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	collectionID, err := utils.ResolveID(
 		cmd.Flag("collection").Value.String(),
+		"--collection",
 		"Select Collection where you want to upload links to:",
 		func() ([]utils.PickerItem, error) { return items, nil },
 	)

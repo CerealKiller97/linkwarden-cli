@@ -47,7 +47,7 @@ Every resource is exposed as a service on `*linkwarden.Client` (`Links`, `Collec
 
 ## 📋 Commands
 
-Commands not listed with a full walkthrough below follow the same shape: flags map directly to the underlying API parameters, and any command that takes a resource ID shows an interactive picker (via `--flag ""`) when the ID isn't passed explicitly.
+Commands not listed with a full walkthrough below follow the same shape: flags map directly to the underlying API parameters, and any command that takes a resource ID shows an interactive picker (via `--flag ""`) when the ID isn't passed explicitly and stdin is a terminal. In scripts, CI, or anywhere else stdin isn't interactive, omitting the ID flag fails fast with an error naming the flag to pass instead of hanging on a prompt nobody can answer — always pass IDs explicitly for non-interactive use.
 
 | Group        | Subcommands                                                                                     |
 | ------------ | ------------------------------------------------------------------------------------------------ |

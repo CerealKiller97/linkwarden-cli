@@ -23,6 +23,7 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 
 	id, err := utils.ResolveID(
 		cmd.Flag("id").Value.String(),
+		"--id",
 		"Select RSS subscription to delete:",
 		rssPickerFetch(cmd.Context(), client),
 	)

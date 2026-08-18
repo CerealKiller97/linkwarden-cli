@@ -35,6 +35,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 
 	linkID, err := utils.ResolveID(
 		cmd.Flag("link-id").Value.String(),
+		"--link-id",
 		"Select Link to highlight:",
 		linksPickerFetch(cmd.Context(), client),
 	)

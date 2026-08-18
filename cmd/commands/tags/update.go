@@ -28,6 +28,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 
 	id, err := utils.ResolveID(
 		cmd.Flag("id").Value.String(),
+		"--id",
 		"Select Tag to update:",
 		tagsPickerFetch(cmd.Context(), client),
 	)

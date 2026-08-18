@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/manifoldco/promptui"
+	"github.com/mattn/go-isatty"
 )
 
 // PickerItem is a single choice in an interactive ID picker.
@@ -33,11 +36,19 @@ func SelectID(label string, items []PickerItem) (int, error) {
 	return items[idx].Value, nil
 }
 
-// ResolveID returns flagValue parsed as an int when non-empty; otherwise it calls
-// fetch to list the available items and shows an interactive picker for label.
-func ResolveID(flagValue string, label string, fetch func() ([]PickerItem, error)) (int, error) {
+// ResolveID returns flagValue parsed as an int when non-empty. Otherwise, if stdin
+// is an interactive terminal, it calls fetch to list the available items and shows
+// a picker for label. If stdin isn't a terminal (a script, CI, piped input, ...),
+// it fails fast with an actionable error instead of hanging on a prompt nobody can
+// answer. flagHint (e.g. "--id") names the flag to use for non-interactive callers,
+// and is only used in that error message.
+func ResolveID(flagValue, flagHint, label string, fetch func() ([]PickerItem, error)) (int, error) {
 	if flagValue != "" {
 		return strconv.Atoi(flagValue)
+	}
+
+	if !isInteractive() {
+		return 0, fmt.Errorf("no %s given and no interactive terminal available; pass %s explicitly for non-interactive use", flagHint, flagHint)
 	}
 
 	items, err := fetch()
@@ -46,4 +57,8 @@ func ResolveID(flagValue string, label string, fetch func() ([]PickerItem, error
 	}
 
 	return SelectID(label, items)
+}
+
+func isInteractive() bool {
+	return isatty.IsTerminal(os.Stdin.Fd())
 }

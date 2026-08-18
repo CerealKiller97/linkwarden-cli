@@ -51,6 +51,7 @@ func resolveHighlightID(cmd *cobra.Command, client *linkwarden.Client, idFlag st
 
 	linkID, err := utils.ResolveID(
 		cmd.Flag("link-id").Value.String(),
+		"--link-id",
 		"Select Link:",
 		linksPickerFetch(cmd.Context(), client),
 	)
@@ -58,5 +59,5 @@ func resolveHighlightID(cmd *cobra.Command, client *linkwarden.Client, idFlag st
 		return 0, err
 	}
 
-	return utils.ResolveID("", "Select Highlight to delete:", highlightsPickerFetch(cmd.Context(), client, linkID))
+	return utils.ResolveID("", "--id", "Select Highlight to delete:", highlightsPickerFetch(cmd.Context(), client, linkID))
 }

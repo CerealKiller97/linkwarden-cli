@@ -36,6 +36,7 @@ func executeUpload(cmd *cobra.Command, _ []string) error {
 
 	linkID, err := utils.ResolveID(
 		cmd.Flag("link-id").Value.String(),
+		"--link-id",
 		"Select Link:",
 		linksPickerFetch(cmd.Context(), client),
 	)

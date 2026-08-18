@@ -23,6 +23,7 @@ func executeArchive(cmd *cobra.Command, _ []string) error {
 
 	id, err := utils.ResolveID(
 		cmd.Flag("id").Value.String(),
+		"--id",
 		"Select Link to archive:",
 		linksPickerFetch(cmd.Context(), client),
 	)

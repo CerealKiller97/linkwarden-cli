@@ -31,6 +31,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 
 	id, err := utils.ResolveID(
 		cmd.Flag("id").Value.String(),
+		"--id",
 		"Select Collection to update:",
 		collectionsPickerFetch(cmd.Context(), client),
 	)
