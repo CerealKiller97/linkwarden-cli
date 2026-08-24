@@ -16,7 +16,7 @@ func NewTable(title string) table.Writer {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.SetTitle(title)
-	t.SetStyle(tableStyleFor(colorEnabled()))
+	t.SetStyle(tableStyleFor(ColorEnabled()))
 
 	return t
 }
@@ -34,7 +34,10 @@ func tableStyleFor(colorEnabled bool) table.Style {
 	return style
 }
 
-func colorEnabled() bool {
+// ColorEnabled reports whether CLI output should include ANSI color: only
+// when NO_COLOR isn't set and stdout is an actual terminal (not piped or
+// redirected).
+func ColorEnabled() bool {
 	return colorEnabledFor(os.Getenv("NO_COLOR"), isatty.IsTerminal(os.Stdout.Fd()))
 }
 
