@@ -1,0 +1,86 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Semantic version bump
+        type: choice
+        options: [patch, minor, major]
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: 🧪 Test
+        run: |
+          go vet ./...
+          go test ./... -race
+
+      - name: 🏷️ Compute version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          version="$(scripts/release.sh next-version "$BUMP")"
+          if git rev-parse -q --verify "refs/tags/v${version}" >/dev/null; then
+            echo "::error::Tag v${version} already exists"
+            exit 1
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "🏷️ Releasing v${version}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 📝 Update CHANGELOG.md
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          scripts/release.sh changelog "$VERSION" --write | tail -n +3 > "$RUNNER_TEMP/notes.md"
+          cat "$RUNNER_TEMP/notes.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 🔖 Commit and tag
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "chore(release): v${VERSION}"
+          git tag -a "v${VERSION}" -m "v${VERSION}"
+
+      # Build before pushing, so a failed build leaves no orphan tag or commit behind.
+      - name: 🔨 Build binaries
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: scripts/release.sh build "$VERSION" dist
+
+      - name: ⬆️ Push commit and tag
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: git push --atomic origin HEAD:main "v${VERSION}"
+
+      - name: 🚀 Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "v${VERSION}" dist/*.tar.gz dist/*.zip dist/checksums.txt \
+            --title "v${VERSION}" \
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            --verify-tag

@@ -40,8 +40,18 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 
 ### 1. Install
 
-> [!NOTE]
-> Requires **Go 1.26+**.
+**📦 Prebuilt binary:** grab the archive for your OS and CPU (x86_64 or ARM64) from
+[Releases](https://github.com/CerealKiller97/linkwarden-cli/releases/latest):
+
+```bash
+# macOS on Apple Silicon. Swap darwin_arm64 for linux_amd64, linux_arm64, darwin_amd64…
+VERSION=1.0.0
+curl -sSL "https://github.com/CerealKiller97/linkwarden-cli/releases/download/v${VERSION}/linkwarden_${VERSION}_darwin_arm64.tar.gz" | tar -xz
+sudo mv "linkwarden_${VERSION}_darwin_arm64/linkwarden" /usr/local/bin/
+linkwarden --version
+```
+
+**🛠️ From source** (requires **Go 1.27+**):
 
 ```bash
 git clone https://github.com/CerealKiller97/linkwarden-cli.git
@@ -556,6 +566,30 @@ go build -o bin/linkwarden .
 ```
 
 CI runs tests, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests.
+
+### 🚀 Releasing
+
+Versions follow [SemVer](https://semver.org), and [CHANGELOG.md](CHANGELOG.md) follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Both are generated from
+[Conventional Commits](https://www.conventionalcommits.org), so write commit messages like
+`feat(links): …`, `fix: …` or `feat!: …` for breaking changes.
+
+```bash
+scripts/release.sh patch   # 1.4.2 → 1.4.3  🐛 bug fixes
+scripts/release.sh minor   # 1.4.2 → 1.5.0  ✨ new features
+scripts/release.sh major   # 1.4.2 → 2.0.0  💥 breaking changes
+```
+
+The script shows the next version and a changelog preview, then triggers the
+[release workflow](.github/workflows/release.yml). The workflow:
+
+1. Tests the code.
+2. Prepends the new version's section to `CHANGELOG.md`.
+3. Commits it and tags `vX.Y.Z`.
+4. Builds Linux, macOS and Windows binaries for x86_64 and ARM64.
+5. Publishes a GitHub Release with the changelog section as its notes.
+
+Preview any step locally with `scripts/release.sh changelog 1.5.0` or `scripts/release.sh build 1.5.0`.
 
 ---
 

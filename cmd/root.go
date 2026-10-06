@@ -83,11 +83,16 @@ func registerCommands(root *cobra.Command) {
 	//})
 }
 
+// version is the released version, set at build time by scripts/release.sh build via
+// -ldflags "-X github.com/CerealKiller97/linkwarden-cli/cmd.version=1.2.3".
+var version = "dev"
+
 func Root() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "linkwarden",
-		Short: "Linkwarden is a CLI and SDK for the Linkwarden platform",
-		Long:  `Linkwarden is a CLI and SDK for the Linkwarden platform`,
+		Use:     "linkwarden",
+		Short:   "Linkwarden is a CLI and SDK for the Linkwarden platform",
+		Long:    `Linkwarden is a CLI and SDK for the Linkwarden platform`,
+		Version: version,
 	}
 
 	registerCommands(rootCmd)
