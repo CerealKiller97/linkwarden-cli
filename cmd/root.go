@@ -2,11 +2,20 @@ package cmd
 
 import (
 	"errors"
-	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/collections"
-	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/migrations"
 	"os"
 
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/archives"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/collections"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/config"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/dashboard"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/favicon"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/highlights"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/migrations"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/rss"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/search"
+
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/links"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tags"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tokens"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
@@ -18,14 +27,31 @@ func registerCommands(root *cobra.Command) {
 	root.AddCommand(tokens.Command())
 	root.AddCommand(collections.Command())
 	root.AddCommand(migrations.Command())
+	root.AddCommand(tags.Command())
+	root.AddCommand(rss.Command())
+	root.AddCommand(search.Command())
+	root.AddCommand(dashboard.Command())
+	root.AddCommand(highlights.Command())
+	root.AddCommand(archives.Command())
+	root.AddCommand(config.Command())
+	root.AddCommand(favicon.Command())
+
+	root.PersistentFlags().Bool("non-interactive", false, "Never prompt (e.g. for a picker); fail fast instead. "+
+		"On by default when stdin isn't a terminal.")
 
 	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		utils.ConfigureDefaultLogger("info")
 
+		nonInteractive, err := cmd.Flags().GetBool("non-interactive")
+		if err != nil {
+			return err
+		}
+		utils.SetNonInteractive(nonInteractive)
+
 		linkwardenToken, exists := os.LookupEnv("LINKWARDEN_TOKEN")
 
 		if !exists {
-			return errors.New("Environment variable LINKWARDEN_TOKEN is not set")
+			return errors.New("environment variable LINKWARDEN_TOKEN is not set")
 		}
 
 		// TODO: Trim / if present from URL
@@ -59,9 +85,9 @@ func registerCommands(root *cobra.Command) {
 
 func Root() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:   "linkwarden-cli",
-		Short: "LinkwardenCLI is CLI SDK for the Linkwarden platform",
-		Long:  `LinkwardenCLI is CLI SDK for the Linkwarden platform`,
+		Use:   "linkwarden",
+		Short: "Linkwarden is a CLI and SDK for the Linkwarden platform",
+		Long:  `Linkwarden is a CLI and SDK for the Linkwarden platform`,
 	}
 
 	registerCommands(rootCmd)

@@ -4,12 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/services/token"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/manifoldco/promptui"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -38,7 +38,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		Label: "Token name",
 		Validate: func(s string) error {
 			if len(s) == 0 {
-				return errors.New("Token name is required")
+				return errors.New("token name is required")
 			}
 
 			return nil
@@ -65,20 +65,16 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	tokenService := token.New(
-		utils.GetInstanceURL(),
-		utils.GetLinkwardenToken(),
-		zerolog.New(os.Stdout),
-	)
+	client := utils.NewLinkwardenClient()
 
-	token, err := tokenService.Create(cmd.Context(), promptResult, int(stringToInt(expirationResult)))
+	created, err := client.Tokens.Create(cmd.Context(), promptResult, int(stringToInt(expirationResult)))
 	if err != nil {
 		log.Err(err).Msg("tokens create prompt failed")
 
 		return err
 	}
 
-	fmt.Println(os.Getenv("SHELL"))
+	token := created.SecretKey
 
 	log.Info().Str("token", token).Msg("Token created")
 
@@ -96,20 +92,78 @@ func execute(cmd *cobra.Command, _ []string) error {
 		}
 
 		if result == "Yes" {
-			log.Info().Str("token", token).Msg("Token set")
 			if err := utils.AppendTokenToShellFile(token); err != nil {
 				log.Err(err).Msg("Failed to append token to shell file")
 				return err
 			}
 
-			if err := utils.Reload(); err != nil {
-				log.Err(err).Msg("Failed to reload shell file")
-				return err
-			}
+			log.Info().
+				Str("path", utils.ShellConfigPath()).
+				Msg("Token added to shell config. Run `source` on it or restart your terminal to use it.")
+		} else {
+			printManualSetupInstructions(token)
 		}
 	}
 
 	return nil
+}
+
+// printManualSetupInstructions prints copy-pasteable, colorized steps for
+// exporting LINKWARDEN_TOKEN by hand, for users who decline to have the CLI
+// edit their shell config directly. Color is skipped automatically when
+// stdout isn't a terminal or NO_COLOR is set (see utils.ColorEnabled).
+func printManualSetupInstructions(token string) {
+	shell := filepath.Base(os.Getenv("SHELL"))
+
+	var configFile, exportLine string
+	switch shell {
+	case "fish":
+		configFile = "~/.config/fish/config.fish"
+		exportLine = fmt.Sprintf("set -x LINKWARDEN_TOKEN %q", token)
+	case "bash":
+		configFile = "~/.bashrc"
+		exportLine = fmt.Sprintf("export LINKWARDEN_TOKEN=%q", token)
+	case "zsh":
+		configFile = "~/.zshenv"
+		exportLine = fmt.Sprintf("export LINKWARDEN_TOKEN=%q", token)
+	default:
+		configFile = "your shell's config file"
+		exportLine = fmt.Sprintf("export LINKWARDEN_TOKEN=%q", token)
+	}
+
+	heading := text.Colors{text.FgHiCyan, text.Bold}
+	step := text.Colors{text.FgHiCyan, text.Bold}
+	cmdColor := text.Colors{text.FgHiGreen}
+	warn := text.Colors{text.FgHiYellow, text.Bold}
+
+	on := utils.ColorEnabled()
+	c := func(colors text.Colors, s string) string {
+		if !on {
+			return s
+		}
+		return colors.Sprint(s)
+	}
+
+	printStep := func(n int, label, command string) {
+		fmt.Printf("%s %s\n", c(step, fmt.Sprintf("%d.", n)), label)
+		fmt.Printf("   %s\n", c(cmdColor, command))
+	}
+
+	fmt.Println()
+	fmt.Println(c(heading, "No problem — the CLI won't touch your shell config. Set it up manually:"))
+	fmt.Println()
+
+	printStep(1, "For the current terminal session only, run:", exportLine)
+	fmt.Println()
+	printStep(2, fmt.Sprintf("To persist it across sessions, add that line to %s:", configFile),
+		fmt.Sprintf("echo '%s' >> %s", exportLine, configFile))
+	fmt.Println()
+	printStep(3, "Reload your shell config (or restart your terminal):", "source "+configFile)
+	fmt.Println()
+	printStep(4, "Verify it's set:", "echo $LINKWARDEN_TOKEN")
+	fmt.Println()
+
+	fmt.Println(c(warn, "⚠ Keep this token secret — anyone with it can act as you on your Linkwarden instance."))
 }
 
 func stringToInt(tokenExpiration string) Expiry {

@@ -1,0 +1,84 @@
+package highlights
+
+import (
+	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/cobra"
+)
+
+func Create() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "create",
+		Short: "Create or update a highlight on a link",
+		RunE:  executeCreate,
+	}
+
+	cmd.Flags().String("link-id", "", "Link ID.")
+	cmd.Flags().String("text", "", "Highlighted text.")
+	cmd.Flags().String("color", "", "Highlight color.")
+	cmd.Flags().String("comment", "", "Optional comment.")
+	cmd.Flags().Int("start-offset", 0, "Start offset of the highlighted text.")
+	cmd.Flags().Int("end-offset", 0, "End offset of the highlighted text.")
+
+	for _, name := range []string{"text", "color", "start-offset", "end-offset"} {
+		if err := cmd.MarkFlagRequired(name); err != nil {
+			return nil
+		}
+	}
+
+	return cmd
+}
+
+func executeCreate(cmd *cobra.Command, _ []string) error {
+	client := utils.NewLinkwardenClient()
+
+	linkID, err := utils.ResolveID(
+		cmd.Flag("link-id").Value.String(),
+		"--link-id",
+		"Select Link to highlight:",
+		linksPickerFetch(cmd.Context(), client),
+	)
+	if err != nil {
+		log.Err(err).Msg("Failed to resolve link ID")
+		return err
+	}
+
+	text, err := cmd.Flags().GetString("text")
+	if err != nil {
+		return err
+	}
+	color, err := cmd.Flags().GetString("color")
+	if err != nil {
+		return err
+	}
+	comment, err := cmd.Flags().GetString("comment")
+	if err != nil {
+		return err
+	}
+	startOffset, err := cmd.Flags().GetInt("start-offset")
+	if err != nil {
+		return err
+	}
+	endOffset, err := cmd.Flags().GetInt("end-offset")
+	if err != nil {
+		return err
+	}
+
+	highlight, err := client.Highlights.Create(cmd.Context(), linkwarden.CreateHighlightRequest{
+		LinkID:      linkID,
+		Text:        text,
+		Color:       color,
+		Comment:     comment,
+		StartOffset: startOffset,
+		EndOffset:   endOffset,
+	})
+	if err != nil {
+		log.Err(err).Msg("Failed to create highlight")
+		return err
+	}
+
+	renderHighlightTable(*highlight)
+
+	return nil
+}

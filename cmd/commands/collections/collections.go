@@ -9,6 +9,10 @@ func Command() *cobra.Command {
 	}
 
 	cmd.AddCommand(Create())
+	cmd.AddCommand(List())
+	cmd.AddCommand(Get())
+	cmd.AddCommand(Update())
+	cmd.AddCommand(Delete())
 
 	return cmd
 }

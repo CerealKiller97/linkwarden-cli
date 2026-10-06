@@ -1,12 +1,8 @@
 package tokens
 
 import (
-	"os"
-
-	"github.com/CerealKiller97/linkwarden-cli/pkg/services/token"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/manifoldco/promptui"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -20,21 +16,17 @@ func Revoke() *cobra.Command {
 }
 
 func executeRevoke(cmd *cobra.Command, _ []string) error {
-	tokenService := token.New(
-		utils.GetInstanceURL(),
-		utils.GetLinkwardenToken(),
-		zerolog.New(os.Stdout),
-	)
+	client := utils.NewLinkwardenClient()
 
-	tokens, err := tokenService.Get(cmd.Context())
+	tokenList, err := client.Tokens.List(cmd.Context())
 	if err != nil {
 		log.Err(err).Msg("Error getting tokens")
 		return err
 	}
 
-	tokenNames := make([]string, len(tokens))
-	tokenMap := make(map[string]int, len(tokens))
-	for i, token := range tokens {
+	tokenNames := make([]string, len(tokenList))
+	tokenMap := make(map[string]int, len(tokenList))
+	for i, token := range tokenList {
 		tokenNames[i] = token.Name
 		tokenMap[token.Name] = token.ID
 	}
@@ -49,7 +41,7 @@ func executeRevoke(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	if err := tokenService.Revoke(cmd.Context(), tokenMap[result]); err != nil {
+	if err := client.Tokens.Revoke(cmd.Context(), tokenMap[result]); err != nil {
 		log.Err(err).Msg("Error revoking token")
 		return err
 	}
