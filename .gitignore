@@ -29,3 +29,6 @@ go.work
 .idea
 .qodo
 bin
+# Local dev Linkwarden instance (scripts/dev-linkwarden.sh)
+.env
+.env.cli
