@@ -80,6 +80,14 @@ export LINKWARDEN_URL="https://links.example.com"   # only for self-hosted insta
 | `LINKWARDEN_TOKEN` |    ✅    | —                              | API token used as a `Bearer` token           |
 | `LINKWARDEN_URL`   |          | `https://cloud.linkwarden.app` | Base URL of your Linkwarden instance         |
 | `NO_COLOR`         |          | —                              | Set to any value to disable colored output   |
+| `XDG_STATE_HOME`   |          | `~/.local/state`               | Where the CLI keeps its cache (see below)    |
+| `XDG_CONFIG_HOME`  |          | `~/.config`                    | Where `tokens generate` finds fish's config  |
+
+> [!NOTE]
+> 📁 The CLI follows the [XDG Base Directory spec](https://specifications.freedesktop.org/basedir-spec/latest/)
+> on **Linux, macOS and Windows** alike. Its only file is a small cache in `$XDG_STATE_HOME/linkwarden/`.
+> If a variable is unset, empty or not an absolute path, the default under your home directory is used
+> (`$HOME` on Linux/macOS, `%USERPROFILE%` on Windows, e.g. `C:\Users\you\.local\state\linkwarden`).
 
 > [!TIP]
 > Already authenticated? Run `linkwarden tokens generate` to create a new token for another machine or script.
