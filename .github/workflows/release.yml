@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  packages: write # push images to ghcr.io
 
 concurrency:
   group: release
@@ -65,7 +66,8 @@ jobs:
           git tag -a "v${VERSION}" -m "v${VERSION}"
 
       # Build and render the Homebrew cask, AUR PKGBUILD and winget manifest before pushing,
-      # so a failed build leaves no orphan tag or commit behind.
+      # so a failed build leaves no orphan tag or commit behind. Docker images are only built
+      # at publish time (dockers_v2), so the Dockerfile is checked in test.yml instead.
       - name: 🔨 Build (dry run)
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
@@ -78,8 +80,22 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: git push --atomic origin HEAD:main "v${VERSION}"
 
-      # Publishes the GitHub release, pushes the AUR package, and opens PRs against
-      # CerealKiller97/homebrew-tap and microsoft/winget-pkgs.
+      # QEMU builds the linux/arm64 image on the amd64 runner.
+      - name: 🐳 Set up QEMU
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+
+      - name: 🐳 Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: 🔑 Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      # Publishes the GitHub release and the ghcr.io image, pushes the AUR package, and opens
+      # PRs against CerealKiller97/homebrew-tap and microsoft/winget-pkgs.
       - name: 🚀 Release and publish packages
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:

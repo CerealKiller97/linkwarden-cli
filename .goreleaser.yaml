@@ -72,7 +72,30 @@ release:
   mode: keep-existing
   make_latest: true
   prerelease: auto
+  skip_upload: false
   include_meta: true
+
+# 🐳 docker run --rm -e LINKWARDEN_TOKEN ghcr.io/cerealkiller97/linkwarden-cli links list
+# One buildx build per release pushes a linux/amd64 + linux/arm64 manifest. --snapshot builds
+# per-platform images locally instead, tagged with an -amd64/-arm64 suffix.
+dockers_v2:
+  - id: linkwarden-cli
+    ids: [linkwarden]
+    dockerfile: Dockerfile
+    images:
+      - ghcr.io/cerealkiller97/linkwarden-cli
+    tags:
+      - "{{ .Version }}"
+      - "{{ if not .Prerelease }}latest{{ end }}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    flags:
+      - --target=goreleaser-production
+    labels:
+      org.opencontainers.image.created: "{{ .Date }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.version: "{{ .Version }}"
 
 # 🍺 brew install CerealKiller97/tap/linkwarden-cli
 # Pushes the cask to a branch of CerealKiller97/homebrew-tap and opens a PR to its main branch.
