@@ -64,23 +64,29 @@ jobs:
           git commit -m "chore(release): v${VERSION}"
           git tag -a "v${VERSION}" -m "v${VERSION}"
 
-      # Build before pushing, so a failed build leaves no orphan tag or commit behind.
-      - name: 🔨 Build binaries
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: scripts/release.sh build "$VERSION" dist
+      # Build and render the Homebrew cask, AUR PKGBUILD and winget manifest before pushing,
+      # so a failed build leaves no orphan tag or commit behind.
+      - name: 🔨 Build (dry run)
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          distribution: goreleaser
+          version: v2.18.3
+          args: release --clean --skip=publish,announce
 
       - name: ⬆️ Push commit and tag
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: git push --atomic origin HEAD:main "v${VERSION}"
 
-      - name: 🚀 Create GitHub release
+      # Publishes the GitHub release, pushes the AUR package, and opens PRs against
+      # CerealKiller97/homebrew-tap and microsoft/winget-pkgs.
+      - name: 🚀 Release and publish packages
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          distribution: goreleaser
+          version: v2.18.3
+          args: release --clean --release-notes ${{ runner.temp }}/notes.md
         env:
-          GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          gh release create "v${VERSION}" dist/*.tar.gz dist/*.zip dist/checksums.txt \
-            --title "v${VERSION}" \
-            --notes-file "$RUNNER_TEMP/notes.md" \
-            --verify-tag
+          GITHUB_TOKEN: ${{ github.token }}
+          PACKAGES_GITHUB_TOKEN: ${{ secrets.PACKAGES_GITHUB_TOKEN }}
+          AUR_KEY: ${{ secrets.AUR_KEY }}
