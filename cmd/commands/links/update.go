@@ -39,14 +39,40 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	link, err := client.Links.Update(cmd.Context(), id, linkwarden.UpdateLinkRequest{
-		Name:        cmd.Flag("name").Value.String(),
-		URL:         cmd.Flag("url").Value.String(),
-		Description: cmd.Flag("description").Value.String(),
-		Icon:        cmd.Flag("icon").Value.String(),
-		IconWeight:  cmd.Flag("icon-weight").Value.String(),
-		Color:       cmd.Flag("color").Value.String(),
-	})
+	// Start from the current link: the API replaces the whole link, so any
+	// field left out of the request would be cleared.
+	current, err := client.Links.Get(cmd.Context(), id)
+	if err != nil {
+		log.Err(err).Msg("Failed to get link")
+		return err
+	}
+
+	req := linkwarden.UpdateLinkRequest{
+		Name:        current.Name,
+		URL:         current.URL,
+		Description: current.Description,
+		Icon:        current.Icon,
+		IconWeight:  current.IconWeight,
+		Color:       current.Color,
+		Tags:        current.Tags,
+		Collection:  linkwarden.Collection{ID: current.Collection.ID, OwnerID: current.Collection.OwnerID},
+		PinnedBy:    current.PinnedBy,
+	}
+
+	for flag, field := range map[string]*string{
+		"name":        &req.Name,
+		"url":         &req.URL,
+		"description": &req.Description,
+		"icon":        &req.Icon,
+		"icon-weight": &req.IconWeight,
+		"color":       &req.Color,
+	} {
+		if cmd.Flags().Changed(flag) {
+			*field = cmd.Flag(flag).Value.String()
+		}
+	}
+
+	link, err := client.Links.Update(cmd.Context(), id, req)
 	if err != nil {
 		log.Err(err).Msg("Failed to update link")
 		return err

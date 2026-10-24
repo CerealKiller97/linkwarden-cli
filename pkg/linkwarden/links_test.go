@@ -94,7 +94,7 @@ func TestLinksService_Update(t *testing.T) {
 		assert.Equal("/api/v1/links/7", r.URL.Path)
 		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"id":7,"name":"Renamed","url":"https://example.com"}`))
+		_, _ = w.Write([]byte(`{"response":{"id":7,"name":"Renamed","url":"https://example.com"}}`))
 	})
 
 	link, err := client.Links.Update(t.Context(), 7, UpdateLinkRequest{Name: "Renamed"})
@@ -102,6 +102,25 @@ func TestLinksService_Update(t *testing.T) {
 	assert.Equal(7, link.ID)
 	assert.Equal("Renamed", link.Name)
 	assert.Equal(7, gotBody.ID)
+}
+
+func TestLinksService_Update_SendsRequiredTagsAndCollection(t *testing.T) {
+	assert := require.New(t)
+
+	var gotBody map[string]any
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"response":{"id":7,"name":"Renamed","url":"https://example.com"}}`))
+	})
+
+	_, err := client.Links.Update(t.Context(), 7, UpdateLinkRequest{
+		Name:       "Renamed",
+		Collection: Collection{ID: 2, OwnerID: 1},
+	})
+	assert.NoError(err)
+	assert.Equal([]any{}, gotBody["tags"])
+	assert.Equal(map[string]any{"id": float64(2), "ownerId": float64(1)}, gotBody["collection"])
 }
 
 func TestLinksService_Delete(t *testing.T) {

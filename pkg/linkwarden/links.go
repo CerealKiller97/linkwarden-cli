@@ -52,6 +52,10 @@ type CreateLinkRequest struct {
 }
 
 // UpdateLinkRequest is the payload for LinksService.Update.
+//
+// The API replaces the whole link: omitted fields are cleared and tags is the
+// complete new tag list. Collection must carry both ID and OwnerID. Callers
+// changing a few fields should start from the current link (see LinksService.Get).
 type UpdateLinkRequest struct {
 	ID          int        `json:"id"`
 	Name        string     `json:"name,omitempty"`
@@ -60,8 +64,8 @@ type UpdateLinkRequest struct {
 	Icon        string     `json:"icon,omitempty"`
 	IconWeight  string     `json:"iconWeight,omitempty"`
 	Color       string     `json:"color,omitempty"`
-	Tags        []Tag      `json:"tags,omitempty"`
-	Collection  Collection `json:"collection,omitzero"`
+	Tags        []Tag      `json:"tags"`
+	Collection  Collection `json:"collection"`
 	PinnedBy    []PinnedBy `json:"pinnedBy,omitempty"`
 }
 
@@ -173,6 +177,9 @@ func (s *LinksService) Create(ctx context.Context, req CreateLinkRequest) (*Link
 
 func (s *LinksService) Update(ctx context.Context, id int, req UpdateLinkRequest) (*Link, error) {
 	req.ID = id
+	if req.Tags == nil {
+		req.Tags = []Tag{}
+	}
 
 	_, body, err := s.c.request(ctx, requestOptions{
 		method:   http.MethodPut,
@@ -183,8 +190,8 @@ func (s *LinksService) Update(ctx context.Context, id int, req UpdateLinkRequest
 		return nil, err
 	}
 
-	var link Link
-	if err := decodeJSON(body, &link); err != nil {
+	link, err := decodeResponseEnvelope[Link](body)
+	if err != nil {
 		return nil, err
 	}
 
