@@ -41,3 +41,16 @@ func TestSearchService_Links_OmitsUnsetQueryParams(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal("", gotQuery)
 }
+
+func TestSearchService_Links_NothingFoundReturnsEmpty(t *testing.T) {
+	assert := require.New(t)
+
+	client := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"data":[],"success":true,"message":"Nothing found."}`))
+	})
+
+	links, err := client.Search.Links(t.Context(), SearchOptions{SearchQueryString: "nope"})
+	assert.NoError(err)
+	assert.Empty(links)
+}

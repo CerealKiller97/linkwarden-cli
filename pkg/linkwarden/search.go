@@ -1,7 +1,9 @@
 package linkwarden
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -29,6 +31,18 @@ func (o SearchOptions) toQuery() url.Values {
 type searchData struct {
 	NextCursor *int   `json:"nextCursor"`
 	Links      []Link `json:"links"`
+}
+
+// UnmarshalJSON also accepts a bare array, which the API sends as "data"
+// instead of an object when nothing matches (`{"data":[],"message":"Nothing found."}`).
+func (d *searchData) UnmarshalJSON(b []byte) error {
+	if trimmed := bytes.TrimSpace(b); len(trimmed) > 0 && trimmed[0] == '[' {
+		*d = searchData{}
+		return json.Unmarshal(trimmed, &d.Links)
+	}
+
+	type plain searchData
+	return json.Unmarshal(b, (*plain)(d))
 }
 
 // SearchService accesses the /api/v1/search endpoint.
