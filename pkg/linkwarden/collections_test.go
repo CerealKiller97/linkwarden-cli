@@ -40,6 +40,19 @@ func TestCollectionsService_Get(t *testing.T) {
 	assert.Equal("Reading List", collection.Name)
 }
 
+func TestCollectionsService_Get_NullResponseIsNotFound(t *testing.T) {
+	assert := require.New(t)
+
+	client := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"response":null}`))
+	})
+
+	collection, err := client.Collections.Get(t.Context(), 9999)
+	assert.Nil(collection)
+	assert.True(IsNotFound(err))
+}
+
 func TestCollectionsService_Create(t *testing.T) {
 	assert := require.New(t)
 
@@ -73,10 +86,29 @@ func TestCollectionsService_Update(t *testing.T) {
 		_, _ = w.Write([]byte(`{"response":{"id":3,"name":"Renamed"}}`))
 	})
 
-	collection, err := client.Collections.Update(t.Context(), 3, UpdateCollectionRequest{Name: "Renamed", IsPublic: true})
+	isPublic := true
+	collection, err := client.Collections.Update(t.Context(), 3, UpdateCollectionRequest{Name: "Renamed", IsPublic: &isPublic})
 	assert.NoError(err)
 	assert.Equal("Renamed", collection.Name)
-	assert.True(gotBody.IsPublic)
+	assert.True(*gotBody.IsPublic)
+}
+
+func TestCollectionsService_Update_SendsRequiredIDAndMembers(t *testing.T) {
+	assert := require.New(t)
+
+	var gotBody map[string]any
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"response":{"id":3,"name":"Renamed"}}`))
+	})
+
+	_, err := client.Collections.Update(t.Context(), 3, UpdateCollectionRequest{Name: "Renamed"})
+	assert.NoError(err)
+	assert.InDelta(3, gotBody["id"], 0)
+	assert.Equal([]any{}, gotBody["members"])
+	assert.NotContains(gotBody, "isPublic")
+	assert.NotContains(gotBody, "parentId")
 }
 
 func TestCollectionsService_Delete(t *testing.T) {

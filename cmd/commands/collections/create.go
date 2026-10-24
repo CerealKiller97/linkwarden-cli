@@ -1,6 +1,8 @@
 package collections
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path"
 	"strconv"
@@ -16,6 +18,8 @@ const (
 	defaultColor              = "#00bba7"
 	defaultDescription        = "Managed by: Linkwarden CLI"
 )
+
+var errCollectionExists = errors.New("collection already exists")
 
 func Create() *cobra.Command {
 	cmd := &cobra.Command{
@@ -92,14 +96,12 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 
 		for _, collection := range collections {
 			if collection.Name == name {
-				log.Err(err).Msg("Collection already exists")
-				return err
+				return fmt.Errorf("%w: %q (id %d)", errCollectionExists, name, collection.ID)
 			}
 
 			// find Unorganized collection
-			if collection.Name == unorganizedCollectionName {
+			if collection.Name == unorganizedCollectionName && unorganizedCollectionID == 0 {
 				unorganizedCollectionID = collection.ID
-				break
 			}
 		}
 

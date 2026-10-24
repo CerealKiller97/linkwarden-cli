@@ -46,15 +46,20 @@ type CreateCollectionRequest struct {
 }
 
 // UpdateCollectionRequest is the payload for CollectionsService.Update.
+//
+// The API requires id, name and members, and replaces the collection's members
+// with the given list, so callers changing other fields should start from the
+// current collection (see CollectionsService.Get).
 type UpdateCollectionRequest struct {
-	Name        string   `json:"name,omitempty"`
+	ID          int      `json:"id"`
+	Name        string   `json:"name"`
 	Description string   `json:"description,omitempty"`
 	Color       string   `json:"color,omitempty"`
 	Icon        string   `json:"icon,omitempty"`
 	IconWeight  string   `json:"iconWeight,omitempty"`
-	ParentID    int      `json:"parentId,omitempty"`
-	IsPublic    bool     `json:"isPublic,omitempty"`
-	Members     []Member `json:"members,omitempty"`
+	ParentID    *int     `json:"parentId,omitempty"`
+	IsPublic    *bool    `json:"isPublic,omitempty"`
+	Members     []Member `json:"members"`
 }
 
 // CollectionsService accesses the /api/v1/collections endpoints.
@@ -83,12 +88,17 @@ func (s *CollectionsService) Get(ctx context.Context, id int) (*Collection, erro
 		return nil, err
 	}
 
-	collection, err := decodeResponseEnvelope[Collection](body)
+	collection, err := decodeResponseEnvelope[*Collection](body)
 	if err != nil {
 		return nil, err
 	}
 
-	return &collection, nil
+	// The API answers 200 {"response":null} for an ID the user can't see.
+	if collection == nil {
+		return nil, &APIError{StatusCode: http.StatusNotFound, Message: "Collection not found.", RawBody: body}
+	}
+
+	return collection, nil
 }
 
 // Create creates a new collection. It posts to the un-suffixed /api/v1/collections
@@ -113,6 +123,11 @@ func (s *CollectionsService) Create(ctx context.Context, req CreateCollectionReq
 }
 
 func (s *CollectionsService) Update(ctx context.Context, id int, req UpdateCollectionRequest) (*Collection, error) {
+	req.ID = id
+	if req.Members == nil {
+		req.Members = []Member{}
+	}
+
 	_, body, err := s.c.request(ctx, requestOptions{
 		method:   http.MethodPut,
 		path:     "/api/v1/collections/" + strconv.Itoa(id),

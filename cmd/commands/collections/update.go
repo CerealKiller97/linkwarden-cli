@@ -40,24 +40,55 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	parentID, err := cmd.Flags().GetInt("parent-id")
+	// Start from the current collection: the API requires name and members and
+	// replaces members with whatever is sent.
+	current, err := client.Collections.Get(cmd.Context(), id)
 	if err != nil {
-		return err
-	}
-	isPublic, err := cmd.Flags().GetBool("public")
-	if err != nil {
+		log.Err(err).Msg("Failed to get collection")
 		return err
 	}
 
-	collection, err := client.Collections.Update(cmd.Context(), id, linkwarden.UpdateCollectionRequest{
-		Name:        cmd.Flag("name").Value.String(),
-		Description: cmd.Flag("description").Value.String(),
-		Color:       cmd.Flag("color").Value.String(),
-		Icon:        cmd.Flag("icon").Value.String(),
-		IconWeight:  cmd.Flag("icon-weight").Value.String(),
-		ParentID:    parentID,
-		IsPublic:    isPublic,
-	})
+	req := linkwarden.UpdateCollectionRequest{
+		Name:        current.Name,
+		Description: current.Description,
+		Color:       current.Color,
+		Icon:        current.Icon,
+		IconWeight:  current.IconWeight,
+		ParentID:    current.ParentID,
+		IsPublic:    &current.IsPublic,
+		Members:     current.Members,
+	}
+
+	flags := cmd.Flags()
+	for flag, field := range map[string]*string{
+		"name":        &req.Name,
+		"description": &req.Description,
+		"color":       &req.Color,
+		"icon":        &req.Icon,
+		"icon-weight": &req.IconWeight,
+	} {
+		if flags.Changed(flag) {
+			*field = cmd.Flag(flag).Value.String()
+		}
+	}
+
+	if flags.Changed("parent-id") {
+		parentID, err := flags.GetInt("parent-id")
+		if err != nil {
+			return err
+		}
+		req.ParentID = &parentID
+	}
+
+	if flags.Changed("public") {
+		isPublic, err := flags.GetBool("public")
+		if err != nil {
+			return err
+		}
+		req.IsPublic = &isPublic
+	}
+
+	collection, err := client.Collections.Update(cmd.Context(), id, req)
 	if err != nil {
 		log.Err(err).Msg("Failed to update collection")
 		return err
