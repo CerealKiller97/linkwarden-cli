@@ -19,3 +19,24 @@ jobs:
       - run: go build ./...
       - run: go vet ./...
       - run: go test ./... -race -cover
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Pinned so an upstream release can't break CI unannounced; bump it deliberately.
+      LINKWARDEN_VERSION: v2.16.3
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Start Linkwarden
+        run: scripts/dev-linkwarden.sh up
+      - name: Run E2E tests
+        run: |
+          eval "$(scripts/dev-linkwarden.sh env)"
+          go test -tags e2e -count=1 -v ./e2e/...
+      - name: Linkwarden logs
+        if: failure()
+        run: docker compose -f docker-compose.yml logs --no-color --tail 300 linkwarden
