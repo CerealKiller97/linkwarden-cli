@@ -66,3 +66,20 @@ func TestDashboardService_UpdateV2Layout(t *testing.T) {
 	assert.Equal("COLLECTION", gotBody[1].Type)
 	assert.Equal(3, *gotBody[1].CollectionID)
 }
+
+func TestDashboardService_UpdateV2Layout_SendsZeroOrder(t *testing.T) {
+	assert := require.New(t)
+
+	var gotBody []map[string]any
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"success":true,"message":"Success","data":{"links":[]}}`))
+	})
+
+	_, err := client.Dashboard.UpdateV2Layout(t.Context(), []DashboardLayoutItem{{Type: "STATS", Enabled: true, Order: 0}})
+	assert.NoError(err)
+	assert.Len(gotBody, 1)
+	assert.Contains(gotBody[0], "order")
+	assert.InDelta(0, gotBody[0]["order"], 0)
+}
