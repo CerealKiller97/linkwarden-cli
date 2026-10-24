@@ -16,7 +16,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var errFileEmpty = errors.New("file is empty")
+var (
+	errFileEmpty          = errors.New("file is empty")
+	errCollectionNotFound = errors.New("collection not found")
+)
 
 const defaultConcurrency = 4
 
@@ -97,7 +100,12 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	collection := collectionByID[collectionID]
+	// An unknown ID would otherwise be sent as an empty collection, which makes
+	// the server create a fresh "Unorganized" collection for every request.
+	collection, ok := collectionByID[collectionID]
+	if !ok {
+		return fmt.Errorf("%w: %d", errCollectionNotFound, collectionID)
+	}
 
 	var (
 		wg      sync.WaitGroup
