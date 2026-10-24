@@ -1,6 +1,7 @@
 package linkwarden
 
 import (
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -65,6 +66,45 @@ func TestArchivesService_Upload(t *testing.T) {
 	assert.Equal(3, link.ID)
 	assert.Equal("format=0", gotQuery)
 	assert.Contains(gotContentType, "multipart/form-data")
+}
+
+func TestArchivesService_Upload_SetsFilePartContentType(t *testing.T) {
+	tests := []struct {
+		filename string
+		contents string
+		want     string
+	}{
+		{filename: "page.html", contents: "<html></html>", want: "text/html"},
+		{filename: "shot.jpg", contents: "fake-jpeg-bytes", want: "image/jpeg"},
+		{filename: "doc.pdf", contents: "%PDF-1.4", want: "application/pdf"},
+		{filename: "no-extension", contents: "%PDF-1.4 sniffed", want: "application/pdf"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.filename, func(t *testing.T) {
+			assert := require.New(t)
+
+			var gotPartType, gotContents string
+			client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+				assert.NoError(r.ParseMultipartForm(1 << 20))
+				file, fileHeader, err := r.FormFile("file")
+				assert.NoError(err)
+				defer file.Close()
+				gotPartType = fileHeader.Header.Get("Content-Type")
+				contents, err := io.ReadAll(file)
+				assert.NoError(err)
+				gotContents = string(contents)
+
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte(`{"response":{"id":3,"name":"Example","url":"https://example.com"}}`))
+			})
+
+			_, err := client.Archives.Upload(t.Context(), 3, ArchiveFormatPDF, false, tt.filename, strings.NewReader(tt.contents))
+			assert.NoError(err)
+			assert.Equal(tt.want, gotPartType)
+			assert.Equal(tt.contents, gotContents)
+		})
+	}
 }
 
 func TestArchivesService_UploadStandalone(t *testing.T) {
