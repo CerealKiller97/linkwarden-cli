@@ -242,12 +242,3 @@ func decodeDataEnvelope[T any](body []byte) (T, error) {
 
 	return envelope.Data, nil
 }
-
-// decodeJSON unmarshals a response body with no enclosing envelope.
-func decodeJSON(body []byte, v any) error {
-	if err := json.Unmarshal(body, v); err != nil {
-		return fmt.Errorf("decode response body: %w", err)
-	}
-
-	return nil
-}
