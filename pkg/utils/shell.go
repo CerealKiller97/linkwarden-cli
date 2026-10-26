@@ -7,43 +7,39 @@ import (
 	"path/filepath"
 )
 
-// getShell returns the path (relative to $HOME) of the file the current shell reads
+// ShellConfigPath returns the absolute path to the file the current shell reads
 // environment variables from, or "" if the shell isn't recognized (e.g. on Windows).
-func getShell() string {
-	shell := filepath.Base(os.Getenv("SHELL"))
+func ShellConfigPath() string {
+	var base string
+	var err error
+	var rel []string
 
-	switch shell {
+	switch filepath.Base(os.Getenv("SHELL")) {
 	case "zsh":
 		// .zshenv is sourced for every zsh invocation (login, interactive, and
 		// non-interactive/scripts), unlike .zshrc which only loads interactively.
-		return ".zshenv"
+		base, err = os.UserHomeDir()
+		rel = []string{".zshenv"}
 	case "bash":
 		// bash has no equivalent of .zshenv read unconditionally by every shell.
 		// .bashrc is the best available choice: most distros' .bash_profile sources
 		// it, so interactive login and non-login shells both pick it up.
-		return ".bashrc"
+		base, err = os.UserHomeDir()
+		rel = []string{".bashrc"}
 	case "fish":
-		// fish has a single config file read for both login and interactive shells.
-		return filepath.Join(".config", "fish", "config.fish")
+		// fish has a single config file read for both login and interactive shells,
+		// located under $XDG_CONFIG_HOME like fish itself resolves it.
+		base, err = ConfigHome()
+		rel = []string{"fish", "config.fish"}
 	default:
 		return "" // Windows, or an unrecognized shell. Not supported.
 	}
-}
 
-// ShellConfigPath returns the absolute path to the current shell's config file, or
-// "" if the shell isn't recognized.
-func ShellConfigPath() string {
-	shellFile := getShell()
-	if shellFile == "" {
-		return ""
-	}
-
-	dir, err := os.UserHomeDir()
 	if err != nil {
 		return ""
 	}
 
-	return filepath.Join(dir, shellFile)
+	return filepath.Join(append([]string{base}, rel...)...)
 }
 
 // AppendTokenToShellFile appends an `export LINKWARDEN_TOKEN=...` line to the

@@ -1,9 +1,12 @@
 package collections
 
 import (
+	"errors"
+	"io/fs"
 	"os"
-	"path"
+	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -15,6 +18,7 @@ const (
 	unorganizedCollectionName = "Unorganized"
 	defaultColor              = "#00bba7"
 	defaultDescription        = "Managed by: Linkwarden CLI"
+	unorganizedStateFile      = "unorganized"
 )
 
 func Create() *cobra.Command {
@@ -25,39 +29,12 @@ func Create() *cobra.Command {
 		RunE:  executeCreate,
 	}
 
-	// Get unorganized collection ID from XDG_STATE_HOME/linkwarden/unorganized if exists
-	getUnorganizedID := func() int {
-		xdgStateHome, exists := os.LookupEnv("XDG_DATA_HOME")
-		if !exists {
-			xdgStateHome = os.Getenv("HOME") + "/.local/state"
-		}
-
-		// Read Unorganized collection ID from XDG_STATE_HOME/linkwarden/unorganized
-		fetched, err := os.ReadFile(path.Join(xdgStateHome, "linkwarden", "unorganized"))
-		if err != nil && !os.IsNotExist(err) {
-			log.Err(err).Msg("Failed to read unorganized collection ID")
-			return 0
-		}
-
-		unorganizedCollectionID := 0
-
-		if len(fetched) > 0 {
-			unorganizedCollectionID, err = strconv.Atoi(string(fetched))
-			if err != nil {
-				log.Err(err).Msg("Failed to convert unorganized collection ID to int")
-				return 0
-			}
-		}
-
-		return unorganizedCollectionID
-	}
-
 	cmd.Flags().String("name", "", "Collection name.")
 	cmd.Flags().String("description", defaultDescription, "Collection description.")
 	cmd.Flags().String("color", defaultColor, "Collection color.")
 	cmd.Flags().String("icon", "", "Collection icon.")
 	cmd.Flags().String("icon-weight", "", "Collection icon weight.")
-	cmd.Flags().Int("parent-id", getUnorganizedID(), "Parent collection ID.")
+	cmd.Flags().Int("parent-id", 0, "Parent collection ID. Defaults to the Unorganized collection.")
 
 	if err := cmd.MarkFlagRequired("name"); err != nil {
 		return nil
@@ -74,12 +51,14 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 	color := cmd.Flag("color").Value.String()
 	icon := cmd.Flag("icon").Value.String()
 	iconWeight := cmd.Flag("icon-weight").Value.String()
-	parentID := cmd.Flag("parent-id").Value.String()
 
-	unorganizedCollectionID, err := strconv.Atoi(parentID)
+	unorganizedCollectionID, err := cmd.Flags().GetInt("parent-id")
 	if err != nil {
-		log.Err(err).Msg("Failed to convert parent ID to int")
 		return err
+	}
+
+	if !cmd.Flags().Changed("parent-id") {
+		unorganizedCollectionID = readUnorganizedCollectionID()
 	}
 
 	// When unorganized collection ID is 0, find Unorganized collection
@@ -103,7 +82,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 			}
 		}
 
-		// persist Unorganized collection ID to XDG_STATE_HOME/linkwarden/unorganized
+		// cache the Unorganized collection ID in $XDG_STATE_HOME/linkwarden/unorganized
 		if unorganizedCollectionID != 0 {
 			if err := persistUnorganizedCollectionID(unorganizedCollectionID); err != nil {
 				return err
@@ -137,27 +116,43 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-func persistUnorganizedCollectionID(unorganizedCollectionID int) error {
-	xdgStateHome, exists := os.LookupEnv("XDG_STATE_HOME")
-
-	// if not exist
-	if !exists {
-		xdgStateHome = os.Getenv("HOME") + "/.local/state"
-	}
-
-	if err := os.MkdirAll(path.Join(xdgStateHome, "/linkwarden"), 0o750); err != nil {
-		log.Err(err).Msg("Failed to create XDG_STATE_HOME/linkwarden/unorganized directory")
-		return err
-	}
-
-	err := os.WriteFile(
-		path.Join(xdgStateHome, "linkwarden", "unorganized"),
-		[]byte(strconv.Itoa(unorganizedCollectionID)),
-		0o600,
-	)
+// readUnorganizedCollectionID returns the Unorganized collection ID cached in
+// $XDG_STATE_HOME/linkwarden/unorganized, or 0 if there is no usable cached value.
+func readUnorganizedCollectionID() int {
+	file, err := utils.StateFile(unorganizedStateFile)
 	if err != nil {
+		log.Err(err).Msg("Failed to resolve state directory")
+		return 0
+	}
+
+	fetched, err := os.ReadFile(file)
+	if err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			log.Err(err).Msg("Failed to read unorganized collection ID")
+		}
+		return 0
+	}
+
+	id, err := strconv.Atoi(strings.TrimSpace(string(fetched)))
+	if err != nil {
+		log.Err(err).Msg("Failed to convert unorganized collection ID to int")
+		return 0
+	}
+
+	return id
+}
+
+func persistUnorganizedCollectionID(unorganizedCollectionID int) error {
+	file, err := utils.StateFile(unorganizedStateFile)
+	if err != nil {
+		log.Err(err).Msg("Failed to resolve state directory")
 		return err
 	}
 
-	return nil
+	if err := os.MkdirAll(filepath.Dir(file), 0o750); err != nil {
+		log.Err(err).Msg("Failed to create state directory")
+		return err
+	}
+
+	return os.WriteFile(file, []byte(strconv.Itoa(unorganizedCollectionID)), 0o600)
 }

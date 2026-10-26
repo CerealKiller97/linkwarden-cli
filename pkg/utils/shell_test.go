@@ -43,12 +43,28 @@ func TestAppendTokenToShellFile_CreatesFishConfigDir(t *testing.T) {
 
 	t.Setenv("SHELL", "/usr/local/bin/fish")
 	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", "")
 
 	assert.NoError(AppendTokenToShellFile("TOKEN3"))
 
 	contents, err := os.ReadFile(filepath.Join(os.Getenv("HOME"), ".config", "fish", "config.fish"))
 	assert.NoError(err)
 	assert.Contains(string(contents), `export LINKWARDEN_TOKEN="TOKEN3"`)
+}
+
+func TestAppendTokenToShellFile_FishHonorsXDGConfigHome(t *testing.T) {
+	assert := require.New(t)
+
+	configHome := t.TempDir()
+	t.Setenv("SHELL", "/usr/local/bin/fish")
+	t.Setenv("HOME", t.TempDir())
+	t.Setenv("XDG_CONFIG_HOME", configHome)
+
+	assert.NoError(AppendTokenToShellFile("TOKEN5"))
+
+	contents, err := os.ReadFile(filepath.Join(configHome, "fish", "config.fish"))
+	assert.NoError(err)
+	assert.Contains(string(contents), `export LINKWARDEN_TOKEN="TOKEN5"`)
 }
 
 func TestAppendTokenToShellFile_UnrecognizedShellErrors(t *testing.T) {
