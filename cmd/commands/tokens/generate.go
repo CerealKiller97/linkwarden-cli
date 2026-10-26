@@ -118,7 +118,7 @@ func printManualSetupInstructions(token string) {
 	var configFile, exportLine string
 	switch shell {
 	case "fish":
-		configFile = "~/.config/fish/config.fish"
+		configFile = utils.ShellConfigPath()
 		exportLine = fmt.Sprintf("set -x LINKWARDEN_TOKEN %q", token)
 	case "bash":
 		configFile = "~/.bashrc"
