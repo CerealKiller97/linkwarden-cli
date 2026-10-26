@@ -83,7 +83,7 @@ func registerCommands(root *cobra.Command) {
 	//})
 }
 
-// version is the released version, set at build time by scripts/release.sh build via
+// version is the released version, set at build time by GoReleaser (.goreleaser.yaml) via
 // -ldflags "-X github.com/CerealKiller97/linkwarden-cli/cmd.version=1.2.3".
 var version = "dev"
 

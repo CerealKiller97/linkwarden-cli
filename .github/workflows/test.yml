@@ -19,3 +19,12 @@ jobs:
       - run: go build ./...
       - run: go vet ./...
       - run: go test ./... -race -cover
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: 🐳 Build image from source
+        run: docker build --target production -t linkwarden-cli:test .
+      - name: 🐳 Smoke test
+        run: docker run --rm linkwarden-cli:test --version
