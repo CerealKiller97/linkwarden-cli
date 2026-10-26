@@ -3,7 +3,10 @@ package links
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
+	"sync"
+	"sync/atomic"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -13,7 +16,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var errFileEmpty = errors.New("file is empty")
+var (
+	errFileEmpty          = errors.New("file is empty")
+	errCollectionNotFound = errors.New("collection not found")
+)
+
+const defaultConcurrency = 4
 
 func Create() *cobra.Command {
 	cmd := &cobra.Command{
@@ -23,6 +31,7 @@ func Create() *cobra.Command {
 
 	cmd.Flags().String("file", "", "File to upload.")
 	cmd.Flags().String("collection", "", "Collection ID to upload to.")
+	cmd.Flags().Int("concurrency", defaultConcurrency, "Number of links to create in parallel.")
 
 	if err := cmd.MarkFlagRequired("file"); err != nil {
 		return nil
@@ -37,6 +46,15 @@ type item struct {
 }
 
 func execute(cmd *cobra.Command, _ []string) error {
+	concurrency, err := cmd.Flags().GetInt("concurrency")
+	if err != nil {
+		return err
+	}
+
+	if concurrency < 1 {
+		return fmt.Errorf("--concurrency must be at least 1, got %d", concurrency)
+	}
+
 	filePath := cmd.Flag("file").Value.String()
 	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
@@ -82,41 +100,55 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	collection := collectionByID[collectionID]
-
-	success := 0
-	failed := 0
-
-	bar := progressbar.Default(100)
-
-	stepSize := 100.0 / float64(len(data))
-
-	for _, item := range data {
-		_, err = client.Links.Create(cmd.Context(), linkwarden.CreateLinkRequest{
-			Name:       item.Title,
-			URL:        item.URL,
-			Type:       "url",
-			Collection: linkwarden.Collection{ID: collection.ID, Name: collection.Name},
-			Tags:       []linkwarden.Tag{},
-		})
-		if err != nil {
-			log.Err(err).
-				Str("url", item.URL).
-				Str("title", item.Title).
-				Msg("Failed to create link")
-
-			failed++
-			continue
-		}
-
-		if err := bar.Add(int(stepSize)); err != nil {
-			return err
-		}
-
-		success++
+	// An unknown ID would otherwise be sent as an empty collection, which makes
+	// the server create a fresh "Unorganized" collection for every request.
+	collection, ok := collectionByID[collectionID]
+	if !ok {
+		return fmt.Errorf("%w: %d", errCollectionNotFound, collectionID)
 	}
 
-	displayResults(total, success, failed)
+	var (
+		wg      sync.WaitGroup
+		sem     = make(chan struct{}, concurrency)
+		success atomic.Int64
+		failed  atomic.Int64
+	)
+
+	bar := progressbar.Default(int64(total))
+
+	for _, item := range data {
+		sem <- struct{}{}
+		wg.Go(func() {
+			defer func() { <-sem }()
+
+			_, err := client.Links.Create(cmd.Context(), linkwarden.CreateLinkRequest{
+				Name:       item.Title,
+				URL:        item.URL,
+				Type:       "url",
+				Collection: linkwarden.Collection{ID: collection.ID, Name: collection.Name},
+				Tags:       []linkwarden.Tag{},
+			})
+
+			// A failed render of the progress bar shouldn't abort the import.
+			_ = bar.Add(1)
+
+			if err != nil {
+				log.Err(err).
+					Str("url", item.URL).
+					Str("title", item.Title).
+					Msg("Failed to create link")
+
+				failed.Add(1)
+				return
+			}
+
+			success.Add(1)
+		})
+	}
+
+	wg.Wait()
+
+	displayResults(total, int(success.Load()), int(failed.Load()))
 
 	return nil
 }
