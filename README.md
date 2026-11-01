@@ -573,7 +573,17 @@ golangci-lint run        # lint (config in .golangci.yml)
 go build -o bin/linkwarden .
 ```
 
-CI runs tests, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests.
+End-to-end tests run the built CLI against a real Linkwarden in Docker. They only run against
+localhost and clean up everything they create:
+
+```bash
+scripts/dev-linkwarden.sh up
+eval "$(scripts/dev-linkwarden.sh env)"
+go test -tags e2e -count=1 ./e2e/...
+```
+
+CI runs tests (including the end-to-end suite against a pinned Linkwarden release), `golangci-lint`,
+`gosec` and `govulncheck` on pushes to `main` and on pull requests.
 
 ### 🚀 Releasing
 
