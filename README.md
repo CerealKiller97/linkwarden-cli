@@ -40,6 +40,34 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 
 ### 1. Install
 
+**🍺 Homebrew** (macOS and Linux):
+
+```bash
+brew install CerealKiller97/tap/linkwarden-cli
+```
+
+**🐧 Arch Linux** ([AUR](https://aur.archlinux.org/packages/linkwarden-cli-bin)):
+
+```bash
+yay -S linkwarden-cli-bin
+```
+
+**🪟 Windows** (winget):
+
+```powershell
+winget install CerealKiller97.LinkwardenCLI
+```
+
+All three install shell completions for bash, zsh and fish where the platform supports them.
+
+**🐳 Docker** (linux/amd64 and linux/arm64):
+
+```bash
+docker run --rm -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/linkwarden-cli links list
+```
+
+Add `-it` for interactive prompts. Tags are `latest` and each release version, e.g. `1.1.0`.
+
 **📦 Prebuilt binary:** grab the archive for your OS and CPU (x86_64 or ARM64) from
 [Releases](https://github.com/CerealKiller97/linkwarden-cli/releases/latest):
 
@@ -604,10 +632,24 @@ The script shows the next version and a changelog preview, then triggers the
 1. Tests the code.
 2. Prepends the new version's section to `CHANGELOG.md`.
 3. Commits it and tags `vX.Y.Z`.
-4. Builds Linux, macOS and Windows binaries for x86_64 and ARM64.
-5. Publishes a GitHub Release with the changelog section as its notes.
+4. Builds Linux, macOS and Windows binaries for x86_64 and ARM64 with [GoReleaser](.goreleaser.yaml).
+5. Pushes the commit and tag, then publishes a GitHub Release with the changelog section as its notes.
+6. Publishes packages: opens PRs against
+   [CerealKiller97/homebrew-tap](https://github.com/CerealKiller97/homebrew-tap) and
+   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs), and pushes the
+   [`linkwarden-cli-bin`](https://aur.archlinux.org/packages/linkwarden-cli-bin) PKGBUILD to the AUR.
+7. Pushes a multi-arch image to `ghcr.io/cerealkiller97/linkwarden-cli`.
 
-Preview any step locally with `scripts/release.sh changelog 1.5.0` or `scripts/release.sh build 1.5.0`.
+Preview the changelog with `scripts/release.sh changelog 1.5.0`, and the binaries, Homebrew cask,
+AUR PKGBUILD, winget manifests and Docker images with `goreleaser release --snapshot --clean`
+(output in `dist/`, images tagged with an `-amd64`/`-arm64` suffix).
+
+The workflow needs two repository secrets:
+
+| Secret | What it is |
+|---|---|
+| `PACKAGES_GITHUB_TOKEN` | Classic PAT with the `public_repo` scope. It pushes to `homebrew-tap` and the `winget-pkgs` fork, and opens the PRs. |
+| `AUR_KEY` | Private SSH key (no passphrase) whose public half is on your [AUR account](https://aur.archlinux.org/account). |
 
 ---
 

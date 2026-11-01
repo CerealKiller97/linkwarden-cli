@@ -32,3 +32,6 @@ bin
 # Local dev Linkwarden instance (scripts/dev-linkwarden.sh)
 .env
 .env.cli
+# GoReleaser output
+dist
+completions

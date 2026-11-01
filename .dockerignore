@@ -1,0 +1,12 @@
+# Keep secrets and build output out of the `docker build .` context.
+.env
+.env.*
+!.env.example
+.git
+.github
+.idea
+.qodo
+bin
+dist
+completions
+plans

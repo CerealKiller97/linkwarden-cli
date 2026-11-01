@@ -18,9 +18,8 @@
 #       the Conventional Commits in <latest tag>..REF (REF defaults to HEAD). --write also
 #       inserts it into CHANGELOG.md below "## [Unreleased]" and updates the compare links.
 #
-#   scripts/release.sh build <version> [out-dir]
-#       Cross-compiles linux/darwin/windows × amd64/arm64 archives and a checksums.txt
-#       into out-dir (default: dist/).
+#   Binaries and packages are built by GoReleaser (.goreleaser.yaml). Preview them with:
+#       goreleaser release --snapshot --clean
 #
 # Commit type → changelog section:
 #   feat                                     → ✨ Added
@@ -40,8 +39,6 @@ cd "$(dirname "$0")/.."
 
 CHANGELOG="CHANGELOG.md"
 WORKFLOW="release.yml"
-BUILD_TARGETS="linux/amd64 linux/arm64 darwin/amd64 darwin/arm64 windows/amd64 windows/arm64"
-VERSION_PKG="github.com/CerealKiller97/linkwarden-cli/cmd.version"
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -243,48 +240,6 @@ cmd_changelog() {
 	fi
 }
 
-# ─── build ────────────────────────────────────────────────────────────────────
-
-cmd_build() {
-	local version="${1:-}" out="${2:-dist}" target goos goarch name staging binary
-	[[ -n "$version" ]] || usage
-
-	rm -rf "$out"
-	mkdir -p "$out"
-
-	for target in $BUILD_TARGETS; do
-		goos="${target%/*}"
-		goarch="${target#*/}"
-		name="linkwarden_${version}_${goos}_${goarch}"
-		staging="${out}/${name}"
-		binary="linkwarden"
-		[[ "$goos" == "windows" ]] && binary="linkwarden.exe"
-
-		echo "🔨 ${goos}/${goarch}"
-		mkdir -p "$staging"
-		CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" \
-			go build -trimpath -ldflags "-s -w -X ${VERSION_PKG}=${version}" -o "${staging}/${binary}" .
-		cp README.md "$staging/"
-		[[ -f "$CHANGELOG" ]] && cp "$CHANGELOG" "$staging/"
-
-		if [[ "$goos" == "windows" ]]; then
-			(cd "$out" && zip -qr "${name}.zip" "$name")
-		else
-			tar -C "$out" -czf "${out}/${name}.tar.gz" "$name"
-		fi
-		rm -rf "$staging"
-	done
-
-	if command -v sha256sum >/dev/null; then
-		(cd "$out" && sha256sum -- *.tar.gz *.zip >checksums.txt)
-	else
-		(cd "$out" && shasum -a 256 -- *.tar.gz *.zip >checksums.txt)
-	fi
-
-	echo "📦 Artifacts in ${out}/:"
-	ls -1 "$out"
-}
-
 # ─── trigger (default) ────────────────────────────────────────────────────────
 
 cmd_trigger() {
@@ -369,10 +324,6 @@ case "${1:-}" in
 	changelog)
 		shift
 		cmd_changelog "$@"
-		;;
-	build)
-		shift
-		cmd_build "$@"
 		;;
 	"" | -h | --help) usage ;;
 	*) cmd_trigger "$@" ;;
