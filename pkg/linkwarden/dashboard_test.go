@@ -31,12 +31,14 @@ func TestDashboardService_GetV2(t *testing.T) {
 		assert.Equal(http.MethodGet, r.Method)
 		assert.Equal("/api/v2/dashboard", r.URL.Path)
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"success":true,"message":"Success","data":{"links":[{"id":1,"name":"Go","url":"https://go.dev"}],"numberOfPinnedLinks":2,"numberOfTags":5}}`))
+		_, _ = w.Write([]byte(`{"success":true,"message":"Success","data":{"links":[{"id":1,"name":"Go","url":"https://go.dev"}],"collectionLinks":{"3":[{"id":7,"name":"Rust","url":"https://rust-lang.org"}]},"numberOfPinnedLinks":2,"numberOfTags":5}}`))
 	})
 
 	data, err := client.Dashboard.GetV2(t.Context())
 	assert.NoError(err)
 	assert.Len(data.Links, 1)
+	assert.Len(data.CollectionLinks["3"], 1)
+	assert.Equal("Rust", data.CollectionLinks["3"][0].Name)
 	assert.Equal(2, data.NumberOfPinnedLinks)
 	assert.Equal(5, data.NumberOfTags)
 }

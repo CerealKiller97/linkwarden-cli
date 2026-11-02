@@ -62,6 +62,24 @@ func TestTagsService_CreateOrUpdateBulk(t *testing.T) {
 	assert.Equal("Reading", gotBody.Tags[0].Label)
 }
 
+func TestTagsService_CreateOrUpdateBulk_ArchiveSettings(t *testing.T) {
+	assert := require.New(t)
+
+	var gotBody struct {
+		Tags []map[string]any `json:"tags"`
+	}
+	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"response":[]}`))
+	})
+
+	off := false
+	_, err := client.Tags.CreateOrUpdateBulk(t.Context(), []CreateOrUpdateTagInput{{Label: "Reading", ArchiveAsPDF: &off}})
+	assert.NoError(err)
+	assert.Equal(map[string]any{"label": "Reading", "archiveAsPDF": false}, gotBody.Tags[0])
+}
+
 func TestTagsService_Update(t *testing.T) {
 	assert := require.New(t)
 
