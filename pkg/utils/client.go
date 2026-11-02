@@ -8,5 +8,5 @@ import (
 // NewLinkwardenClient builds a Linkwarden API client from the instance URL and
 // token configured via SetVars (LINKWARDEN_URL / LINKWARDEN_TOKEN).
 func NewLinkwardenClient() *linkwarden.Client {
-	return linkwarden.New(GetInstanceURL(), GetLinkwardenToken(), linkwarden.WithLogger(log.Logger))
+	return linkwarden.New(GetInstanceURL(), GetLinkwardenToken(), linkwarden.WithLogger(NewSlogLogger(log.Logger)))
 }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ♻️ Changed
+
+- **sdk:** `WithLogger` now takes a standard-library `*slog.Logger` instead of `zerolog.Logger`, so the SDK no longer depends on zerolog. **Breaking** for SDK users who passed a logger.
+
 ## [1.0.0] - 2026-10-06
 
 ### ✨ Added
