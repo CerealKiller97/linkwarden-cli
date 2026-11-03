@@ -11,12 +11,15 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 [![lint](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/lint.yml/badge.svg)](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/lint.yml)
 [![gosec](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/gosec.yml/badge.svg)](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/gosec.yml)
 [![govulncheck](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/govulncheck.yml)
+[![release](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/release.yml/badge.svg)](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/release.yml)
 <br>
+[![Latest release](https://img.shields.io/github/v/release/CerealKiller97/linkwarden-cli?logo=github&sort=semver)](https://github.com/CerealKiller97/linkwarden-cli/releases/latest)
+[![License](https://img.shields.io/github/license/CerealKiller97/linkwarden-cli)](LICENSE)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/CerealKiller97/linkwarden-cli?logo=go&logoColor=white)](go.mod)
 [![Go Reference](https://pkg.go.dev/badge/github.com/CerealKiller97/linkwarden-go-sdk.svg)](https://pkg.go.dev/github.com/CerealKiller97/linkwarden-go-sdk)
 [![Go Report Card](https://goreportcard.com/badge/github.com/CerealKiller97/linkwarden-cli)](https://goreportcard.com/report/github.com/CerealKiller97/linkwarden-cli)
 
-[Quick start](#-quick-start) · [Recipes](#-recipes) · [Command reference](#-command-reference) · [Go SDK](#-go-sdk)
+[Quick start](#-quick-start) · [Recipes](#-recipes) · [Scripting](#-use-it-in-shell-scripts-and-ci) · [Command reference](#-command-reference) · [Go SDK](#-go-sdk)
 
 </div>
 
@@ -308,6 +311,132 @@ linkwarden dashboard update-v2 --file layout.json
 linkwarden dashboard get-v2
 ```
 
+### 🔎 Browse and filter your library
+
+```bash
+# Pinned links only
+linkwarden links list --pinned-only
+
+# Everything tagged "golang" (tag 5) inside the Go collection (3)
+linkwarden links list --collection-id 3 --tag-id 5
+
+# Full-text search within your links, then page through the results
+linkwarden links list --search "generics"
+linkwarden links list --search "generics" --cursor 421
+
+# Find tags by name
+linkwarden tags list --search kube
+```
+
+### ⚡ Faster bulk imports
+
+`links create --file` imports 4 links at a time by default. Raise it for big lists, or lower it
+if a small self-hosted instance struggles:
+
+```bash
+linkwarden links create --file reading-list.json --collection 3 --concurrency 16
+linkwarden links create --file reading-list.json --collection 3 --concurrency 1   # one at a time
+```
+
+### ✏️ Edit a single link
+
+```bash
+# Fix a title and description
+linkwarden links update --id 412 --name "Effective Go (official)" --description "The style guide"
+
+# Point a link at its new URL, then refresh its snapshots
+linkwarden links update --id 418 --url https://k8spatterns.com
+linkwarden links archive --id 418
+
+# Drop stale snapshots for several links at once
+linkwarden links delete-archive --ids 301,302,303
+```
+
+### 🗃️ Save pages you archived yourself
+
+```bash
+# Attach your own PDF to an existing link
+linkwarden archives upload --link-id 412 --file effective-go.pdf --format 2
+
+# Use a screenshot as the link's preview image
+linkwarden archives upload --link-id 412 --file cover.png --format 0 --preview
+
+# Create a new link straight from a saved HTML page
+linkwarden archives upload-standalone --url https://example.com/paywalled-article --file article.html --format 4
+
+# Download the preview image of a link
+linkwarden archives get --link-id 412 --format 0 --preview --output preview.png
+```
+
+### 🔁 Copy your library to another instance
+
+```bash
+# Export from Linkwarden Cloud…
+linkwarden migrations export --output cloud.json
+
+# …and import into your self-hosted server
+LINKWARDEN_URL=https://links.example.com LINKWARDEN_TOKEN="$SELF_HOSTED_TOKEN" \
+  linkwarden migrations import --file cloud.json --format 0
+```
+
+### 🔐 Rotate API tokens
+
+```bash
+linkwarden tokens generate   # name it, pick an expiry, optionally save it to your shell config
+linkwarden tokens list       # check names and expiry dates
+linkwarden tokens revoke     # pick the old one to revoke
+```
+
+### 🧑‍💻 Use it in shell scripts and CI
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Fail fast instead of opening a picker if an ID is missing
+lw() { linkwarden --non-interactive "$@"; }
+
+lw collections create --name "Sprint $(date +%V)" --color "#22c55e"
+lw links create --file sprint-links.json --collection 12
+lw migrations export --output "backup-$(date +%F).json"
+```
+
+```yaml
+# .github/workflows/backup.yml: weekly backup kept as a workflow artifact
+on:
+  schedule: [{ cron: "0 4 * * 0" }]
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          docker run --rm --user "$(id -u):$(id -g)" -e LINKWARDEN_TOKEN -e LINKWARDEN_URL -v "$PWD:/out" \
+            ghcr.io/cerealkiller97/linkwarden-cli migrations export --output /out/linkwarden.json
+        env:
+          LINKWARDEN_TOKEN: ${{ secrets.LINKWARDEN_TOKEN }}
+          LINKWARDEN_URL: ${{ vars.LINKWARDEN_URL }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linkwarden-backup
+          path: linkwarden.json
+```
+
+### 🌐 Instance info and favicons
+
+```bash
+linkwarden config get                                   # what your instance has enabled
+linkwarden favicon get --url https://go.dev             # content type and size only
+linkwarden favicon get --url https://go.dev --output go.ico
+```
+
+### ⌨️ Shell completion
+
+```bash
+linkwarden completion bash > ~/.local/share/bash-completion/completions/linkwarden
+linkwarden completion zsh  > "${fpath[1]}/_linkwarden"
+linkwarden completion fish > ~/.config/fish/completions/linkwarden.fish
+```
+
 ---
 
 ## 🤖 Interactive vs. non-interactive
@@ -340,7 +469,7 @@ Run `linkwarden <command> <subcommand> --help` for the full flag list of anythin
 <summary><b><code>links</code></b>: create, list, update and archive bookmarks</summary>
 
 ```bash
-linkwarden links create         --file FILE [--collection ID]
+linkwarden links create         --file FILE [--collection ID] [--concurrency N]
 linkwarden links list           [--collection-id ID] [--tag-id ID] [--pinned-only] [--search QUERY] [--cursor N]
 linkwarden links get            [--id ID]
 linkwarden links update         [--id ID] [--name NAME] [--url URL] [--description TEXT] [--color HEX] [--icon NAME] [--icon-weight W]
