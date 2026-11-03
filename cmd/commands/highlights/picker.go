@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
 func linksPickerFetch(ctx context.Context, client *linkwarden.Client) func() ([]utils.PickerItem, error) {

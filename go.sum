@@ -1,3 +1,5 @@
+github.com/CerealKiller97/linkwarden-go-sdk v1.0.0 h1:GOGjFXKQm818RvgWDlnuG82t2x1BUe1WmfN36WKLtkg=
+github.com/CerealKiller97/linkwarden-go-sdk v1.0.0/go.mod h1:GT89cVwU0AqnDsCKY5nmxf8kewkwVZ6wdSSQqsi1Df4=
 github.com/chengxilo/virtualterm v1.0.4 h1:Z6IpERbRVlfB8WkOmtbHiDbBANU7cimRIof7mk9/PwM=
 github.com/chengxilo/virtualterm v1.0.4/go.mod h1:DyxxBZz/x1iqJjFxTFcr6/x+jSpqN0iwWCOK1q10rlY=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
