@@ -4,7 +4,6 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"time"
 
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
@@ -39,7 +38,7 @@ func New(level string, prettyPrint bool) *slog.Logger {
 func newConsoleHandler(w *os.File, level slog.Level) slog.Handler {
 	return tint.NewTextHandler(w, &tint.Options{
 		Level:      level,
-		TimeFormat: time.Kitchen,
+		TimeFormat: DateTimeFormat,
 		NoColor:    !isatty.IsTerminal(w.Fd()) && !isatty.IsCygwinTerminal(w.Fd()),
 		ReplaceAttr: func(_ []string, a slog.Attr) slog.Attr {
 			if _, ok := a.Value.Any().(error); ok && a.Value.Kind() == slog.KindAny {
