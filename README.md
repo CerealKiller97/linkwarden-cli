@@ -589,7 +589,7 @@ case err != nil:
 | `client.Config`      | Public instance configuration                         |
 | `client.Favicon`     | Favicon lookup for any URL                            |
 
-Options: `WithHTTPClient(*http.Client)` for timeouts, proxies or custom transports, and `WithLogger(*slog.Logger)` for internal diagnostics (no-op by default). The SDK depends only on the standard library.
+Options: `WithHTTPClient(*http.Client)` for timeouts, proxies or custom transports, and `WithLogger(*slog.Logger)` for internal diagnostics (defaults to a text handler on stdout; pass `slog.New(slog.DiscardHandler)` to silence it). The SDK depends only on the standard library.
 
 ---
 
