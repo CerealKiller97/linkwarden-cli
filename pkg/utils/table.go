@@ -1,37 +1,76 @@
 package utils
 
 import (
+	"fmt"
+	"io"
 	"os"
 
-	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
+	"github.com/charmbracelet/x/term"
 	"github.com/mattn/go-isatty"
+	"github.com/rs/zerolog/log"
 )
 
-// NewTable returns a table.Writer preconfigured with the CLI's shared look
-// (rounded borders, bold cyan header) writing to stdout. Color is skipped
-// automatically when stdout isn't a terminal or NO_COLOR is set, so piped or
-// redirected output stays free of raw ANSI escape codes.
-func NewTable(title string) table.Writer {
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.SetTitle(title)
-	t.SetStyle(tableStyleFor(ColorEnabled()))
-
-	return t
+// Table collects rows for one of the CLI's result tables.
+type Table struct {
+	data tui.Table
+	out  io.Writer
 }
 
-// tableStyleFor returns the shared rounded-border style, adding a bold cyan
-// header (foreground only, no forced background) when colorEnabled is true.
-func tableStyleFor(colorEnabled bool) table.Style {
-	style := table.StyleRounded
-	if !colorEnabled {
-		return style
+// NewTable starts a table titled title, written to stdout.
+func NewTable(title string) *Table {
+	return &Table{data: tui.Table{Title: title}, out: os.Stdout}
+}
+
+// Header sets the column names.
+func (t *Table) Header(cols ...string) { t.data.Headers = cols }
+
+// Row appends a row; each cell is formatted with fmt.Sprint.
+func (t *Table) Row(cells ...any) {
+	row := make([]string, len(cells))
+	for i, c := range cells {
+		row[i] = fmt.Sprint(c)
+	}
+	t.data.Rows = append(t.data.Rows, row)
+}
+
+// Len is the number of data rows.
+func (t *Table) Len() int { return len(t.data.Rows) }
+
+// Render shows the table. When stdin and stdout are both terminals and the
+// table is taller than the screen, it opens a scrollable viewer and then
+// prints the full table so it stays in the scrollback. Otherwise (it fits,
+// output is piped, or --non-interactive is set) it just prints it, in color
+// only when ColorEnabled.
+func (t *Table) Render() {
+	if width, height, ok := t.browseSize(); ok {
+		if err := tui.BrowseTable(t.data, width, height, tui.Options{}); err != nil {
+			log.Debug().Err(err).Msg("table viewer failed, printing instead")
+		}
 	}
 
-	style.Color.Header = text.Colors{text.FgHiCyan, text.Bold}
+	_ = tui.WriteStatic(t.out, t.data, ColorEnabled())
+}
 
-	return style
+// browseSize returns the terminal size when the viewer should be used.
+func (t *Table) browseSize() (width, height int, ok bool) {
+	if t.out != os.Stdout || !isInteractive() || !isatty.IsTerminal(os.Stdout.Fd()) {
+		return 0, 0, false
+	}
+
+	width, height, err := term.GetSize(os.Stdout.Fd())
+	if err != nil {
+		return 0, 0, false
+	}
+
+	return width, height, shouldBrowse(len(t.data.Rows), height)
+}
+
+// shouldBrowse reports whether rows data rows (plus the table's borders,
+// header and title, and a line for the next prompt) overflow a terminal
+// height rows tall.
+func shouldBrowse(rows, height int) bool {
+	return height > 0 && rows+tui.TableChromeHeight+1 > height
 }
 
 // ColorEnabled reports whether CLI output should include ANSI color: only

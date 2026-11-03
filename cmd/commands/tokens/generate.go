@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"strings"
 
+	"charm.land/lipgloss/v2"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -116,17 +116,17 @@ func printManualSetupInstructions(token string) {
 		exportLine = fmt.Sprintf("export LINKWARDEN_TOKEN=%q", token)
 	}
 
-	heading := text.Colors{text.FgHiCyan, text.Bold}
-	step := text.Colors{text.FgHiCyan, text.Bold}
-	cmdColor := text.Colors{text.FgHiGreen}
-	warn := text.Colors{text.FgHiYellow, text.Bold}
+	heading := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("14"))
+	step := heading
+	cmdColor := lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
+	warn := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("11"))
 
 	on := utils.ColorEnabled()
-	c := func(colors text.Colors, s string) string {
+	c := func(style lipgloss.Style, s string) string {
 		if !on {
 			return s
 		}
-		return colors.Sprint(s)
+		return style.Render(s)
 	}
 
 	printStep := func(n int, label, command string) {

@@ -10,9 +10,7 @@ import (
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/rs/zerolog/log"
-	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 )
 
@@ -43,6 +41,11 @@ func Create() *cobra.Command {
 type item struct {
 	URL   string `json:"url"`
 	Title string `json:"title"`
+}
+
+type failure struct {
+	item item
+	err  error
 }
 
 func execute(cmd *cobra.Command, _ []string) error {
@@ -108,13 +111,14 @@ func execute(cmd *cobra.Command, _ []string) error {
 	}
 
 	var (
-		wg      sync.WaitGroup
-		sem     = make(chan struct{}, concurrency)
-		success atomic.Int64
-		failed  atomic.Int64
+		wg       sync.WaitGroup
+		sem      = make(chan struct{}, concurrency)
+		success  atomic.Int64
+		mu       sync.Mutex
+		failures []failure
 	)
 
-	bar := progressbar.Default(int64(total))
+	bar := utils.StartProgress("Creating links", total)
 
 	for _, item := range data {
 		sem <- struct{}{}
@@ -129,16 +133,13 @@ func execute(cmd *cobra.Command, _ []string) error {
 				Tags:       []linkwarden.Tag{},
 			})
 
-			// A failed render of the progress bar shouldn't abort the import.
-			_ = bar.Add(1)
+			bar.Increment()
 
 			if err != nil {
-				log.Err(err).
-					Str("url", item.URL).
-					Str("title", item.Title).
-					Msg("Failed to create link")
+				mu.Lock()
+				failures = append(failures, failure{item: item, err: err})
+				mu.Unlock()
 
-				failed.Add(1)
 				return
 			}
 
@@ -147,18 +148,24 @@ func execute(cmd *cobra.Command, _ []string) error {
 	}
 
 	wg.Wait()
+	bar.Stop()
 
-	displayResults(total, int(success.Load()), int(failed.Load()))
+	// Logged only once the bar is gone, so they don't tear through its redraws.
+	for _, f := range failures {
+		log.Err(f.err).
+			Str("url", f.item.URL).
+			Str("title", f.item.Title).
+			Msg("Failed to create link")
+	}
+
+	displayResults(total, int(success.Load()), len(failures))
 
 	return nil
 }
 
 func displayResults(total int, success int, failed int) {
 	t := utils.NewTable("Linkwarden")
-	t.AppendHeader(table.Row{"Total", "Success", "Failed"})
-	t.AppendRows([]table.Row{
-		{total, success, failed},
-	})
-	t.AppendSeparator()
+	t.Header("Total", "Success", "Failed")
+	t.Row(total, success, failed)
 	t.Render()
 }

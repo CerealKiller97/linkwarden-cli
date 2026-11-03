@@ -1,9 +1,10 @@
 package utils
 
 import (
+	"bytes"
+	"strings"
 	"testing"
 
-	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,29 +17,39 @@ func TestColorEnabledFor(t *testing.T) {
 	assert.False(colorEnabledFor("1", false), "NO_COLOR set, not a terminal -> color off")
 }
 
-func TestTableStyleFor_ColorDisabled(t *testing.T) {
+func TestShouldBrowse(t *testing.T) {
 	assert := require.New(t)
 
-	style := tableStyleFor(false)
-	assert.Equal(table.StyleRounded.Box, style.Box, "borders stay rounded regardless of color")
-	assert.Empty(style.Color.Header, "no header color applied when color is disabled")
+	assert.False(shouldBrowse(5, 40), "fits on screen -> just print")
+	assert.True(shouldBrowse(100, 40), "taller than the screen -> viewer")
+	assert.False(shouldBrowse(100, 0), "unknown height -> just print")
 }
 
-func TestTableStyleFor_ColorEnabled(t *testing.T) {
+func TestTable_RendersStaticWhenNotATerminal(t *testing.T) {
 	assert := require.New(t)
 
-	style := tableStyleFor(true)
-	assert.Equal(table.StyleRounded.Box, style.Box, "borders stay rounded")
-	assert.NotEmpty(style.Color.Header, "header gets a color when color is enabled")
-}
-
-func TestNewTable_ReturnsConfiguredWriter(t *testing.T) {
-	assert := require.New(t)
-
+	var out bytes.Buffer
 	tbl := NewTable("Example")
-	assert.NotNil(tbl)
+	tbl.out = &out
+	tbl.Header("ID", "Name")
+	tbl.Row(1, "first")
+	tbl.Row(2, nil)
 
-	tbl.AppendHeader(table.Row{"A", "B"})
-	tbl.AppendRow(table.Row{1, 2})
-	assert.Equal(1, tbl.Length())
+	tbl.Render()
+
+	assert.Equal(2, tbl.Len())
+	got := out.String()
+	assert.True(strings.HasPrefix(got, "Example\n"))
+	assert.Contains(got, "╭")
+	assert.Contains(got, "first")
+	assert.Contains(got, "<nil>")
+	assert.NotContains(got, "\x1b[", "test output isn't a terminal, so no ANSI")
+}
+
+func TestStartProgress_NoOpWithoutTerminal(t *testing.T) {
+	p := StartProgress("x", 3)
+	p.Increment()
+	p.Stop()
+
+	require.IsType(t, noProgress{}, p)
 }
