@@ -38,15 +38,17 @@ func (t *Table) Row(cells ...any) {
 func (t *Table) Len() int { return len(t.data.Rows) }
 
 // Render shows the table. When stdin and stdout are both terminals and the
-// table is taller than the screen, it opens a scrollable viewer and then
-// prints the full table so it stays in the scrollback. Otherwise (it fits,
-// output is piped, or --non-interactive is set) it just prints it, in color
-// only when ColorEnabled.
+// table is taller than the screen, it opens an interactive table (in the style
+// of Bubble Tea's table example) that stays on screen after you quit.
+// Otherwise (it fits, output is piped, or --non-interactive is set) it prints
+// the table in the same style, in color only when ColorEnabled.
 func (t *Table) Render() {
 	if width, height, ok := t.browseSize(); ok {
-		if err := tui.BrowseTable(t.data, width, height, tui.Options{}); err != nil {
-			log.Debug().Err(err).Msg("table viewer failed, printing instead")
+		err := tui.BrowseTable(t.data, width, height, tui.Options{})
+		if err == nil {
+			return
 		}
+		log.Debug().Err(err).Msg("table viewer failed, printing instead")
 	}
 
 	_ = tui.WriteStatic(t.out, t.data, ColorEnabled())

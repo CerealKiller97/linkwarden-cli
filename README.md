@@ -31,7 +31,7 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 | 📦 **Bulk operations**     | Import hundreds of links with a progress bar; retag, move or delete many links in one call.       |
 | 🗄️ **Archives & backups**  | Download PDF, screenshot or HTML snapshots; export and import your whole library.                 |
 | 🔄 **Easy migration**      | Import from browser bookmarks, Pocket, Wallabag, Omnivore or another Linkwarden instance.         |
-| 🎨 **Readable output**     | Rounded tables with colored headers; long tables open in a scrollable viewer. Plain text when piped or `NO_COLOR` is set. |
+| 🎨 **Readable output**     | Bordered tables; long ones open as an interactive, scrollable table. Plain text when piped or `NO_COLOR` is set. |
 | 🧰 **Go SDK**              | Every command is backed by [`linkwarden-go-sdk`](https://github.com/CerealKiller97/linkwarden-go-sdk), a typed API client you can use in your own code. |
 
 ---
@@ -315,9 +315,10 @@ linkwarden dashboard get-v2
 Any command that takes a resource ID opens a **picker** when you leave the ID out and stdin is a terminal.
 Type to filter the list, use ↑/↓ to move, Enter to select and Esc to cancel.
 
-List output that's taller than your terminal opens in a scrollable table viewer (↑/↓ or j/k, PgUp/PgDn, g/G, `q` to quit).
-When you quit, the full table is printed so it stays in your scrollback. Tables that fit on screen, piped output and
-`--non-interactive` always print plain tables.
+List output that's taller than your terminal opens as an interactive table (↑/↓ or j/k, PgUp/PgDn, g/G, `q` to quit),
+styled after Bubble Tea's [table example](https://github.com/charmbracelet/bubbletea/blob/main/examples/table/main.go).
+It renders inline and stays on screen when you quit. Tables that fit on screen, piped output and `--non-interactive`
+print the same table as plain text.
 When stdin isn't a terminal (scripts, CI, pipes), it **fails fast** and tells you which flag to pass:
 
 ```console

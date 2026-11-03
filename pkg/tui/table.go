@@ -19,32 +19,29 @@ type Table struct {
 	Rows    [][]string
 }
 
+// The look follows Bubble Tea's table example: a thin gray outer border, a
+// gray rule under the header, no column separators, and a purple highlight on
+// the selected row.
 var (
-	titleStyle  = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("14"))
-	headerStyle = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("14"))
+	borderColor = lipgloss.Color("240")
+	baseStyle   = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderForeground(borderColor)
+	titleStyle  = lipgloss.NewStyle().Bold(true)
 	cellStyle   = lipgloss.NewStyle().Padding(0, 1)
 )
 
-// RenderStatic returns t as a rounded-border text table. With color false the
-// output has no ANSI escapes at all, which keeps piped output clean.
+// RenderStatic returns t as plain text in the same style as the viewer. With
+// color false the output has no ANSI escapes at all, so piped output is clean.
 func RenderStatic(t Table, color bool) string {
 	tbl := lgtable.New().
-		Border(lipgloss.RoundedBorder()).
+		Border(lipgloss.NormalBorder()).
+		BorderStyle(lipgloss.NewStyle().Foreground(borderColor)).
+		BorderColumn(false).
+		BorderHeader(true).
 		Headers(t.Headers...).
 		Rows(t.Rows...).
-		StyleFunc(func(row, _ int) lipgloss.Style {
-			if row == lgtable.HeaderRow && color {
-				return headerStyle.Padding(0, 1)
-			}
-			return cellStyle
-		})
+		StyleFunc(func(_, _ int) lipgloss.Style { return cellStyle })
 
-	title := t.Title
-	if color {
-		title = titleStyle.Render(title)
-	}
-
-	out := title + "\n" + tbl.String() + "\n"
+	out := titleStyle.Render(t.Title) + "\n" + tbl.String() + "\n"
 	if !color {
 		out = ansi.Strip(out)
 	}
@@ -53,14 +50,14 @@ func RenderStatic(t Table, color bool) string {
 }
 
 // TableChromeHeight is how many terminal rows RenderStatic adds around the data
-// rows: title, top border, header, header separator and bottom border.
+// rows: title, top border, header, header rule and bottom border.
 const TableChromeHeight = 5
 
-// BrowseTable opens t in a scrollable bubbles/table sized to width×height (the
-// terminal's size). It returns when the user quits with q, Esc or Ctrl+C.
+// BrowseTable shows t as an interactive bubbles/table, inline in the terminal,
+// fitted to width×height (the terminal's size). It returns when the user quits
+// with q, Esc or Ctrl+C, leaving the table on screen.
 func BrowseTable(t Table, width, height int, o Options) error {
-	m := newBrowseModel(t, width, height)
-	_, err := run(m, o)
+	_, err := run(newBrowseModel(t, width, height), o)
 	if errors.Is(err, ErrAborted) {
 		return nil
 	}
@@ -70,16 +67,18 @@ func BrowseTable(t Table, width, height int, o Options) error {
 
 type browseModel struct {
 	title string
-	total int
 	table table.Model
+	done  bool
 }
 
-// browseChrome is the rows the viewer itself needs: title line, header,
-// header border, and the footer.
-const browseChrome = 4
+// browseChrome is the rows the viewer needs besides data rows: title, top
+// border, header, header rule, bottom border, help line, and one spare line
+// so the shell prompt doesn't scroll the table.
+const browseChrome = 7
 
 func newBrowseModel(t Table, width, height int) browseModel {
-	cols := fitColumns(t, width)
+	// The outer border takes two columns.
+	cols := fitColumns(t, width-2)
 	rows := make([]table.Row, len(t.Rows))
 	for i, r := range t.Rows {
 		rows[i] = table.Row(r)
@@ -87,26 +86,54 @@ func newBrowseModel(t Table, width, height int) browseModel {
 
 	styles := table.DefaultStyles()
 	styles.Header = styles.Header.
-		Bold(true).
-		Foreground(lipgloss.Color("14")).
 		BorderStyle(lipgloss.NormalBorder()).
-		BorderBottom(true)
+		BorderForeground(borderColor).
+		BorderBottom(true).
+		Bold(false)
 	styles.Selected = styles.Selected.
-		Bold(true).
-		Foreground(lipgloss.Color("0")).
-		Background(lipgloss.Color("14"))
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
 
 	tbl := table.New(
 		table.WithColumns(cols),
 		table.WithRows(rows),
 		table.WithFocused(true),
-		table.WithHeight(max(height-browseChrome, 3)),
-		// Without a width the viewport is zero columns wide and shows no rows.
-		table.WithWidth(width),
+		// Styles before height: WithHeight measures the (styled) header.
 		table.WithStyles(styles),
+		table.WithHeight(tableHeight(len(rows), height)),
+		// Without a width the viewport is zero columns wide and shows no rows.
+		table.WithWidth(tableWidth(cols)),
 	)
 
-	return browseModel{title: t.Title, total: len(t.Rows), table: tbl}
+	return browseModel{title: fmt.Sprintf("%s (%d)", t.Title, len(t.Rows)), table: tbl}
+}
+
+// visibleRows is how many data rows fit in a terminal height rows tall
+// (at least 3), never more than there are rows.
+func visibleRows(rows, height int) int {
+	return max(min(rows, height-browseChrome), 3)
+}
+
+// headerHeight is the header line plus the rule under it. bubbles/table
+// counts it as part of the height it's given.
+const headerHeight = 2
+
+// tableHeight is the height to give bubbles/table so that visibleRows data
+// rows show below the header.
+func tableHeight(rows, height int) int {
+	return visibleRows(rows, height) + headerHeight
+}
+
+// tableWidth is the inner width of a bubbles/table with cols: each column plus
+// one cell of padding on either side.
+func tableWidth(cols []table.Column) int {
+	w := 0
+	for _, c := range cols {
+		w += c.Width + 2
+	}
+
+	return w
 }
 
 func (m browseModel) Init() tea.Cmd { return nil }
@@ -116,11 +143,11 @@ func (m browseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyPressMsg:
 		switch msg.String() {
 		case "q", "esc", "ctrl+c":
+			m.done = true
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		m.table.SetWidth(msg.Width)
-		m.table.SetHeight(max(msg.Height-browseChrome, 3))
+		m.table.SetHeight(tableHeight(len(m.table.Rows()), msg.Height))
 	}
 
 	var cmd tea.Cmd
@@ -130,13 +157,13 @@ func (m browseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m browseModel) View() tea.View {
-	footer := dimStyle.Render(fmt.Sprintf("%d/%d · ↑/↓ j/k scroll · pgup/pgdn page · g/G top/bottom · q quit",
-		m.table.Cursor()+1, m.total))
+	out := titleStyle.Render(m.title) + "\n" + baseStyle.Render(m.table.View()) + "\n"
+	// The help line goes away on quit, so what's left behind is just the table.
+	if !m.done {
+		out += "  " + m.table.HelpView() + dimStyle.Render(" • q quit") + "\n"
+	}
 
-	v := tea.NewView(titleStyle.Render(m.title) + "\n" + m.table.View() + "\n" + footer)
-	v.AltScreen = true
-
-	return v
+	return tea.NewView(out)
 }
 
 // fitColumns sizes each column to its widest cell, then shrinks the widest

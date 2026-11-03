@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ♻️ Changed
 
 - **ui:** Replace promptui with Bubble Tea for all interactive prompts. Pickers can now be filtered by typing, scroll past 10 items, and cancel with Esc.
-- **ui:** Replace go-pretty tables with Lip Gloss tables. In a terminal, tables taller than the screen open in a scrollable bubbles/table viewer, then print in full on exit.
+- **ui:** Replace go-pretty tables with Lip Gloss tables styled after Bubble Tea's table example. In a terminal, tables taller than the screen open as an inline, scrollable bubbles/table that stays on screen when you quit.
 - **ui:** Replace the schollz/progressbar bar in `links create` with a bubbles/progress bar on stderr (hidden when stderr isn't a terminal). Per-link failures are logged after the bar finishes instead of interleaving with it.
 - **tokens:** `tokens generate` and `tokens revoke` now fail fast without an interactive terminal, like the other pickers.
 
