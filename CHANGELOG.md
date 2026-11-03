@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ♻️ Changed
 
 - **sdk:** `WithLogger` now takes a standard-library `*slog.Logger` instead of `zerolog.Logger`, so the SDK no longer depends on zerolog. **Breaking** for SDK users who passed a logger.
+- **cli:** Replace zerolog with `log/slog` and [tint](https://github.com/lmittmann/tint) for colorized console logs. Same fields (`id`, `ids`, `path`, `error`, …) and levels; color is now disabled when output isn't a terminal.
 
 ## [1.0.0] - 2026-10-06
 

@@ -1,9 +1,10 @@
 package collections
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +37,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		collectionsPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve collection ID")
+		slog.Error("Failed to resolve collection ID", slog.Any("error", err))
 		return err
 	}
 
@@ -59,11 +60,11 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		IsPublic:    isPublic,
 	})
 	if err != nil {
-		log.Err(err).Msg("Failed to update collection")
+		slog.Error("Failed to update collection", slog.Any("error", err))
 		return err
 	}
 
-	log.Info().Int("id", collection.ID).Msg("Collection updated successfully")
+	slog.Info("Collection updated successfully", slog.Int("id", collection.ID))
 
 	return nil
 }

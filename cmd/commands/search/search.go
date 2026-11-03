@@ -1,9 +1,10 @@
 package search
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -48,7 +49,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		Cursor:            cursor,
 	})
 	if err != nil {
-		log.Err(err).Msg("Failed to search links")
+		slog.Error("Failed to search links", slog.Any("error", err))
 		return err
 	}
 

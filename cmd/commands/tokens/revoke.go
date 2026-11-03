@@ -1,9 +1,10 @@
 package tokens
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/manifoldco/promptui"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,7 @@ func executeRevoke(cmd *cobra.Command, _ []string) error {
 
 	tokenList, err := client.Tokens.List(cmd.Context())
 	if err != nil {
-		log.Err(err).Msg("Error getting tokens")
+		slog.Error("Error getting tokens", slog.Any("error", err))
 		return err
 	}
 
@@ -42,11 +43,11 @@ func executeRevoke(cmd *cobra.Command, _ []string) error {
 	}
 
 	if err := client.Tokens.Revoke(cmd.Context(), tokenMap[result]); err != nil {
-		log.Err(err).Msg("Error revoking token")
+		slog.Error("Error revoking token", slog.Any("error", err))
 		return err
 	}
 
-	log.Info().Str("name", result).Msg("Token revoked successfully")
+	slog.Info("Token revoked successfully", slog.String("name", result))
 
 	return nil
 }

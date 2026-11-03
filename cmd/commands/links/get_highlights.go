@@ -1,8 +1,9 @@
 package links
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -28,13 +29,13 @@ func executeGetHighlights(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
+		slog.Error("Failed to resolve link ID", slog.Any("error", err))
 		return err
 	}
 
 	highlights, err := client.Links.Highlights(cmd.Context(), id)
 	if err != nil {
-		log.Err(err).Msg("Failed to get highlights")
+		slog.Error("Failed to get highlights", slog.Any("error", err))
 		return err
 	}
 

@@ -1,8 +1,9 @@
 package dashboard
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +22,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 
 	links, err := client.Dashboard.GetV1(cmd.Context())
 	if err != nil {
-		log.Err(err).Msg("Failed to get dashboard data")
+		slog.Error("Failed to get dashboard data", slog.Any("error", err))
 		return err
 	}
 

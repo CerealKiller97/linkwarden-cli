@@ -1,8 +1,9 @@
 package collections
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -28,16 +29,16 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 		collectionsPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve collection ID")
+		slog.Error("Failed to resolve collection ID", slog.Any("error", err))
 		return err
 	}
 
 	if err := client.Collections.Delete(cmd.Context(), id); err != nil {
-		log.Err(err).Msg("Failed to delete collection")
+		slog.Error("Failed to delete collection", slog.Any("error", err))
 		return err
 	}
 
-	log.Info().Int("id", id).Msg("Collection deleted successfully")
+	slog.Info("Collection deleted successfully", slog.Int("id", id))
 
 	return nil
 }

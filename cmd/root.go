@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"log/slog"
 	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/archives"
@@ -18,7 +19,6 @@ import (
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tags"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tokens"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -72,8 +72,6 @@ func registerCommands(root *cobra.Command) {
 	}
 
 	//	appLogger.ConfigureDefaultLogger(cfg.Logging.Level, cfg.Logging.PrettyPrint)
-	//	//nolint:all
-	//	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	//	command.SetContext(context.WithValue(ctx, constants.ContextKeyContainer, container.New(ctx, cfg)))
 	//	return nil
 	//})
@@ -102,6 +100,7 @@ func Root() *cobra.Command {
 
 func Execute() {
 	if err := Root().Execute(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to execute CLI command")
+		slog.Error("Failed to execute CLI command", slog.Any("error", err))
+		os.Exit(1)
 	}
 }

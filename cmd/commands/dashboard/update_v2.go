@@ -2,11 +2,11 @@ package dashboard
 
 import (
 	"encoding/json"
+	"log/slog"
 	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -35,13 +35,13 @@ func executeUpdateV2(cmd *cobra.Command, _ []string) error {
 
 	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		log.Err(err).Msg("Failed to read layout file")
+		slog.Error("Failed to read layout file", slog.Any("error", err))
 		return err
 	}
 
 	var layout []linkwarden.DashboardLayoutItem
 	if err := json.Unmarshal(fileBytes, &layout); err != nil {
-		log.Err(err).Msg("Failed to parse layout file")
+		slog.Error("Failed to parse layout file", slog.Any("error", err))
 		return err
 	}
 
@@ -49,7 +49,7 @@ func executeUpdateV2(cmd *cobra.Command, _ []string) error {
 
 	data, err := client.Dashboard.UpdateV2Layout(cmd.Context(), layout)
 	if err != nil {
-		log.Err(err).Msg("Failed to update dashboard layout")
+		slog.Error("Failed to update dashboard layout", slog.Any("error", err))
 		return err
 	}
 

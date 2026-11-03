@@ -1,9 +1,10 @@
 package tags
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +39,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 
 	createdTags, err := client.Tags.CreateOrUpdateBulk(cmd.Context(), inputs)
 	if err != nil {
-		log.Err(err).Msg("Failed to create tags")
+		slog.Error("Failed to create tags", slog.Any("error", err))
 		return err
 	}
 

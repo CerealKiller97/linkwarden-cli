@@ -1,8 +1,9 @@
 package collections
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +20,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 
 	collections, err := client.Collections.List(cmd.Context())
 	if err != nil {
-		log.Err(err).Msg("Failed to list collections")
+		slog.Error("Failed to list collections", slog.Any("error", err))
 		return err
 	}
 

@@ -1,11 +1,11 @@
 package migrations
 
 import (
+	"log/slog"
 	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -43,7 +43,7 @@ func executeImport(cmd *cobra.Command, _ []string) error {
 
 	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		log.Err(err).Msg("Failed to read import file")
+		slog.Error("Failed to read import file", slog.Any("error", err))
 		return err
 	}
 
@@ -51,11 +51,11 @@ func executeImport(cmd *cobra.Command, _ []string) error {
 
 	message, err := client.Migrations.Import(cmd.Context(), linkwarden.ImportFormat(format), string(fileBytes))
 	if err != nil {
-		log.Err(err).Msg("Failed to import data")
+		slog.Error("Failed to import data", slog.Any("error", err))
 		return err
 	}
 
-	log.Info().Str("message", message).Msg("Import started")
+	slog.Info("Import started", slog.String("message", message))
 
 	return nil
 }

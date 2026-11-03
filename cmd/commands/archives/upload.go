@@ -1,12 +1,12 @@
 package archives
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +41,7 @@ func executeUpload(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
+		slog.Error("Failed to resolve link ID", slog.Any("error", err))
 		return err
 	}
 
@@ -60,14 +60,14 @@ func executeUpload(cmd *cobra.Command, _ []string) error {
 
 	f, err := os.Open(filePath)
 	if err != nil {
-		log.Err(err).Msg("Failed to open file")
+		slog.Error("Failed to open file", slog.Any("error", err))
 		return err
 	}
 	defer f.Close()
 
 	link, err := client.Archives.Upload(cmd.Context(), linkID, linkwarden.ArchiveFormat(format), preview, filepath.Base(filePath), f)
 	if err != nil {
-		log.Err(err).Msg("Failed to upload archive")
+		slog.Error("Failed to upload archive", slog.Any("error", err))
 		return err
 	}
 

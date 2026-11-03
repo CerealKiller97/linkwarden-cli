@@ -1,9 +1,10 @@
 package collections
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -29,13 +30,13 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		collectionsPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve collection ID")
+		slog.Error("Failed to resolve collection ID", slog.Any("error", err))
 		return err
 	}
 
 	collection, err := client.Collections.Get(cmd.Context(), id)
 	if err != nil {
-		log.Err(err).Msg("Failed to get collection")
+		slog.Error("Failed to get collection", slog.Any("error", err))
 		return err
 	}
 

@@ -1,9 +1,10 @@
 package tokens
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +21,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 
 	tokenList, err := client.Tokens.List(cmd.Context())
 	if err != nil {
-		log.Err(err).Msg("Error getting tokens")
+		slog.Error("Error getting tokens", slog.Any("error", err))
 		return err
 	}
 

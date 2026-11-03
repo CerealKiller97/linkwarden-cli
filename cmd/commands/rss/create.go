@@ -1,9 +1,10 @@
 package rss
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -56,7 +57,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		CollectionName: collectionName,
 	})
 	if err != nil {
-		log.Err(err).Msg("Failed to create RSS subscription")
+		slog.Error("Failed to create RSS subscription", slog.Any("error", err))
 		return err
 	}
 

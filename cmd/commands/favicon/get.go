@@ -2,10 +2,10 @@ package favicon
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -40,7 +40,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 
 	favicon, err := client.Favicon.Get(cmd.Context(), targetURL)
 	if err != nil {
-		log.Err(err).Msg("Failed to fetch favicon")
+		slog.Error("Failed to fetch favicon", slog.Any("error", err))
 		return err
 	}
 
@@ -50,11 +50,11 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 	}
 
 	if err := os.WriteFile(output, favicon.Data, 0o600); err != nil {
-		log.Err(err).Msg("Failed to write favicon file")
+		slog.Error("Failed to write favicon file", slog.Any("error", err))
 		return err
 	}
 
-	log.Info().Str("path", output).Msg("Favicon saved successfully")
+	slog.Info("Favicon saved successfully", slog.String("path", output))
 
 	return nil
 }

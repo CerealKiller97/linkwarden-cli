@@ -3,6 +3,7 @@ package collections
 import (
 	"errors"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -65,13 +65,13 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 	if unorganizedCollectionID == 0 {
 		collections, err := client.Collections.List(cmd.Context())
 		if err != nil {
-			log.Err(err).Msg("Failed to get collections")
+			slog.Error("Failed to get collections", slog.Any("error", err))
 			return err
 		}
 
 		for _, collection := range collections {
 			if collection.Name == name {
-				log.Err(err).Msg("Collection already exists")
+				slog.Error("Collection already exists", slog.Any("error", err))
 				return err
 			}
 
@@ -105,13 +105,11 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 
 	collection, err := client.Collections.Create(cmd.Context(), request)
 	if err != nil {
-		log.Err(err).Msg("Failed to create collection")
+		slog.Error("Failed to create collection", slog.Any("error", err))
 		return err
 	}
 
-	log.Info().
-		Int("id", collection.ID).
-		Msg("Collection created successfully")
+	slog.Info("Collection created successfully", slog.Int("id", collection.ID))
 
 	return nil
 }
@@ -121,21 +119,21 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 func readUnorganizedCollectionID() int {
 	file, err := utils.StateFile(unorganizedStateFile)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve state directory")
+		slog.Error("Failed to resolve state directory", slog.Any("error", err))
 		return 0
 	}
 
 	fetched, err := os.ReadFile(file)
 	if err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
-			log.Err(err).Msg("Failed to read unorganized collection ID")
+			slog.Error("Failed to read unorganized collection ID", slog.Any("error", err))
 		}
 		return 0
 	}
 
 	id, err := strconv.Atoi(strings.TrimSpace(string(fetched)))
 	if err != nil {
-		log.Err(err).Msg("Failed to convert unorganized collection ID to int")
+		slog.Error("Failed to convert unorganized collection ID to int", slog.Any("error", err))
 		return 0
 	}
 
@@ -145,12 +143,12 @@ func readUnorganizedCollectionID() int {
 func persistUnorganizedCollectionID(unorganizedCollectionID int) error {
 	file, err := utils.StateFile(unorganizedStateFile)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve state directory")
+		slog.Error("Failed to resolve state directory", slog.Any("error", err))
 		return err
 	}
 
 	if err := os.MkdirAll(filepath.Dir(file), 0o750); err != nil {
-		log.Err(err).Msg("Failed to create state directory")
+		slog.Error("Failed to create state directory", slog.Any("error", err))
 		return err
 	}
 

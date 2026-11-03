@@ -1,12 +1,12 @@
 package archives
 
 import (
+	"log/slog"
 	"os"
 	"path/filepath"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +51,7 @@ func executeUploadStandalone(cmd *cobra.Command, _ []string) error {
 
 	f, err := os.Open(filePath)
 	if err != nil {
-		log.Err(err).Msg("Failed to open file")
+		slog.Error("Failed to open file", slog.Any("error", err))
 		return err
 	}
 	defer f.Close()
@@ -60,7 +60,7 @@ func executeUploadStandalone(cmd *cobra.Command, _ []string) error {
 
 	link, err := client.Archives.UploadStandalone(cmd.Context(), linkwarden.ArchiveFormat(format), preview, linkURL, filepath.Base(filePath), f)
 	if err != nil {
-		log.Err(err).Msg("Failed to upload standalone archive")
+		slog.Error("Failed to upload standalone archive", slog.Any("error", err))
 		return err
 	}
 

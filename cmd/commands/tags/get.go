@@ -1,9 +1,10 @@
 package tags
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -29,13 +30,13 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		tagsPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve tag ID")
+		slog.Error("Failed to resolve tag ID", slog.Any("error", err))
 		return err
 	}
 
 	tag, err := client.Tags.Get(cmd.Context(), id)
 	if err != nil {
-		log.Err(err).Msg("Failed to get tag")
+		slog.Error("Failed to get tag", slog.Any("error", err))
 		return err
 	}
 

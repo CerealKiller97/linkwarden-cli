@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"sync"
 	"sync/atomic"
@@ -11,7 +12,6 @@ import (
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/rs/zerolog/log"
 	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 )
@@ -58,13 +58,13 @@ func execute(cmd *cobra.Command, _ []string) error {
 	filePath := cmd.Flag("file").Value.String()
 	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		log.Err(err).Msg("failed to read file")
+		slog.Error("failed to read file", slog.Any("error", err))
 		return err
 	}
 
 	var data []item
 	if err := json.Unmarshal(fileBytes, &data); err != nil {
-		log.Err(err).Msg("failed to unmarshal file")
+		slog.Error("failed to unmarshal file", slog.Any("error", err))
 		return err
 	}
 
@@ -78,7 +78,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	collections, err := client.Collections.List(cmd.Context())
 	if err != nil {
-		log.Err(err).Msg("Failed to get collections")
+		slog.Error("Failed to get collections", slog.Any("error", err))
 		return err
 	}
 
@@ -96,7 +96,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		func() ([]utils.PickerItem, error) { return items, nil },
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve collection")
+		slog.Error("Failed to resolve collection", slog.Any("error", err))
 		return err
 	}
 
@@ -133,10 +133,12 @@ func execute(cmd *cobra.Command, _ []string) error {
 			_ = bar.Add(1)
 
 			if err != nil {
-				log.Err(err).
-					Str("url", item.URL).
-					Str("title", item.Title).
-					Msg("Failed to create link")
+				slog.Error(
+					"Failed to create link",
+					slog.Any("error", err),
+					slog.String("url", item.URL),
+					slog.String("title", item.Title),
+				)
 
 				failed.Add(1)
 				return

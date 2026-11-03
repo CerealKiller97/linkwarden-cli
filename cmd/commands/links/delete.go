@@ -1,8 +1,9 @@
 package links
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -28,16 +29,16 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
+		slog.Error("Failed to resolve link ID", slog.Any("error", err))
 		return err
 	}
 
 	if err := client.Links.Delete(cmd.Context(), id); err != nil {
-		log.Err(err).Msg("Failed to delete link")
+		slog.Error("Failed to delete link", slog.Any("error", err))
 		return err
 	}
 
-	log.Info().Int("id", id).Msg("Link deleted successfully")
+	slog.Info("Link deleted successfully", slog.Int("id", id))
 
 	return nil
 }

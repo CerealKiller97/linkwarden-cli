@@ -1,8 +1,9 @@
 package links
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -25,18 +26,18 @@ func DeleteArchive() *cobra.Command {
 func executeDeleteArchive(cmd *cobra.Command, _ []string) error {
 	ids, err := parseIDs(cmd.Flag("ids").Value.String())
 	if err != nil {
-		log.Err(err).Msg("Failed to parse --ids")
+		slog.Error("Failed to parse --ids", slog.Any("error", err))
 		return err
 	}
 
 	client := utils.NewLinkwardenClient()
 
 	if err := client.Links.DeleteArchive(cmd.Context(), ids); err != nil {
-		log.Err(err).Msg("Failed to delete archived files")
+		slog.Error("Failed to delete archived files", slog.Any("error", err))
 		return err
 	}
 
-	log.Info().Ints("ids", ids).Msg("Archived files deleted successfully")
+	slog.Info("Archived files deleted successfully", slog.Any("ids", ids))
 
 	return nil
 }

@@ -1,8 +1,9 @@
 package tags
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -28,16 +29,16 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 		tagsPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve tag ID")
+		slog.Error("Failed to resolve tag ID", slog.Any("error", err))
 		return err
 	}
 
 	if err := client.Tags.Delete(cmd.Context(), id); err != nil {
-		log.Err(err).Msg("Failed to delete tag")
+		slog.Error("Failed to delete tag", slog.Any("error", err))
 		return err
 	}
 
-	log.Info().Int("id", id).Msg("Tag deleted successfully")
+	slog.Info("Tag deleted successfully", slog.Int("id", id))
 
 	return nil
 }

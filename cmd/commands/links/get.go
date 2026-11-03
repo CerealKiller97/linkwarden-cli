@@ -1,9 +1,10 @@
 package links
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -29,13 +30,13 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
+		slog.Error("Failed to resolve link ID", slog.Any("error", err))
 		return err
 	}
 
 	link, err := client.Links.Get(cmd.Context(), id)
 	if err != nil {
-		log.Err(err).Msg("Failed to get link")
+		slog.Error("Failed to get link", slog.Any("error", err))
 		return err
 	}
 

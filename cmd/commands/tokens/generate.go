@@ -3,6 +3,7 @@ package tokens
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -10,7 +11,6 @@ import (
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/manifoldco/promptui"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -50,7 +50,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	promptResult, err := prompt.Run()
 	if err != nil {
-		log.Err(err).Msg("tokens name prompt failed")
+		slog.Error("tokens name prompt failed", slog.Any("error", err))
 		return err
 	}
 
@@ -61,7 +61,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	_, expirationResult, err := expiration.Run()
 	if err != nil {
-		log.Err(err).Msg("tokens expiration prompt failed")
+		slog.Error("tokens expiration prompt failed", slog.Any("error", err))
 		return err
 	}
 
@@ -69,14 +69,14 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	created, err := client.Tokens.Create(cmd.Context(), promptResult, int(stringToInt(expirationResult)))
 	if err != nil {
-		log.Err(err).Msg("tokens create prompt failed")
+		slog.Error("tokens create prompt failed", slog.Any("error", err))
 
 		return err
 	}
 
 	token := created.SecretKey
 
-	log.Info().Str("token", token).Msg("Token created")
+	slog.Info("Token created", slog.String("token", token))
 
 	// Prompt do you want app to set ENV Variable on your system?
 	// Only in Linux / macOS
@@ -87,19 +87,20 @@ func execute(cmd *cobra.Command, _ []string) error {
 		}
 		_, result, err := prompt.Run()
 		if err != nil {
-			log.Err(err).Msg("tokens prompt failed")
+			slog.Error("tokens prompt failed", slog.Any("error", err))
 			return err
 		}
 
 		if result == "Yes" {
 			if err := utils.AppendTokenToShellFile(token); err != nil {
-				log.Err(err).Msg("Failed to append token to shell file")
+				slog.Error("Failed to append token to shell file", slog.Any("error", err))
 				return err
 			}
 
-			log.Info().
-				Str("path", utils.ShellConfigPath()).
-				Msg("Token added to shell config. Run `source` on it or restart your terminal to use it.")
+			slog.Info(
+				"Token added to shell config. Run `source` on it or restart your terminal to use it.",
+				slog.String("path", utils.ShellConfigPath()),
+			)
 		} else {
 			printManualSetupInstructions(token)
 		}
@@ -180,7 +181,7 @@ func stringToInt(tokenExpiration string) Expiry {
 	case "7 days":
 		expiration = SevenDays
 	default:
-		log.Info().Msgf("Invalid token expiration: %s", tokenExpiration)
+		slog.Info("Invalid token expiration", slog.String("expiration", tokenExpiration))
 	}
 
 	return expiration

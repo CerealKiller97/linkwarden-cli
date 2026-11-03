@@ -2,11 +2,11 @@ package archives
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +37,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
+		slog.Error("Failed to resolve link ID", slog.Any("error", err))
 		return err
 	}
 
@@ -61,7 +61,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 
 	file, err := client.Archives.Get(cmd.Context(), linkID, format, preview)
 	if err != nil {
-		log.Err(err).Msg("Failed to get archive")
+		slog.Error("Failed to get archive", slog.Any("error", err))
 		return err
 	}
 
@@ -71,11 +71,11 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 	}
 
 	if err := os.WriteFile(output, file.Data, 0o600); err != nil {
-		log.Err(err).Msg("Failed to write archive file")
+		slog.Error("Failed to write archive file", slog.Any("error", err))
 		return err
 	}
 
-	log.Info().Str("path", output).Msg("Archive saved successfully")
+	slog.Info("Archive saved successfully", slog.String("path", output))
 
 	return nil
 }

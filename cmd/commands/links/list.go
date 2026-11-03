@@ -1,9 +1,10 @@
 package links
 
 import (
+	"log/slog"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -55,7 +56,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		SearchQueryString: search,
 	})
 	if err != nil {
-		log.Err(err).Msg("Failed to list links")
+		slog.Error("Failed to list links", slog.Any("error", err))
 		return err
 	}
 
