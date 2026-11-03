@@ -13,7 +13,7 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 [![govulncheck](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/govulncheck.yml)
 <br>
 [![Go Version](https://img.shields.io/github/go-mod/go-version/CerealKiller97/linkwarden-cli?logo=go&logoColor=white)](go.mod)
-[![Go Reference](https://pkg.go.dev/badge/github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden.svg)](https://pkg.go.dev/github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden)
+[![Go Reference](https://pkg.go.dev/badge/github.com/CerealKiller97/linkwarden-go-sdk.svg)](https://pkg.go.dev/github.com/CerealKiller97/linkwarden-go-sdk)
 [![Go Report Card](https://goreportcard.com/badge/github.com/CerealKiller97/linkwarden-cli)](https://goreportcard.com/report/github.com/CerealKiller97/linkwarden-cli)
 
 [Quick start](#-quick-start) · [Recipes](#-recipes) · [Command reference](#-command-reference) · [Go SDK](#-go-sdk)
@@ -32,7 +32,7 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 | 🗄️ **Archives & backups**  | Download PDF, screenshot or HTML snapshots; export and import your whole library.                 |
 | 🔄 **Easy migration**      | Import from browser bookmarks, Pocket, Wallabag, Omnivore or another Linkwarden instance.         |
 | 🎨 **Readable output**     | Rounded tables with colored headers that drop color automatically when piped or `NO_COLOR` is set. |
-| 🧰 **Go SDK included**     | Every command is backed by `pkg/linkwarden`, a typed API client you can import into your own code. |
+| 🧰 **Go SDK**              | Every command is backed by [`linkwarden-go-sdk`](https://github.com/CerealKiller97/linkwarden-go-sdk), a typed API client you can use in your own code. |
 
 ---
 
@@ -454,11 +454,11 @@ linkwarden completion zsh > "${fpath[1]}/_linkwarden"   # also: bash, fish, powe
 
 ## 🧰 Go SDK
 
-Every command goes through [`pkg/linkwarden`](pkg/linkwarden), a typed client for the Linkwarden API
-with no dependency on the CLI. You can use it in your own tools:
+Every command goes through [`linkwarden-go-sdk`](https://github.com/CerealKiller97/linkwarden-go-sdk), a typed client for the Linkwarden API
+maintained as its own module. You can use it in your own tools:
 
 ```bash
-go get github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden
+go get github.com/CerealKiller97/linkwarden-go-sdk
 ```
 
 ```go
@@ -472,7 +472,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
 func main() {

@@ -3,8 +3,8 @@ package rss
 import (
 	"context"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
 func rssPickerFetch(ctx context.Context, client *linkwarden.Client) func() ([]utils.PickerItem, error) {

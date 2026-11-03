@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
@@ -14,13 +13,18 @@ import (
 func TestUpdate_SendsFlagsAsRequestBody(t *testing.T) {
 	assert := require.New(t)
 
-	var gotBody linkwarden.UpdateLinkRequest
+	var gotBody map[string]any
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodPut, r.Method)
 		assert.Equal("/api/v1/links/9", r.URL.Path)
-		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"id":9,"name":"Renamed","url":"https://example.com"}`))
+		switch r.Method {
+		case http.MethodGet:
+			_, _ = w.Write([]byte(`{"response":{"id":9,"name":"Old","url":"https://example.com","collection":{"id":1,"ownerId":1}}}`))
+		case http.MethodPut:
+			assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
+			_, _ = w.Write([]byte(`{"response":{"id":9,"name":"Renamed","url":"https://example.com"}}`))
+		default:
+			t.Errorf("unexpected method %s", r.Method)
+		}
 	}))
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
@@ -28,7 +32,8 @@ func TestUpdate_SendsFlagsAsRequestBody(t *testing.T) {
 	cmd := Update()
 	cmd.SetArgs([]string{"--id", "9", "--name", "Renamed"})
 	assert.NoError(cmd.Execute())
-	assert.Equal("Renamed", gotBody.Name)
+	assert.Equal("Renamed", gotBody["name"])
+	assert.Equal("https://example.com", gotBody["url"])
 }
 
 func TestUpdate_PropagatesAPIError(t *testing.T) {

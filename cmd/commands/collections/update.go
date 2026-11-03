@@ -1,8 +1,8 @@
 package collections
 
 import (
-	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -21,7 +21,7 @@ func Update() *cobra.Command {
 	cmd.Flags().String("icon", "", "New collection icon.")
 	cmd.Flags().String("icon-weight", "", "New collection icon weight.")
 	cmd.Flags().Int("parent-id", 0, "New parent collection ID.")
-	cmd.Flags().Bool("public", false, "Make the collection public.")
+	cmd.Flags().Bool("public", false, "Make the collection public (--public=false makes it private).")
 
 	return cmd
 }
@@ -44,9 +44,13 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	isPublic, err := cmd.Flags().GetBool("public")
-	if err != nil {
-		return err
+	var isPublic *bool
+	if cmd.Flags().Changed("public") {
+		v, err := cmd.Flags().GetBool("public")
+		if err != nil {
+			return err
+		}
+		isPublic = &v
 	}
 
 	collection, err := client.Collections.Update(cmd.Context(), id, linkwarden.UpdateCollectionRequest{
