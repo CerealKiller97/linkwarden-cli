@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ♻️ Changed
+
+- **ui:** Replace promptui with Bubble Tea for all interactive prompts. Pickers can now be filtered by typing, scroll past 10 items, and cancel with Esc.
+- **tokens:** `tokens generate` and `tokens revoke` now fail fast without an interactive terminal, like the other pickers.
+
+### 🐛 Fixed
+
+- **tokens:** `tokens revoke` revokes the selected token even when several tokens share a name.
+
 ## [1.0.0] - 2026-10-06
 
 ### ✨ Added

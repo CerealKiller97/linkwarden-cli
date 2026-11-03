@@ -313,6 +313,7 @@ linkwarden dashboard get-v2
 ## 🤖 Interactive vs. non-interactive
 
 Any command that takes a resource ID opens a **picker** when you leave the ID out and stdin is a terminal.
+Type to filter the list, use ↑/↓ to move, Enter to select and Esc to cancel.
 When stdin isn't a terminal (scripts, CI, pipes), it **fails fast** and tells you which flag to pass:
 
 ```console
@@ -645,7 +646,7 @@ The workflow needs two repository secrets:
 
 <div align="center">
 
-Built with [Cobra](https://github.com/spf13/cobra) · [go-pretty](https://github.com/jedib0t/go-pretty) · [promptui](https://github.com/manifoldco/promptui) · [progressbar](https://github.com/schollz/progressbar)
+Built with [Cobra](https://github.com/spf13/cobra) · [go-pretty](https://github.com/jedib0t/go-pretty) · [Bubble Tea](https://github.com/charmbracelet/bubbletea) · [progressbar](https://github.com/schollz/progressbar)
 
 Not affiliated with the Linkwarden project.
 
