@@ -35,7 +35,8 @@ Please include:
 
 In scope:
 
-- The `linkwarden` CLI and the Go SDK in `pkg/linkwarden`
+- The `linkwarden` CLI. Report issues in the Go SDK to
+  [linkwarden-go-sdk](https://github.com/CerealKiller97/linkwarden-go-sdk/security)
 - Handling of API tokens, for example leaking `LINKWARDEN_TOKEN` in logs or errors, or
   writing it to shell config files with unsafe permissions
 - Release artifacts and the release workflow

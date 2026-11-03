@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 

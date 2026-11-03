@@ -3,7 +3,7 @@ package utils
 import (
 	"log/slog"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/linkwarden"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
 // NewLinkwardenClient builds a Linkwarden API client from the instance URL and
