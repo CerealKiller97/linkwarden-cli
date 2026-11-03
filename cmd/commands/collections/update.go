@@ -22,7 +22,7 @@ func Update() *cobra.Command {
 	cmd.Flags().String("icon", "", "New collection icon.")
 	cmd.Flags().String("icon-weight", "", "New collection icon weight.")
 	cmd.Flags().Int("parent-id", 0, "New parent collection ID.")
-	cmd.Flags().Bool("public", false, "Make the collection public.")
+	cmd.Flags().Bool("public", false, "Make the collection public (--public=false makes it private).")
 
 	return cmd
 }
@@ -45,9 +45,14 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	isPublic, err := cmd.Flags().GetBool("public")
-	if err != nil {
-		return err
+	// Only send visibility when --public was given, so omitting it leaves it unchanged.
+	var isPublic *bool
+	if cmd.Flags().Changed("public") {
+		public, err := cmd.Flags().GetBool("public")
+		if err != nil {
+			return err
+		}
+		isPublic = &public
 	}
 
 	collection, err := client.Collections.Update(cmd.Context(), id, linkwarden.UpdateCollectionRequest{
