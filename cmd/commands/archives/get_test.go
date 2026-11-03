@@ -1,68 +1,62 @@
 package archives
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"bytes"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/stretchr/testify/require"
 )
+
+// linkWithPNGArchive creates a link with png as its uploaded PNG archive.
+func linkWithPNGArchive(t *testing.T, c *linkwarden.Client, png []byte) *linkwarden.Link {
+	t.Helper()
+
+	link := e2etest.Link(t, c, e2etest.Collection(t, c).ID)
+	_, err := c.Archives.Upload(t.Context(), link.ID, linkwarden.ArchiveFormatPNG, false, "screenshot.png", bytes.NewReader(png))
+	require.NoError(t, err)
+
+	return link
+}
 
 func TestGet_SavesToOutputFile(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodGet, r.Method)
-		assert.Equal("/api/v1/archives/5", r.URL.Path)
-		assert.Equal("format=2", r.URL.RawQuery)
-		w.Header().Set("Content-Type", "application/pdf")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("%PDF-fake"))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
-
-	outputPath := filepath.Join(t.TempDir(), "archive.pdf")
+	client := e2etest.Setup(t)
+	png := e2etest.PNG(t)
+	link := linkWithPNGArchive(t, client, png)
+	outputPath := filepath.Join(t.TempDir(), "archive.png")
 
 	cmd := Get()
-	cmd.SetArgs([]string{"--link-id", "5", "--format", "2", "--output", outputPath})
+	cmd.SetArgs([]string{"--link-id", strconv.Itoa(link.ID), "--format", "0", "--output", outputPath})
 	assert.NoError(cmd.Execute())
 
 	data, err := os.ReadFile(outputPath)
 	assert.NoError(err)
-	assert.Equal("%PDF-fake", string(data))
+	assert.Equal(png, data)
 }
 
 func TestGet_WithoutOutputPrintsSummary(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "image/png")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("fake-png"))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	link := linkWithPNGArchive(t, client, e2etest.PNG(t))
 
 	cmd := Get()
-	cmd.SetArgs([]string{"--link-id", "5"})
+	cmd.SetArgs([]string{"--link-id", strconv.Itoa(link.ID)})
 	assert.NoError(cmd.Execute())
 }
 
 func TestGet_PropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(`{"response":"Link not found."}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	e2etest.Setup(t)
 
 	cmd := Get()
-	cmd.SetArgs([]string{"--link-id", "999"})
+	cmd.SetArgs([]string{"--link-id", "999999999"})
 	assert.Error(cmd.Execute())
 }

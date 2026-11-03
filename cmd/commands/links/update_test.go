@@ -1,47 +1,37 @@
 package links
 
 import (
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
+	"strconv"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/CerealKiller97/linkwarden-go-sdk"
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/stretchr/testify/require"
 )
 
-func TestUpdate_SendsFlagsAsRequestBody(t *testing.T) {
+func TestUpdate_AppliesFlags(t *testing.T) {
 	assert := require.New(t)
 
-	var gotBody linkwarden.UpdateLinkRequest
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodPut, r.Method)
-		assert.Equal("/api/v1/links/9", r.URL.Path)
-		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"id":9,"name":"Renamed","url":"https://example.com"}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	link := e2etest.Link(t, client, e2etest.Collection(t, client).ID)
 
 	cmd := Update()
-	cmd.SetArgs([]string{"--id", "9", "--name", "Renamed"})
+	cmd.SetArgs([]string{"--id", strconv.Itoa(link.ID), "--name", "Renamed", "--description", "updated"})
 	assert.NoError(cmd.Execute())
-	assert.Equal("Renamed", gotBody.Name)
+
+	got, err := client.Links.Get(t.Context(), link.ID)
+	assert.NoError(err)
+	assert.Equal("Renamed", got.Name)
+	assert.Equal("updated", got.Description)
+	assert.Equal(link.URL, got.URL)
+	assert.Equal(link.CollectionID, got.Collection.ID)
 }
 
 func TestUpdate_PropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(`{"message":"Link not found."}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	e2etest.Setup(t)
 
 	cmd := Update()
-	cmd.SetArgs([]string{"--id", "9"})
+	cmd.SetArgs([]string{"--id", "999999999", "--name", "Renamed"})
 	assert.Error(cmd.Execute())
 }

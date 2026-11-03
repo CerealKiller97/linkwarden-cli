@@ -1,42 +1,35 @@
 package tags
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"strconv"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/stretchr/testify/require"
 )
 
 func TestUpdate_UsesIDAndNameFlags(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodPut, r.Method)
-		assert.Equal("/api/v1/tags/3", r.URL.Path)
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":{"id":3,"name":"Renamed"}}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	tag := e2etest.Tag(t, client)
+	renamed := e2etest.UniqueName("renamed")
 
 	cmd := Update()
-	cmd.SetArgs([]string{"--id", "3", "--name", "Renamed"})
+	cmd.SetArgs([]string{"--id", strconv.Itoa(tag.ID), "--name", renamed})
 	assert.NoError(cmd.Execute())
+
+	got, err := client.Tags.Get(t.Context(), tag.ID)
+	assert.NoError(err)
+	assert.Equal(renamed, got.Name)
 }
 
 func TestUpdate_PropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(`{"message":"not found"}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	e2etest.Setup(t)
 
 	cmd := Update()
-	cmd.SetArgs([]string{"--id", "3", "--name", "Renamed"})
+	cmd.SetArgs([]string{"--id", "999999999", "--name", "Renamed"})
 	assert.Error(cmd.Execute())
 }

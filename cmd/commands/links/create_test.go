@@ -1,85 +1,63 @@
 package links
 
 import (
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"path/filepath"
-	"sync/atomic"
+	"fmt"
+	"strconv"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreate_UploadsLinksFromFile(t *testing.T) {
 	assert := require.New(t)
 
-	var createCount int
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/collections":
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Unorganized"}]}`))
-		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/links":
-			createCount++
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"response":{"id":1,"name":"x","url":"https://example.com"}}`))
-		default:
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
-
-	file := filepath.Join(t.TempDir(), "links.json")
-	assert.NoError(os.WriteFile(file, []byte(`[{"url":"https://example.com","title":"Example"}]`), 0o644))
+	client := e2etest.Setup(t)
+	collection := e2etest.Collection(t, client)
+	first, second := e2etest.UniqueURL(), e2etest.UniqueURL()
+	file := e2etest.WriteFile(t, "links.json", fmt.Appendf(nil,
+		`[{"url":%q,"title":"First"},{"url":%q,"title":"Second"}]`, first, second))
 
 	cmd := Create()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
+	cmd.SetArgs([]string{"--file", file, "--collection", strconv.Itoa(collection.ID)})
 	assert.NoError(cmd.Execute())
-	assert.Equal(1, createCount)
+
+	links, err := client.Links.List(t.Context(), linkwarden.ListLinksOptions{CollectionID: collection.ID})
+	assert.NoError(err)
+	t.Cleanup(func() { _ = client.Links.BulkDelete(t.Context(), e2etest.LinkIDs(links)) })
+
+	var urls []string
+	for _, l := range links {
+		urls = append(urls, l.URL)
+	}
+	assert.ElementsMatch([]string{first, second}, urls)
 }
 
 func TestCreate_EmptyFileErrors(t *testing.T) {
 	assert := require.New(t)
 
-	file := filepath.Join(t.TempDir(), "links.json")
-	assert.NoError(os.WriteFile(file, []byte(`[]`), 0o644))
+	client := e2etest.Setup(t)
+	collection := e2etest.Collection(t, client)
+	file := e2etest.WriteFile(t, "links.json", []byte(`[]`))
 
 	cmd := Create()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
-	err := cmd.Execute()
-	assert.ErrorIs(err, errFileEmpty)
+	cmd.SetArgs([]string{"--file", file, "--collection", strconv.Itoa(collection.ID)})
+	assert.ErrorIs(cmd.Execute(), errFileEmpty)
 }
 
 func TestCreate_UnknownCollectionErrorsWithoutCreatingLinks(t *testing.T) {
 	assert := require.New(t)
 
-	var createCount atomic.Int64
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/collections":
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Unorganized"}]}`))
-		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/links":
-			createCount.Add(1)
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"response":{"id":1,"name":"x","url":"https://example.com"}}`))
-		default:
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
-
-	file := filepath.Join(t.TempDir(), "links.json")
-	assert.NoError(os.WriteFile(file, []byte(`[{"url":"https://example.com","title":"Example"}]`), 0o644))
+	client := e2etest.Setup(t)
+	url := e2etest.UniqueURL()
+	file := e2etest.WriteFile(t, "links.json", fmt.Appendf(nil, `[{"url":%q,"title":"Example"}]`, url))
 
 	cmd := Create()
-	cmd.SetArgs([]string{"--file", file, "--collection", "9999"})
-	err := cmd.Execute()
-	assert.ErrorIs(err, errCollectionNotFound)
-	assert.ErrorContains(err, "9999")
-	assert.Zero(createCount.Load())
+	cmd.SetArgs([]string{"--file", file, "--collection", "999999999"})
+	assert.ErrorIs(cmd.Execute(), errCollectionNotFound)
+
+	links, err := client.Links.List(t.Context(), linkwarden.ListLinksOptions{SearchQueryString: url})
+	assert.NoError(err)
+	assert.Empty(links)
 }

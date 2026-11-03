@@ -1,10 +1,10 @@
 package highlights
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"strconv"
 	"testing"
 
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
@@ -12,18 +12,17 @@ import (
 func TestDelete_UsesIDFlag(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodDelete, r.Method)
-		assert.Equal("/api/v1/highlights/4", r.URL.Path)
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":4}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	link := e2etest.Link(t, client, e2etest.Collection(t, client).ID)
+	highlight := e2etest.Highlight(t, client, link.ID)
 
 	cmd := Delete()
-	cmd.SetArgs([]string{"--id", "4"})
+	cmd.SetArgs([]string{"--id", strconv.Itoa(highlight.ID)})
 	assert.NoError(cmd.Execute())
+
+	highlights, err := client.Links.Highlights(t.Context(), link.ID)
+	assert.NoError(err)
+	assert.Empty(highlights)
 }
 
 func TestDelete_InvalidIDErrors(t *testing.T) {

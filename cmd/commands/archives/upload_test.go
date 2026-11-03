@@ -1,50 +1,30 @@
 package archives
 
 import (
-	"net/http"
-	"net/http/httptest"
-	"os"
-	"path/filepath"
+	"strconv"
 	"testing"
 
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/stretchr/testify/require"
 )
-
-func writeTempFile(t *testing.T, name, contents string) string {
-	t.Helper()
-
-	path := filepath.Join(t.TempDir(), name)
-	require.NoError(t, os.WriteFile(path, []byte(contents), 0o600))
-
-	return path
-}
 
 func TestUpload_SendsFile(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodPost, r.Method)
-		assert.Equal("/api/v1/archives/2", r.URL.Path)
-		assert.Equal("format=0", r.URL.RawQuery)
-
-		assert.NoError(r.ParseMultipartForm(1 << 20))
-		file, header, err := r.FormFile("file")
-		assert.NoError(err)
-		defer file.Close()
-		assert.Equal("screenshot.png", header.Filename)
-
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":{"id":2,"name":"Example","url":"https://example.com"}}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
-
-	filePath := writeTempFile(t, "screenshot.png", "fake-png-bytes")
+	client := e2etest.Setup(t)
+	link := e2etest.Link(t, client, e2etest.Collection(t, client).ID)
+	png := e2etest.PNG(t)
+	filePath := e2etest.WriteFile(t, "screenshot.png", png)
 
 	cmd := Upload()
-	cmd.SetArgs([]string{"--link-id", "2", "--file", filePath, "--format", "0"})
+	cmd.SetArgs([]string{"--link-id", strconv.Itoa(link.ID), "--file", filePath, "--format", "0"})
 	assert.NoError(cmd.Execute())
+
+	file, err := client.Archives.Get(t.Context(), link.ID, linkwarden.ArchiveFormatPNG, false)
+	assert.NoError(err)
+	assert.Equal(png, file.Data)
 }
 
 func TestUpload_MissingFileErrors(t *testing.T) {

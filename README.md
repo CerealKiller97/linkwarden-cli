@@ -467,11 +467,18 @@ See its [README](https://github.com/CerealKiller97/linkwarden-go-sdk#readme) for
 
 ## 🛠️ Development
 
+The tests run against a real, throwaway Linkwarden instance instead of mocked responses. Start
+one in Docker (it also creates a test user and API token), then run the tests against it:
+
 ```bash
-go test ./...            # unit tests
+scripts/dev-linkwarden.sh up
+eval "$(scripts/dev-linkwarden.sh env)"
+go test ./...            # command tests
+go build -o bin/linkwarden . && scripts/e2e.sh   # smoke test of the built binary
 golangci-lint run        # lint (config in .golangci.yml)
-go build -o bin/linkwarden .
 ```
+
+Without `LINKWARDEN_URL` and `LINKWARDEN_TOKEN` the tests are skipped locally, and fail in CI.
 
 CI runs tests, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests.
 

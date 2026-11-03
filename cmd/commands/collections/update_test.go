@@ -1,48 +1,52 @@
 package collections
 
 import (
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
+	"strconv"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/CerealKiller97/linkwarden-go-sdk"
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/stretchr/testify/require"
 )
 
-func TestUpdate_SendsFlagsAsRequestBody(t *testing.T) {
+func TestUpdate_AppliesFlags(t *testing.T) {
 	assert := require.New(t)
 
-	var gotBody linkwarden.UpdateCollectionRequest
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodPut, r.Method)
-		assert.Equal("/api/v1/collections/3", r.URL.Path)
-		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":{"id":3,"name":"Renamed"}}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	collection := e2etest.Collection(t, client)
+	renamed := e2etest.UniqueName("renamed")
 
 	cmd := Update()
-	cmd.SetArgs([]string{"--id", "3", "--name", "Renamed", "--public"})
+	cmd.SetArgs([]string{"--id", strconv.Itoa(collection.ID), "--name", renamed, "--public"})
 	assert.NoError(cmd.Execute())
-	assert.Equal("Renamed", gotBody.Name)
-	assert.True(gotBody.IsPublic)
+
+	got, err := client.Collections.Get(t.Context(), collection.ID)
+	assert.NoError(err)
+	assert.Equal(renamed, got.Name)
+	assert.True(got.IsPublic)
+}
+
+func TestUpdate_KeepsUnsetFields(t *testing.T) {
+	assert := require.New(t)
+
+	client := e2etest.Setup(t)
+	collection := e2etest.Collection(t, client)
+
+	cmd := Update()
+	cmd.SetArgs([]string{"--id", strconv.Itoa(collection.ID), "--color", "#10b981"})
+	assert.NoError(cmd.Execute())
+
+	got, err := client.Collections.Get(t.Context(), collection.ID)
+	assert.NoError(err)
+	assert.Equal(collection.Name, got.Name)
+	assert.Equal("#10b981", got.Color)
 }
 
 func TestUpdate_PropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(`{"message":"Collection not found."}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	e2etest.Setup(t)
 
 	cmd := Update()
-	cmd.SetArgs([]string{"--id", "3"})
+	cmd.SetArgs([]string{"--id", "999999999", "--name", "Renamed"})
 	assert.Error(cmd.Execute())
 }

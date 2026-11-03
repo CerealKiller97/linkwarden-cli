@@ -1,44 +1,30 @@
 package tokens
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/stretchr/testify/require"
 )
 
-func TestRevoke_FetchesTokensBeforePrompting(t *testing.T) {
+func TestRevoke_FailsWithoutInteractiveTerminal(t *testing.T) {
 	assert := require.New(t)
 
-	var listCalled bool
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		listCalled = true
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"CI token"}]}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	e2etest.Setup(t)
 
+	// Revoke always picks the token interactively. A test run has no terminal, so it
+	// fetches the tokens and then fails at the picker without revoking anything.
 	cmd := Revoke()
-	err := cmd.Execute()
-	assert.True(listCalled)
-	// promptui needs an interactive terminal; in a non-interactive test run it
-	// errors out immediately, which is expected here — this test only asserts that
-	// the token list is fetched before the (untestable) interactive picker runs.
-	assert.Error(err)
+	assert.Error(cmd.Execute())
+
+	_, err := e2etest.Setup(t).Collections.List(t.Context())
+	assert.NoError(err, "the test's own token must still work")
 }
 
 func TestRevoke_PropagatesListError(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(`{"message":"boom"}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	e2etest.UseInvalidToken(t)
 
 	cmd := Revoke()
 	assert.Error(cmd.Execute())

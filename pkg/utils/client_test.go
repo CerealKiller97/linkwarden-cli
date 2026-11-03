@@ -1,28 +1,30 @@
 package utils
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
+// This package can't import internal/e2etest (which imports it), so it reads the test
+// instance from the environment itself.
 func TestNewLinkwardenClient_UsesConfiguredURLAndToken(t *testing.T) {
 	assert := require.New(t)
 
-	var gotAuth string
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotAuth = r.Header.Get("Authorization")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":[]}`))
-	}))
-	defer server.Close()
+	baseURL, token := os.Getenv("LINKWARDEN_URL"), os.Getenv("LINKWARDEN_TOKEN")
+	if baseURL == "" || token == "" {
+		if os.Getenv("CI") != "" {
+			t.Fatal("LINKWARDEN_URL and LINKWARDEN_TOKEN must be set in CI")
+		}
+		t.Skip("LINKWARDEN_URL / LINKWARDEN_TOKEN not set; start an instance with scripts/dev-linkwarden.sh up")
+	}
 
-	SetVars("test-token", server.URL)
-
-	client := NewLinkwardenClient()
-	_, err := client.Collections.List(t.Context())
+	SetVars(token, baseURL)
+	_, err := NewLinkwardenClient().Collections.List(t.Context())
 	assert.NoError(err)
-	assert.Equal("Bearer test-token", gotAuth)
+
+	SetVars("invalid-token", baseURL)
+	_, err = NewLinkwardenClient().Collections.List(t.Context())
+	assert.Error(err)
 }

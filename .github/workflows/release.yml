@@ -30,6 +30,14 @@ jobs:
         with:
           go-version-file: go.mod
 
+      # The tests need a real Linkwarden instance, the same one test.yml uses.
+      - name: 🐳 Start Linkwarden
+        env:
+          LINKWARDEN_VERSION: v2.16.3
+        run: |
+          scripts/dev-linkwarden.sh up
+          scripts/dev-linkwarden.sh env | sed 's/^export //; s/"//g' >> "$GITHUB_ENV"
+
       - name: 🧪 Test
         run: |
           go vet ./...

@@ -1,10 +1,10 @@
 package tags
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"strconv"
 	"testing"
 
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
@@ -12,18 +12,22 @@ import (
 func TestGet_UsesIDFlag(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodGet, r.Method)
-		assert.Equal("/api/v1/tags/1", r.URL.Path)
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":{"id":1,"name":"Technology"}}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	tag := e2etest.Tag(t, client)
 
 	cmd := Get()
-	cmd.SetArgs([]string{"--id", "1"})
+	cmd.SetArgs([]string{"--id", strconv.Itoa(tag.ID)})
 	assert.NoError(cmd.Execute())
+}
+
+func TestGet_NotFoundErrors(t *testing.T) {
+	assert := require.New(t)
+
+	e2etest.Setup(t)
+
+	cmd := Get()
+	cmd.SetArgs([]string{"--id", "999999999"})
+	assert.Error(cmd.Execute())
 }
 
 func TestGet_InvalidIDErrors(t *testing.T) {

@@ -1,40 +1,29 @@
 package links
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"strconv"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetHighlights_UsesIDFlag(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodGet, r.Method)
-		assert.Equal("/api/v1/links/6/highlights", r.URL.Path)
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":[{"id":1,"linkId":6,"text":"quote","color":"yellow"}]}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	link := e2etest.Link(t, client, e2etest.Collection(t, client).ID)
+	e2etest.Highlight(t, client, link.ID)
 
 	cmd := GetHighlights()
-	cmd.SetArgs([]string{"--id", "6"})
+	cmd.SetArgs([]string{"--id", strconv.Itoa(link.ID)})
 	assert.NoError(cmd.Execute())
 }
 
 func TestGetHighlights_PropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(`{"message":"not found"}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	e2etest.UseInvalidToken(t)
 
 	cmd := GetHighlights()
 	cmd.SetArgs([]string{"--id", "6"})

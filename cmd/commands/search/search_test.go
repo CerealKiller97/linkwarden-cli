@@ -1,62 +1,57 @@
 package search
 
 import (
-	"net/http"
-	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/stretchr/testify/require"
 )
 
-func TestExecute_UsesQueryFlags(t *testing.T) {
+func TestExecute_FindsIndexedLink(t *testing.T) {
 	assert := require.New(t)
 
-	var gotQuery string
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodGet, r.Method)
-		assert.Equal("/api/v1/search", r.URL.Path)
-		gotQuery = r.URL.RawQuery
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"message":"Success","data":{"links":[{"id":1,"name":"Go","url":"https://go.dev"}]}}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	collection := e2etest.Collection(t, client)
+	// One word with no separators, so the search can't match other links on a shared prefix.
+	word := strings.ReplaceAll(e2etest.UniqueName("searchable"), "-", "")
+	link, err := client.Links.Create(t.Context(), linkwarden.CreateLinkRequest{
+		Name:       word,
+		URL:        e2etest.UniqueURL(),
+		Collection: linkwarden.Collection{ID: collection.ID},
+	})
+	assert.NoError(err)
+	t.Cleanup(func() { _ = client.Links.Delete(t.Context(), link.ID) })
+
+	// Wait until the link reaches the search index, then run the command against it.
+	assert.Eventually(func() bool {
+		links, err := client.Search.Links(t.Context(), linkwarden.SearchOptions{SearchQueryString: word})
+		return err == nil && len(links) > 0
+	}, time.Minute, time.Second)
 
 	cmd := Command()
-	cmd.SetArgs([]string{"--query", "go", "--sort", "2", "--cursor", "3"})
+	cmd.SetArgs([]string{"--query", word, "--sort", "0"})
 	assert.NoError(cmd.Execute())
-	assert.Equal("cursor=3&searchQueryString=go&sort=2", gotQuery)
 }
 
-func TestExecute_OmitsUnsetSort(t *testing.T) {
+func TestExecute_NoMatches(t *testing.T) {
 	assert := require.New(t)
 
-	var gotQuery string
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		gotQuery = r.URL.RawQuery
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"message":"Success","data":{"links":[]}}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	e2etest.Setup(t)
 
 	cmd := Command()
-	cmd.SetArgs([]string{})
+	cmd.SetArgs([]string{"--query", e2etest.UniqueName("nothing")})
 	assert.NoError(cmd.Execute())
-	assert.Equal("", gotQuery)
 }
 
 func TestExecute_PropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(`{"message":"boom"}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	e2etest.UseInvalidToken(t)
 
 	cmd := Command()
+	cmd.SetArgs([]string{"--query", "go"})
 	assert.Error(cmd.Execute())
 }

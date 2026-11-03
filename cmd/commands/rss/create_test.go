@@ -1,48 +1,45 @@
 package rss
 
 import (
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
+	"strconv"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/CerealKiller97/linkwarden-go-sdk"
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreate_SendsRequestedFields(t *testing.T) {
+func TestCreate_SubscribesToFeed(t *testing.T) {
 	assert := require.New(t)
 
-	var gotBody linkwarden.CreateRSSRequest
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodPost, r.Method)
-		assert.Equal("/api/v1/rss", r.URL.Path)
-		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":{"id":1,"name":"News","url":"https://news.example.com/rss"}}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	collection := e2etest.Collection(t, client)
+	name := e2etest.UniqueName("feed")
 
 	cmd := Create()
-	cmd.SetArgs([]string{"--name", "News", "--url", "https://news.example.com/rss", "--collection-id", "7"})
+	cmd.SetArgs([]string{"--name", name, "--url", e2etest.FeedURL, "--collection-id", strconv.Itoa(collection.ID)})
 	assert.NoError(cmd.Execute())
-	assert.Equal("News", gotBody.Name)
-	assert.Equal(7, gotBody.CollectionID)
+
+	subs, err := client.RSS.List(t.Context())
+	assert.NoError(err)
+
+	var found bool
+	for _, sub := range subs {
+		if sub.Name == name {
+			found = true
+			t.Cleanup(func() { _ = client.RSS.Delete(t.Context(), sub.ID) })
+			assert.Equal(e2etest.FeedURL, sub.URL)
+			assert.Equal(collection.ID, sub.CollectionID)
+		}
+	}
+	assert.True(found, "new subscription should be listed")
 }
 
 func TestCreate_PropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = w.Write([]byte(`{"message":"invalid feed"}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	e2etest.UseInvalidToken(t)
 
 	cmd := Create()
-	cmd.SetArgs([]string{"--name", "News", "--url", "https://news.example.com/rss"})
+	cmd.SetArgs([]string{"--name", "News", "--url", e2etest.FeedURL})
 	assert.Error(cmd.Execute())
 }

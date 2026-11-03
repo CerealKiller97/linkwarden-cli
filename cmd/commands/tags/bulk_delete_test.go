@@ -1,35 +1,31 @@
 package tags
 
 import (
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
+	"fmt"
 	"testing"
 
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/stretchr/testify/require"
 )
 
 func TestBulkDelete_ParsesIDs(t *testing.T) {
 	assert := require.New(t)
 
-	var gotBody struct {
-		TagIDs []int `json:"tagIds"`
-	}
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodDelete, r.Method)
-		assert.Equal("/api/v1/tags", r.URL.Path)
-		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":"Tags deleted."}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	first, second, kept := e2etest.Tag(t, client), e2etest.Tag(t, client), e2etest.Tag(t, client)
 
 	cmd := BulkDelete()
-	cmd.SetArgs([]string{"--ids", "1,2"})
+	cmd.SetArgs([]string{"--ids", fmt.Sprintf("%d,%d", first.ID, second.ID)})
 	assert.NoError(cmd.Execute())
-	assert.Equal([]int{1, 2}, gotBody.TagIDs)
+
+	for _, id := range []int{first.ID, second.ID} {
+		_, err := client.Tags.Get(t.Context(), id)
+		assert.True(linkwarden.IsNotFound(err))
+	}
+	_, err := client.Tags.Get(t.Context(), kept.ID)
+	assert.NoError(err)
 }
 
 func TestBulkDelete_InvalidIDsErrors(t *testing.T) {

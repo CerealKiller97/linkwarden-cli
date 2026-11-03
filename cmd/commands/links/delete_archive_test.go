@@ -1,11 +1,10 @@
 package links
 
 import (
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
+	"fmt"
 	"testing"
 
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
@@ -13,23 +12,14 @@ import (
 func TestDeleteArchive_ParsesIDs(t *testing.T) {
 	assert := require.New(t)
 
-	var gotBody struct {
-		LinkIDs []int `json:"linkIds"`
-	}
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodDelete, r.Method)
-		assert.Equal("/api/v1/links/archive", r.URL.Path)
-		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":"Archived files deleted."}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	collection := e2etest.Collection(t, client)
+	first := e2etest.Link(t, client, collection.ID)
+	second := e2etest.Link(t, client, collection.ID)
 
 	cmd := DeleteArchive()
-	cmd.SetArgs([]string{"--ids", "1, 2,3"})
+	cmd.SetArgs([]string{"--ids", fmt.Sprintf("%d, %d", first.ID, second.ID)})
 	assert.NoError(cmd.Execute())
-	assert.Equal([]int{1, 2, 3}, gotBody.LinkIDs)
 }
 
 func TestDeleteArchive_InvalidIDsErrors(t *testing.T) {

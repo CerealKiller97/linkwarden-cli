@@ -1,44 +1,47 @@
 package links
 
 import (
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
+	"fmt"
+	"strconv"
 	"testing"
 
+	"github.com/CerealKiller97/linkwarden-cli/internal/e2etest"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/stretchr/testify/require"
 )
 
-func TestBulkUpdate_BuildsRequestFromFlags(t *testing.T) {
+func TestBulkUpdate_AppliesFlags(t *testing.T) {
 	assert := require.New(t)
 
-	var gotBody linkwarden.BulkUpdateLinksRequest
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(http.MethodPut, r.Method)
-		assert.Equal("/api/v1/links", r.URL.Path)
-		assert.NoError(json.NewDecoder(r.Body).Decode(&gotBody))
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":"Links updated."}`))
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
+	client := e2etest.Setup(t)
+	from := e2etest.Collection(t, client)
+	to := e2etest.Collection(t, client)
+	first := e2etest.Link(t, client, from.ID)
+	second := e2etest.Link(t, client, from.ID)
+	tagA, tagB := e2etest.UniqueName("a"), e2etest.UniqueName("b")
+	e2etest.CleanupTagsNamed(t, client, tagA, tagB)
 
 	cmd := BulkUpdate()
 	cmd.SetArgs([]string{
-		"--ids", "1,2",
-		"--collection-id", "7",
-		"--tag", "a",
-		"--tag", "b",
+		"--ids", fmt.Sprintf("%d,%d", first.ID, second.ID),
+		"--collection-id", strconv.Itoa(to.ID),
+		"--tag", tagA,
+		"--tag", tagB,
 		"--remove-previous-tags",
 	})
 	assert.NoError(cmd.Execute())
 
-	assert.Len(gotBody.Links, 2)
-	assert.Equal(7, gotBody.NewData.CollectionID)
-	assert.Equal([]linkwarden.Tag{{Name: "a"}, {Name: "b"}}, gotBody.NewData.Tags)
-	assert.True(gotBody.RemovePreviousTags)
+	moved, err := client.Links.List(t.Context(), linkwarden.ListLinksOptions{CollectionID: to.ID})
+	assert.NoError(err)
+	assert.ElementsMatch([]int{first.ID, second.ID}, e2etest.LinkIDs(moved))
+	for _, l := range moved {
+		var names []string
+		for _, tag := range l.Tags {
+			names = append(names, tag.Name)
+		}
+		assert.ElementsMatch([]string{tagA, tagB}, names)
+	}
 }
 
 func TestBulkUpdate_InvalidIDsErrors(t *testing.T) {
