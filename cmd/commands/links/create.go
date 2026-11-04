@@ -131,7 +131,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 	alreadyExists.Add(int64(skipped))
 
 	// Nothing new to create: no point flashing an empty bar.
-	var bar utils.Progress = utils.NoProgress()
+	bar := utils.NoProgress()
 	if len(toCreate) > 0 {
 		bar = utils.StartProgress("Creating links", len(toCreate))
 	}

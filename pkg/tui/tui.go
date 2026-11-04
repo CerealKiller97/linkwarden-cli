@@ -16,12 +16,12 @@ import (
 var ErrAborted = errors.New("prompt aborted")
 
 var (
-	labelStyle    = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("14"))
-	cursorStyle   = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("10"))
-	selectedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
-	dimStyle      = lipgloss.NewStyle().Faint(true)
-	errorStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
-	doneStyle     = lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
+	labelStyle    = lipgloss.NewStyle().Bold(true).Foreground(Sky)
+	cursorStyle   = lipgloss.NewStyle().Bold(true).Foreground(Sky)
+	selectedStyle = lipgloss.NewStyle().Bold(true).Foreground(Sky)
+	dimStyle      = lipgloss.NewStyle().Foreground(Muted)
+	errorStyle    = lipgloss.NewStyle().Foreground(Danger)
+	doneStyle     = lipgloss.NewStyle().Bold(true).Foreground(Ocean)
 )
 
 // Options let tests (or unusual callers) swap the terminal Bubble Tea talks to.

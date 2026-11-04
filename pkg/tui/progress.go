@@ -71,7 +71,7 @@ func newProgressModel(label string, total int) progressModel {
 	return progressModel{
 		label: label,
 		total: total,
-		bar:   progress.New(progress.WithDefaultBlend(), progress.WithWidth(40)),
+		bar:   progress.New(progress.WithColors(Ocean, Sky), progress.WithWidth(40)),
 	}
 }
 

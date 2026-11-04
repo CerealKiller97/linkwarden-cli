@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"charm.land/lipgloss/v2"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -116,10 +117,10 @@ func printManualSetupInstructions(token string) {
 		exportLine = fmt.Sprintf("export LINKWARDEN_TOKEN=%q", token)
 	}
 
-	heading := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("14"))
+	heading := lipgloss.NewStyle().Bold(true).Foreground(tui.Sky)
 	step := heading
-	cmdColor := lipgloss.NewStyle().Foreground(lipgloss.Color("10"))
-	warn := lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("11"))
+	cmdColor := lipgloss.NewStyle().Foreground(tui.Ocean)
+	warn := lipgloss.NewStyle().Bold(true).Foreground(tui.Warning)
 
 	on := utils.ColorEnabled()
 	c := func(style lipgloss.Style, s string) string {

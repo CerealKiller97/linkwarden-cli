@@ -33,30 +33,25 @@ const (
 	ToneDanger
 )
 
-// The palette borrows the progress bar's default gradient (#5A56E0 → #EE6FF8)
-// so tables and the bar look like one app: a rounded purple border, pink
-// header, a purple title badge, and dimmed alternate rows.
+// Tables use the Linkwarden blues from theme.go: a rounded Ocean border, Sky
+// header, a Sky title badge like Linkwarden's buttons, and muted alternate rows.
 var (
-	accent      = lipgloss.Color("#7D56F4")
-	headerColor = lipgloss.Color("#EE6FF8")
-	dimRow      = lipgloss.Color("245")
-
 	titleStyle = lipgloss.NewStyle().
 			Bold(true).
-			Foreground(lipgloss.Color("#FFFDF5")).
-			Background(lipgloss.Color("#5A56E0")).
+			Foreground(Ink).
+			Background(Sky).
 			Padding(0, 1)
 	baseStyle = lipgloss.NewStyle().
 			BorderStyle(lipgloss.RoundedBorder()).
-			BorderForeground(accent)
+			BorderForeground(Ocean)
 	cellStyle   = lipgloss.NewStyle().Padding(0, 1)
-	headerCell  = cellStyle.Bold(true).Foreground(headerColor)
-	borderStyle = lipgloss.NewStyle().Foreground(accent)
+	headerCell  = cellStyle.Bold(true).Foreground(Sky)
+	borderStyle = lipgloss.NewStyle().Foreground(Ocean)
 
 	toneStyles = map[Tone]lipgloss.Style{
-		ToneSuccess: lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("42")),
-		ToneWarning: lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("214")),
-		ToneDanger:  lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("203")),
+		ToneSuccess: lipgloss.NewStyle().Bold(true).Foreground(Sky),
+		ToneWarning: lipgloss.NewStyle().Bold(true).Foreground(Warning),
+		ToneDanger:  lipgloss.NewStyle().Bold(true).Foreground(Danger),
 	}
 )
 
@@ -93,7 +88,7 @@ func staticCellStyle(t Table, row, col int) lipgloss.Style {
 	}
 
 	if row%2 == 1 {
-		return cellStyle.Foreground(dimRow)
+		return cellStyle.Foreground(Muted)
 	}
 
 	return cellStyle
@@ -137,14 +132,15 @@ func newBrowseModel(t Table, width, height int) browseModel {
 	styles := table.DefaultStyles()
 	styles.Header = styles.Header.
 		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(accent).
+		BorderForeground(Ocean).
 		BorderBottom(true).
 		Bold(true).
-		Foreground(headerColor)
+		Foreground(Sky)
+	// Like the selected row in Linkwarden's sidebar.
 	styles.Selected = styles.Selected.
-		Foreground(lipgloss.Color("229")).
-		Background(lipgloss.Color("57")).
-		Bold(false)
+		Foreground(Sky).
+		Background(Slate).
+		Bold(true)
 
 	tbl := table.New(
 		table.WithColumns(cols),

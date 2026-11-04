@@ -41,6 +41,9 @@ type inputModel struct {
 func newInputModel(label string, validate func(string) error) inputModel {
 	ti := textinput.New()
 	ti.Prompt = ""
+	styles := textinput.DefaultDarkStyles()
+	styles.Cursor.Color = Sky
+	ti.SetStyles(styles)
 	ti.Focus()
 
 	return inputModel{label: label, validate: validate, input: ti}
