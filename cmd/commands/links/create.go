@@ -110,17 +110,33 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("%w: %d", errCollectionNotFound, collectionID)
 	}
 
+	// Linkwarden happily stores the same URL twice unless the account has
+	// "prevent duplicate links" on, so check the collection first.
+	existing, err := existingURLs(cmd.Context(), client, collection.ID)
+	if err != nil {
+		log.Err(err).Msg("Failed to list links already in the collection")
+		return err
+	}
+
+	toCreate, skipped := splitExisting(data, existing)
+
 	var (
-		wg       sync.WaitGroup
-		sem      = make(chan struct{}, concurrency)
-		success  atomic.Int64
-		mu       sync.Mutex
-		failures []failure
+		wg            sync.WaitGroup
+		sem           = make(chan struct{}, concurrency)
+		success       atomic.Int64
+		alreadyExists atomic.Int64
+		mu            sync.Mutex
+		failures      []failure
 	)
+	alreadyExists.Add(int64(skipped))
 
-	bar := utils.StartProgress("Creating links", total)
+	// Nothing new to create: no point flashing an empty bar.
+	var bar utils.Progress = utils.NoProgress()
+	if len(toCreate) > 0 {
+		bar = utils.StartProgress("Creating links", len(toCreate))
+	}
 
-	for _, item := range data {
+	for _, item := range toCreate {
 		sem <- struct{}{}
 		wg.Go(func() {
 			defer func() { <-sem }()
@@ -134,6 +150,12 @@ func execute(cmd *cobra.Command, _ []string) error {
 			})
 
 			bar.Increment()
+
+			// Accounts with "prevent duplicate links" on reject them with a 409.
+			if linkwarden.IsConflict(err) {
+				alreadyExists.Add(1)
+				return
+			}
 
 			if err != nil {
 				mu.Lock()
@@ -158,14 +180,67 @@ func execute(cmd *cobra.Command, _ []string) error {
 			Msg("Failed to create link")
 	}
 
-	displayResults(total, int(success.Load()), len(failures))
+	displayResults(results{
+		total:         total,
+		success:       int(success.Load()),
+		alreadyExists: int(alreadyExists.Load()),
+		failed:        len(failures),
+	})
 
 	return nil
 }
 
-func displayResults(total int, success int, failed int) {
+// splitExisting returns the items whose URL isn't in existing yet, and how many
+// were skipped. A URL repeated within the file counts as already existing
+// after its first occurrence. existing is updated in place.
+func splitExisting(data []item, existing map[string]bool) ([]item, int) {
+	toCreate := make([]item, 0, len(data))
+	skipped := 0
+
+	for _, it := range data {
+		key := normalizeURL(it.URL)
+		if existing[key] {
+			skipped++
+			continue
+		}
+		existing[key] = true
+		toCreate = append(toCreate, it)
+	}
+
+	return toCreate, skipped
+}
+
+type results struct {
+	total, success, alreadyExists, failed int
+}
+
+// Columns of the results table.
+const (
+	colTotal = iota
+	colSuccess
+	colAlreadyExists
+	colFailed
+)
+
+func displayResults(r results) {
 	t := utils.NewTable("Linkwarden")
-	t.Header("Total", "Success", "Failed")
-	t.Row(total, success, failed)
+	t.Header("Total", "Success", "Already exists", "Failed")
+	t.Row(r.total, r.success, r.alreadyExists, r.failed)
+	t.Tone(func(_, col int, value string) utils.Tone {
+		if value == "0" {
+			return utils.ToneNone
+		}
+
+		switch col {
+		case colSuccess:
+			return utils.ToneSuccess
+		case colAlreadyExists:
+			return utils.ToneWarning
+		case colFailed:
+			return utils.ToneDanger
+		default:
+			return utils.ToneNone
+		}
+	})
 	t.Render()
 }

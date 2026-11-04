@@ -40,7 +40,7 @@ func TestTable_RendersStaticWhenNotATerminal(t *testing.T) {
 	assert.Equal(2, tbl.Len())
 	got := out.String()
 	assert.True(strings.HasPrefix(got, "Example\n"))
-	assert.Contains(got, "┌", "same border style as the viewer")
+	assert.Contains(got, "╭", "rounded border, same as the viewer")
 	assert.Contains(got, "first")
 	assert.Contains(got, "<nil>")
 	assert.NotContains(got, "\x1b[", "test output isn't a terminal, so no ANSI")

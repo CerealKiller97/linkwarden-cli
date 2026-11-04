@@ -94,3 +94,23 @@ func TestNewBrowseModel_WidthFitsContent(t *testing.T) {
 	// "ID"(2) + "Bubble Tea"(10), each with 2 cells of padding.
 	require.Equal(t, 2+2+10+2, tableWidth(m.table.Columns()))
 }
+
+func TestRenderStatic_TonesColorCells(t *testing.T) {
+	assert := require.New(t)
+
+	tbl := Table{
+		Title:   "Results",
+		Headers: []string{"Success", "Failed"},
+		Rows:    [][]string{{"9", "1"}},
+		Tone: func(_, col int) Tone {
+			if col == 1 {
+				return ToneDanger
+			}
+			return ToneSuccess
+		},
+	}
+
+	colored := RenderStatic(tbl, true)
+	assert.Contains(colored, toneStyles[ToneSuccess].Render("9")[:10], "success cell uses the success color")
+	assert.NotContains(RenderStatic(tbl, false), "\x1b[", "tones disappear without color")
+}

@@ -23,6 +23,9 @@ func StartProgress(label string, total int) Progress {
 	return tui.StartProgress(label, total, os.Stderr)
 }
 
+// NoProgress returns a Progress that draws nothing.
+func NoProgress() Progress { return noProgress{} }
+
 type noProgress struct{}
 
 func (noProgress) Increment() {}

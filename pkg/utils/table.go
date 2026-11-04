@@ -34,6 +34,27 @@ func (t *Table) Row(cells ...any) {
 	t.data.Rows = append(t.data.Rows, row)
 }
 
+// Tone colors data cells: fn gets each cell's 0-based row, column and text.
+// Colors only show in static output when ColorEnabled.
+func (t *Table) Tone(fn func(row, col int, value string) Tone) {
+	t.data.Tone = func(row, col int) Tone {
+		if row < 0 || row >= len(t.data.Rows) || col < 0 || col >= len(t.data.Rows[row]) {
+			return ToneNone
+		}
+		return fn(row, col, t.data.Rows[row][col])
+	}
+}
+
+// Tone is a semantic cell color; see Table.Tone.
+type Tone = tui.Tone
+
+const (
+	ToneNone    = tui.ToneNone
+	ToneSuccess = tui.ToneSuccess
+	ToneWarning = tui.ToneWarning
+	ToneDanger  = tui.ToneDanger
+)
+
 // Len is the number of data rows.
 func (t *Table) Len() int { return len(t.data.Rows) }
 

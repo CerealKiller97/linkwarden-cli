@@ -17,36 +17,86 @@ type Table struct {
 	Title   string
 	Headers []string
 	Rows    [][]string
+
+	// Tone, when set, picks a color for a data cell (row and col are 0-based
+	// into Rows). Only static output uses it.
+	Tone func(row, col int) Tone
 }
 
-// The look follows Bubble Tea's table example: a thin gray outer border, a
-// gray rule under the header, no column separators, and a purple highlight on
-// the selected row.
-var (
-	borderColor = lipgloss.Color("240")
-	baseStyle   = lipgloss.NewStyle().BorderStyle(lipgloss.NormalBorder()).BorderForeground(borderColor)
-	titleStyle  = lipgloss.NewStyle().Bold(true)
-	cellStyle   = lipgloss.NewStyle().Padding(0, 1)
+// Tone is a semantic color for a table cell.
+type Tone int
+
+const (
+	ToneNone Tone = iota
+	ToneSuccess
+	ToneWarning
+	ToneDanger
 )
 
-// RenderStatic returns t as plain text in the same style as the viewer. With
-// color false the output has no ANSI escapes at all, so piped output is clean.
+// The palette borrows the progress bar's default gradient (#5A56E0 → #EE6FF8)
+// so tables and the bar look like one app: a rounded purple border, pink
+// header, a purple title badge, and dimmed alternate rows.
+var (
+	accent      = lipgloss.Color("#7D56F4")
+	headerColor = lipgloss.Color("#EE6FF8")
+	dimRow      = lipgloss.Color("245")
+
+	titleStyle = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#FFFDF5")).
+			Background(lipgloss.Color("#5A56E0")).
+			Padding(0, 1)
+	baseStyle = lipgloss.NewStyle().
+			BorderStyle(lipgloss.RoundedBorder()).
+			BorderForeground(accent)
+	cellStyle   = lipgloss.NewStyle().Padding(0, 1)
+	headerCell  = cellStyle.Bold(true).Foreground(headerColor)
+	borderStyle = lipgloss.NewStyle().Foreground(accent)
+
+	toneStyles = map[Tone]lipgloss.Style{
+		ToneSuccess: lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("42")),
+		ToneWarning: lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("214")),
+		ToneDanger:  lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("203")),
+	}
+)
+
+// RenderStatic returns t as text in the same style as the viewer. With color
+// false the output has no ANSI escapes at all, so piped output is clean.
 func RenderStatic(t Table, color bool) string {
 	tbl := lgtable.New().
-		Border(lipgloss.NormalBorder()).
-		BorderStyle(lipgloss.NewStyle().Foreground(borderColor)).
+		Border(lipgloss.RoundedBorder()).
+		BorderStyle(borderStyle).
 		BorderColumn(false).
 		BorderHeader(true).
 		Headers(t.Headers...).
 		Rows(t.Rows...).
-		StyleFunc(func(_, _ int) lipgloss.Style { return cellStyle })
+		StyleFunc(func(row, col int) lipgloss.Style { return staticCellStyle(t, row, col) })
 
-	out := titleStyle.Render(t.Title) + "\n" + tbl.String() + "\n"
+	// Plain output gets a bare title: the badge's padding only makes sense
+	// with its background color behind it.
 	if !color {
-		out = ansi.Strip(out)
+		return t.Title + "\n" + ansi.Strip(tbl.String()) + "\n"
 	}
 
-	return out
+	return titleStyle.Render(t.Title) + "\n" + tbl.String() + "\n"
+}
+
+func staticCellStyle(t Table, row, col int) lipgloss.Style {
+	if row == lgtable.HeaderRow {
+		return headerCell
+	}
+
+	if t.Tone != nil {
+		if style, ok := toneStyles[t.Tone(row, col)]; ok {
+			return style.Padding(0, 1)
+		}
+	}
+
+	if row%2 == 1 {
+		return cellStyle.Foreground(dimRow)
+	}
+
+	return cellStyle
 }
 
 // TableChromeHeight is how many terminal rows RenderStatic adds around the data
@@ -87,9 +137,10 @@ func newBrowseModel(t Table, width, height int) browseModel {
 	styles := table.DefaultStyles()
 	styles.Header = styles.Header.
 		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(borderColor).
+		BorderForeground(accent).
 		BorderBottom(true).
-		Bold(false)
+		Bold(true).
+		Foreground(headerColor)
 	styles.Selected = styles.Selected.
 		Foreground(lipgloss.Color("229")).
 		Background(lipgloss.Color("57")).
