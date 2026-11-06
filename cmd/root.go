@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"os"
+	"strings"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/archives"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/collections"
@@ -54,15 +55,7 @@ func registerCommands(root *cobra.Command) {
 			return errors.New("environment variable LINKWARDEN_TOKEN is not set")
 		}
 
-		// TODO: Trim / if present from URL
-		instanceURL, exists := os.LookupEnv("LINKWARDEN_URL")
-		if !exists {
-			instanceURL = "https://cloud.linkwarden.app"
-		}
-
-		utils.SetVars(linkwardenToken, instanceURL)
-
-		// INSTANCE_URL env var if not set use https://cloud.linkwarden.app/
+		utils.SetVars(linkwardenToken, instanceURL(os.Getenv("LINKWARDEN_URL")))
 
 		// TODO: App set
 		// configure logger
@@ -81,6 +74,21 @@ func registerCommands(root *cobra.Command) {
 	//root.PersistentPostRunE = cmd.PersistentPostRunE(func(cmd *cobra.Command, _ []string) error {
 	//	return cmd.Context().Value(constants.ContextKeyContainer).(*container.Container).Close()
 	//})
+}
+
+// defaultInstanceURL is used when LINKWARDEN_URL is unset or empty.
+const defaultInstanceURL = "https://cloud.linkwarden.app"
+
+// instanceURL normalizes the LINKWARDEN_URL value: surrounding whitespace and
+// trailing slashes are dropped (so "https://links.example.com/" works), and an
+// empty value falls back to defaultInstanceURL.
+func instanceURL(raw string) string {
+	u := strings.TrimRight(strings.TrimSpace(raw), "/")
+	if u == "" {
+		return defaultInstanceURL
+	}
+
+	return u
 }
 
 // version is the released version, set at build time by GoReleaser (.goreleaser.yaml) via
