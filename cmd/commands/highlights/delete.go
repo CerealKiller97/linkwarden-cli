@@ -1,6 +1,7 @@
 package highlights
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -27,13 +28,11 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 
 	id, err := resolveHighlightID(cmd, client, cmd.Flag("id").Value.String())
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve highlight ID")
-		return err
+		return fmt.Errorf("resolve highlight ID: %w", err)
 	}
 
 	if err := client.Highlights.Delete(cmd.Context(), id); err != nil {
-		log.Err(err).Msg("Failed to delete highlight")
-		return err
+		return fmt.Errorf("delete highlight: %w", err)
 	}
 
 	log.Info().Int("id", id).Msg("Highlight deleted successfully")

@@ -1,6 +1,7 @@
 package tokens
 
 import (
+	"fmt"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -19,8 +20,7 @@ func executeRevoke(cmd *cobra.Command, _ []string) error {
 
 	tokenList, err := client.Tokens.List(cmd.Context())
 	if err != nil {
-		log.Err(err).Msg("Error getting tokens")
-		return err
+		return fmt.Errorf("get tokens: %w", err)
 	}
 
 	tokenNames := make([]string, len(tokenList))
@@ -35,8 +35,7 @@ func executeRevoke(cmd *cobra.Command, _ []string) error {
 	}
 
 	if err := client.Tokens.Revoke(cmd.Context(), tokenList[idx].ID); err != nil {
-		log.Err(err).Msg("Error revoking token")
-		return err
+		return fmt.Errorf("revoke token: %w", err)
 	}
 
 	log.Info().Str("name", result).Msg("Token revoked successfully")

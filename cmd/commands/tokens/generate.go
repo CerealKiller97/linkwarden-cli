@@ -43,24 +43,20 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return nil
 	})
 	if err != nil {
-		log.Err(err).Msg("tokens name prompt failed")
-		return err
+		return fmt.Errorf("prompt for token name: %w", err)
 	}
 
 	_, expirationResult, err := utils.Select("Token expiration:",
 		[]string{"7 days", "30 days", "60 days", "90 days", "no expiration"})
 	if err != nil {
-		log.Err(err).Msg("tokens expiration prompt failed")
-		return err
+		return fmt.Errorf("prompt for token expiration: %w", err)
 	}
 
 	client := utils.NewLinkwardenClient()
 
 	created, err := client.Tokens.Create(cmd.Context(), promptResult, int(stringToInt(expirationResult)))
 	if err != nil {
-		log.Err(err).Msg("tokens create prompt failed")
-
-		return err
+		return fmt.Errorf("prompt for token confirmation: %w", err)
 	}
 
 	token := created.SecretKey
@@ -73,14 +69,12 @@ func execute(cmd *cobra.Command, _ []string) error {
 		_, result, err := utils.Select("Do you want the CLI to set the token in your shell config?",
 			[]string{"Yes", "No"})
 		if err != nil {
-			log.Err(err).Msg("tokens prompt failed")
-			return err
+			return fmt.Errorf("prompt: %w", err)
 		}
 
 		if result == "Yes" {
 			if err := utils.AppendTokenToShellFile(token); err != nil {
-				log.Err(err).Msg("Failed to append token to shell file")
-				return err
+				return fmt.Errorf("append token to shell file: %w", err)
 			}
 
 			log.Info().

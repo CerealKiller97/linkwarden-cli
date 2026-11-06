@@ -1,12 +1,12 @@
 package archives
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -41,8 +41,7 @@ func executeUpload(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
-		return err
+		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
 	filePath, err := cmd.Flags().GetString("file")
@@ -60,15 +59,13 @@ func executeUpload(cmd *cobra.Command, _ []string) error {
 
 	f, err := os.Open(filePath)
 	if err != nil {
-		log.Err(err).Msg("Failed to open file")
-		return err
+		return fmt.Errorf("open file: %w", err)
 	}
 	defer f.Close()
 
 	link, err := client.Archives.Upload(cmd.Context(), linkID, linkwarden.ArchiveFormat(format), preview, filepath.Base(filePath), f)
 	if err != nil {
-		log.Err(err).Msg("Failed to upload archive")
-		return err
+		return fmt.Errorf("upload archive: %w", err)
 	}
 
 	renderLinkTable(*link)

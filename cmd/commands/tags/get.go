@@ -1,9 +1,9 @@
 package tags
 
 import (
+	"fmt"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -29,14 +29,12 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		tagsPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve tag ID")
-		return err
+		return fmt.Errorf("resolve tag ID: %w", err)
 	}
 
 	tag, err := client.Tags.Get(cmd.Context(), id)
 	if err != nil {
-		log.Err(err).Msg("Failed to get tag")
-		return err
+		return fmt.Errorf("get tag: %w", err)
 	}
 
 	renderTagsTable([]linkwarden.TagInfo{*tag})

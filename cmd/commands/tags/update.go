@@ -1,6 +1,7 @@
 package tags
 
 import (
+	"fmt"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -33,14 +34,12 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		tagsPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve tag ID")
-		return err
+		return fmt.Errorf("resolve tag ID: %w", err)
 	}
 
 	tag, err := client.Tags.Update(cmd.Context(), id, cmd.Flag("name").Value.String())
 	if err != nil {
-		log.Err(err).Msg("Failed to update tag")
-		return err
+		return fmt.Errorf("update tag: %w", err)
 	}
 
 	log.Info().Int("id", tag.ID).Str("name", tag.Name).Msg("Tag updated successfully")

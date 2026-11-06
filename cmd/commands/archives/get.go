@@ -37,8 +37,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
-		return err
+		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
 	var format linkwarden.ArchiveFormat
@@ -61,8 +60,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 
 	file, err := client.Archives.Get(cmd.Context(), linkID, format, preview)
 	if err != nil {
-		log.Err(err).Msg("Failed to get archive")
-		return err
+		return fmt.Errorf("get archive: %w", err)
 	}
 
 	if output == "" {
@@ -71,8 +69,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 	}
 
 	if err := os.WriteFile(output, file.Data, 0o600); err != nil {
-		log.Err(err).Msg("Failed to write archive file")
-		return err
+		return fmt.Errorf("write archive file: %w", err)
 	}
 
 	log.Info().Str("path", output).Msg("Archive saved successfully")

@@ -1,6 +1,7 @@
 package links
 
 import (
+	"fmt"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
@@ -29,8 +30,7 @@ func BulkUpdate() *cobra.Command {
 func executeBulkUpdate(cmd *cobra.Command, _ []string) error {
 	ids, err := parseIDs(cmd.Flag("ids").Value.String())
 	if err != nil {
-		log.Err(err).Msg("Failed to parse --ids")
-		return err
+		return fmt.Errorf("parse --ids: %w", err)
 	}
 
 	collectionID, err := cmd.Flags().GetInt("collection-id")
@@ -67,8 +67,7 @@ func executeBulkUpdate(cmd *cobra.Command, _ []string) error {
 		},
 	})
 	if err != nil {
-		log.Err(err).Msg("Failed to bulk update links")
-		return err
+		return fmt.Errorf("bulk update links: %w", err)
 	}
 
 	log.Info().Ints("ids", ids).Msg("Links updated successfully")

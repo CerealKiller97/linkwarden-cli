@@ -1,8 +1,8 @@
 package tokens
 
 import (
+	"fmt"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -19,8 +19,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 
 	tokenList, err := client.Tokens.List(cmd.Context())
 	if err != nil {
-		log.Err(err).Msg("Error getting tokens")
-		return err
+		return fmt.Errorf("get tokens: %w", err)
 	}
 
 	t := utils.NewTable("Tokens")

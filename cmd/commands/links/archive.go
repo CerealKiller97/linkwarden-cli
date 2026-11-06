@@ -1,6 +1,7 @@
 package links
 
 import (
+	"fmt"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -28,13 +29,11 @@ func executeArchive(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
-		return err
+		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
 	if err := client.Links.Archive(cmd.Context(), id); err != nil {
-		log.Err(err).Msg("Failed to archive link")
-		return err
+		return fmt.Errorf("archive link: %w", err)
 	}
 
 	log.Info().Int("id", id).Msg("Link archiving triggered")

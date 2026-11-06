@@ -1,9 +1,9 @@
 package highlights
 
 import (
+	"fmt"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -40,8 +40,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
-		return err
+		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
 	text, err := cmd.Flags().GetString("text")
@@ -74,8 +73,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		EndOffset:   endOffset,
 	})
 	if err != nil {
-		log.Err(err).Msg("Failed to create highlight")
-		return err
+		return fmt.Errorf("create highlight: %w", err)
 	}
 
 	renderHighlightTable(*highlight)

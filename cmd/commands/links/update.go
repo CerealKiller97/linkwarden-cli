@@ -1,6 +1,7 @@
 package links
 
 import (
+	"fmt"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
@@ -35,8 +36,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
-		return err
+		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
 	link, err := client.Links.Update(cmd.Context(), id, linkwarden.UpdateLinkRequest{
@@ -48,8 +48,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		Color:       cmd.Flag("color").Value.String(),
 	})
 	if err != nil {
-		log.Err(err).Msg("Failed to update link")
-		return err
+		return fmt.Errorf("update link: %w", err)
 	}
 
 	log.Info().Int("id", link.ID).Msg("Link updated successfully")

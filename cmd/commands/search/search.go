@@ -1,9 +1,9 @@
 package search
 
 import (
+	"fmt"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -48,8 +48,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		Cursor:            cursor,
 	})
 	if err != nil {
-		log.Err(err).Msg("Failed to search links")
-		return err
+		return fmt.Errorf("search links: %w", err)
 	}
 
 	renderSearchResultsTable(links)

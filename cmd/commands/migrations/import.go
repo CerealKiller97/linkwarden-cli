@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -43,16 +44,14 @@ func executeImport(cmd *cobra.Command, _ []string) error {
 
 	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		log.Err(err).Msg("Failed to read import file")
-		return err
+		return fmt.Errorf("read import file: %w", err)
 	}
 
 	client := utils.NewLinkwardenClient()
 
 	message, err := client.Migrations.Import(cmd.Context(), linkwarden.ImportFormat(format), string(fileBytes))
 	if err != nil {
-		log.Err(err).Msg("Failed to import data")
-		return err
+		return fmt.Errorf("import data: %w", err)
 	}
 
 	log.Info().Str("message", message).Msg("Import started")

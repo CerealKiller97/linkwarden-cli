@@ -1,9 +1,9 @@
 package rss
 
 import (
+	"fmt"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -56,8 +56,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		CollectionName: collectionName,
 	})
 	if err != nil {
-		log.Err(err).Msg("Failed to create RSS subscription")
-		return err
+		return fmt.Errorf("create RSS subscription: %w", err)
 	}
 
 	renderRSSTable([]linkwarden.RSSSubscription{*sub})

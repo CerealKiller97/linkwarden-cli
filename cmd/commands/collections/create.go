@@ -2,6 +2,7 @@ package collections
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -65,14 +66,12 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 	if unorganizedCollectionID == 0 {
 		collections, err := client.Collections.List(cmd.Context())
 		if err != nil {
-			log.Err(err).Msg("Failed to get collections")
-			return err
+			return fmt.Errorf("get collections: %w", err)
 		}
 
 		for _, collection := range collections {
 			if collection.Name == name {
-				log.Err(err).Msg("Collection already exists")
-				return err
+				return fmt.Errorf("collection %q already exists", name)
 			}
 
 			// find Unorganized collection
@@ -105,8 +104,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 
 	collection, err := client.Collections.Create(cmd.Context(), request)
 	if err != nil {
-		log.Err(err).Msg("Failed to create collection")
-		return err
+		return fmt.Errorf("create collection: %w", err)
 	}
 
 	log.Info().
@@ -145,13 +143,11 @@ func readUnorganizedCollectionID() int {
 func persistUnorganizedCollectionID(unorganizedCollectionID int) error {
 	file, err := utils.StateFile(unorganizedStateFile)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve state directory")
-		return err
+		return fmt.Errorf("resolve state directory: %w", err)
 	}
 
 	if err := os.MkdirAll(filepath.Dir(file), 0o750); err != nil {
-		log.Err(err).Msg("Failed to create state directory")
-		return err
+		return fmt.Errorf("create state directory: %w", err)
 	}
 
 	return os.WriteFile(file, []byte(strconv.Itoa(unorganizedCollectionID)), 0o600)

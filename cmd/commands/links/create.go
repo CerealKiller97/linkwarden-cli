@@ -61,14 +61,12 @@ func execute(cmd *cobra.Command, _ []string) error {
 	filePath := cmd.Flag("file").Value.String()
 	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		log.Err(err).Msg("failed to read file")
-		return err
+		return fmt.Errorf("read file: %w", err)
 	}
 
 	var data []item
 	if err := json.Unmarshal(fileBytes, &data); err != nil {
-		log.Err(err).Msg("failed to unmarshal file")
-		return err
+		return fmt.Errorf("unmarshal file: %w", err)
 	}
 
 	total := len(data)
@@ -81,8 +79,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	collections, err := client.Collections.List(cmd.Context())
 	if err != nil {
-		log.Err(err).Msg("Failed to get collections")
-		return err
+		return fmt.Errorf("get collections: %w", err)
 	}
 
 	collectionByID := make(map[int]linkwarden.Collection, len(collections))
@@ -99,8 +96,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		func() ([]utils.PickerItem, error) { return items, nil },
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve collection")
-		return err
+		return fmt.Errorf("resolve collection: %w", err)
 	}
 
 	// An unknown ID would otherwise be sent as an empty collection, which makes
@@ -114,8 +110,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 	// "prevent duplicate links" on, so check the collection first.
 	existing, err := existingURLs(cmd.Context(), client, collection.ID)
 	if err != nil {
-		log.Err(err).Msg("Failed to list links already in the collection")
-		return err
+		return fmt.Errorf("list links already in the collection: %w", err)
 	}
 
 	toCreate, skipped := splitExisting(data, existing)
