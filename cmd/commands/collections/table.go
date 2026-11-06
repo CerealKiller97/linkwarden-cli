@@ -3,17 +3,19 @@ package collections
 import (
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 func renderCollectionsTable(collections []linkwarden.Collection) {
-	t := utils.NewTable("Collections")
-	t.AppendHeader(table.Row{"ID", "Name", "Description", "Color"})
+	t := utils.NewListTable("Collections",
+		utils.Column{Header: "ID"},
+		utils.Column{Header: "Name", Flex: true},
+		utils.Column{Header: "Description", Flex: true, HideWhenEmpty: true},
+		utils.Column{Header: "Color"},
+	)
 
 	for _, c := range collections {
-		t.AppendRow(table.Row{c.ID, c.Name, c.Description, c.Color})
+		t.AppendRow(c.ID, c.Name, c.Description, c.Color)
 	}
 
-	t.AppendSeparator()
 	t.Render()
 }

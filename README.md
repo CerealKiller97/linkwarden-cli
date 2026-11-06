@@ -31,7 +31,7 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 | 📦 **Bulk operations**     | Import hundreds of links with a progress bar; retag, move or delete many links in one call.       |
 | 🗄️ **Archives & backups**  | Download PDF, screenshot or HTML snapshots; export and import your whole library.                 |
 | 🔄 **Easy migration**      | Import from browser bookmarks, Pocket, Wallabag, Omnivore or another Linkwarden instance.         |
-| 🎨 **Readable output**     | Rounded tables with colored headers that drop color automatically when piped or `NO_COLOR` is set. |
+| 🎨 **Readable output**     | Rounded tables with colored headers that drop color automatically when piped or `NO_COLOR` is set. On a terminal, long names and URLs are shortened with `…` so tables fit the window; piped or redirected output keeps full values. |
 | 🧰 **Go SDK**              | Every command is backed by [`linkwarden-go-sdk`](https://github.com/CerealKiller97/linkwarden-go-sdk), a typed API client you can use in your own code. |
 
 ---

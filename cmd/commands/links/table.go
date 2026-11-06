@@ -1,38 +1,25 @@
 package links
 
 import (
-	"strings"
-
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 func renderLinksTable(links []linkwarden.Link) {
-	t := utils.NewTable("Links")
-	t.AppendHeader(table.Row{"ID", "Name", "URL", "Collection", "Tags"})
-
-	for _, l := range links {
-		tagNames := make([]string, len(l.Tags))
-		for i, tag := range l.Tags {
-			tagNames[i] = tag.Name
-		}
-
-		t.AppendRow(table.Row{l.ID, l.Name, l.URL, l.Collection.Name, strings.Join(tagNames, ", ")})
-	}
-
-	t.AppendSeparator()
-	t.Render()
+	utils.RenderLinksTable("Links", links)
 }
 
 func renderHighlightsTable(highlights []linkwarden.Highlight) {
-	t := utils.NewTable("Highlights")
-	t.AppendHeader(table.Row{"ID", "Text", "Color", "Comment"})
+	t := utils.NewListTable("Highlights",
+		utils.Column{Header: "ID"},
+		utils.Column{Header: "Text", Flex: true},
+		utils.Column{Header: "Color"},
+		utils.Column{Header: "Comment", Flex: true, HideWhenEmpty: true},
+	)
 
 	for _, h := range highlights {
-		t.AppendRow(table.Row{h.ID, h.Text, h.Color, h.Comment})
+		t.AppendRow(h.ID, h.Text, h.Color, h.Comment)
 	}
 
-	t.AppendSeparator()
 	t.Render()
 }
