@@ -6,10 +6,11 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
+	"charm.land/lipgloss/v2"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/jedib0t/go-pretty/v6/text"
-	"github.com/manifoldco/promptui"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -34,32 +35,20 @@ func Generate() *cobra.Command {
 }
 
 func execute(cmd *cobra.Command, _ []string) error {
-	prompt := promptui.Prompt{
-		Label: "Token name",
-		Validate: func(s string) error {
-			if len(s) == 0 {
-				return errors.New("token name is required")
-			}
+	promptResult, err := utils.Input("Token name:", func(s string) error {
+		if strings.TrimSpace(s) == "" {
+			return errors.New("token name is required")
+		}
 
-			return nil
-		},
-		Templates: nil,
-		IsConfirm: false,
-		IsVimMode: false,
-	}
-
-	promptResult, err := prompt.Run()
+		return nil
+	})
 	if err != nil {
 		log.Err(err).Msg("tokens name prompt failed")
 		return err
 	}
 
-	expiration := promptui.Select{
-		Label: "Token Expiration",
-		Items: []string{"7 days", "30 days", "60 days", "90 days", "no expiration"},
-	}
-
-	_, expirationResult, err := expiration.Run()
+	_, expirationResult, err := utils.Select("Token expiration:",
+		[]string{"7 days", "30 days", "60 days", "90 days", "no expiration"})
 	if err != nil {
 		log.Err(err).Msg("tokens expiration prompt failed")
 		return err
@@ -81,11 +70,8 @@ func execute(cmd *cobra.Command, _ []string) error {
 	// Prompt do you want app to set ENV Variable on your system?
 	// Only in Linux / macOS
 	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-		prompt := promptui.Select{
-			Label: "Do you want CLI to set token?",
-			Items: []string{"Yes", "No"},
-		}
-		_, result, err := prompt.Run()
+		_, result, err := utils.Select("Do you want the CLI to set the token in your shell config?",
+			[]string{"Yes", "No"})
 		if err != nil {
 			log.Err(err).Msg("tokens prompt failed")
 			return err
@@ -131,17 +117,17 @@ func printManualSetupInstructions(token string) {
 		exportLine = fmt.Sprintf("export LINKWARDEN_TOKEN=%q", token)
 	}
 
-	heading := text.Colors{text.FgHiCyan, text.Bold}
-	step := text.Colors{text.FgHiCyan, text.Bold}
-	cmdColor := text.Colors{text.FgHiGreen}
-	warn := text.Colors{text.FgHiYellow, text.Bold}
+	heading := lipgloss.NewStyle().Bold(true).Foreground(tui.Sky)
+	step := heading
+	cmdColor := lipgloss.NewStyle().Foreground(tui.Ocean)
+	warn := lipgloss.NewStyle().Bold(true).Foreground(tui.Warning)
 
 	on := utils.ColorEnabled()
-	c := func(colors text.Colors, s string) string {
+	c := func(style lipgloss.Style, s string) string {
 		if !on {
 			return s
 		}
-		return colors.Sprint(s)
+		return style.Render(s)
 	}
 
 	printStep := func(n int, label, command string) {

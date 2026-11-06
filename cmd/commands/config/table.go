@@ -8,19 +8,20 @@ import (
 )
 
 func renderConfigTable(cfg *linkwarden.PublicConfig) {
-	t := utils.NewListTable("Instance Configuration",
+	t := utils.NewTable("Instance Configuration")
+	t.Columns(
 		utils.Column{Header: "Key"},
 		utils.Column{Header: "Value", Flex: true},
 	)
 
-	t.AppendRow("DISABLE_REGISTRATION", boolValue(cfg.DisableRegistration))
-	t.AppendRow("ADMIN", intValue(cfg.Admin))
-	t.AppendRow("RSS_POLLING_INTERVAL_MINUTES", intValue(cfg.RSSPollingIntervalMinutes))
-	t.AppendRow("EMAIL_PROVIDER", boolValue(cfg.EmailProvider))
-	t.AppendRow("MAX_FILE_BUFFER", intValue(cfg.MaxFileBuffer))
-	t.AppendRow("USER_CONTENT_DOMAIN", stringValue(cfg.UserContentDomain))
-	t.AppendRow("AI_ENABLED", boolValue(cfg.AIEnabled))
-	t.AppendRow("INSTANCE_VERSION", stringValue(cfg.InstanceVersion))
+	t.Row("DISABLE_REGISTRATION", boolValue(cfg.DisableRegistration))
+	t.Row("ADMIN", intValue(cfg.Admin))
+	t.Row("RSS_POLLING_INTERVAL_MINUTES", intValue(cfg.RSSPollingIntervalMinutes))
+	t.Row("EMAIL_PROVIDER", boolValue(cfg.EmailProvider))
+	t.Row("MAX_FILE_BUFFER", intValue(cfg.MaxFileBuffer))
+	t.Row("USER_CONTENT_DOMAIN", stringValue(cfg.UserContentDomain))
+	t.Row("AI_ENABLED", boolValue(cfg.AIEnabled))
+	t.Row("INSTANCE_VERSION", stringValue(cfg.InstanceVersion))
 
 	t.Render()
 }

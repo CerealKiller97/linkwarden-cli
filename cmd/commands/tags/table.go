@@ -6,13 +6,14 @@ import (
 )
 
 func renderTagsTable(tags []linkwarden.TagInfo) {
-	t := utils.NewListTable("Tags",
+	t := utils.NewTable("Tags")
+	t.Columns(
 		utils.Column{Header: "ID"},
 		utils.Column{Header: "Name", Flex: true},
 	)
 
 	for _, tag := range tags {
-		t.AppendRow(tag.ID, tag.Name)
+		t.Row(tag.ID, tag.Name)
 	}
 
 	t.Render()

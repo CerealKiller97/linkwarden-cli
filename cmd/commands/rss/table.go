@@ -6,7 +6,8 @@ import (
 )
 
 func renderRSSTable(subs []linkwarden.RSSSubscription) {
-	t := utils.NewListTable("RSS Subscriptions",
+	t := utils.NewTable("RSS Subscriptions")
+	t.Columns(
 		utils.Column{Header: "ID"},
 		utils.Column{Header: "Name", Flex: true},
 		utils.Column{Header: "URL", Flex: true},
@@ -14,7 +15,7 @@ func renderRSSTable(subs []linkwarden.RSSSubscription) {
 	)
 
 	for _, sub := range subs {
-		t.AppendRow(sub.ID, sub.Name, sub.URL, sub.CollectionID)
+		t.Row(sub.ID, sub.Name, sub.URL, sub.CollectionID)
 	}
 
 	t.Render()

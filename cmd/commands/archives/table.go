@@ -6,12 +6,13 @@ import (
 )
 
 func renderLinkTable(link linkwarden.Link) {
-	t := utils.NewListTable("Link",
+	t := utils.NewTable("Link")
+	t.Columns(
 		utils.Column{Header: "ID"},
 		utils.Column{Header: "Name", Flex: true},
 		utils.Column{Header: "URL", Flex: true},
 		utils.Column{Header: "Collection"},
 	)
-	t.AppendRow(link.ID, link.Name, link.URL, link.Collection.Name)
+	t.Row(link.ID, link.Name, link.URL, link.Collection.Name)
 	t.Render()
 }

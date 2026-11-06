@@ -23,7 +23,8 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	t := utils.NewListTable("Tokens",
+	t := utils.NewTable("Tokens")
+	t.Columns(
 		utils.Column{Header: "ID"},
 		utils.Column{Header: "Name", Flex: true},
 		utils.Column{Header: "Is Session"},
@@ -32,7 +33,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 	)
 
 	for _, token := range tokenList {
-		t.AppendRow(token.ID, token.Name, token.IsSession, token.Expires, token.CreatedAt)
+		t.Row(token.ID, token.Name, token.IsSession, token.Expires, token.CreatedAt)
 	}
 
 	t.Render()

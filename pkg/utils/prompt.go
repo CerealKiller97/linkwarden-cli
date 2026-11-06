@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/manifoldco/promptui"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/mattn/go-isatty"
 )
 
@@ -15,25 +15,50 @@ type PickerItem struct {
 	Value int
 }
 
-// SelectID shows an interactive promptui select over items and returns the chosen
-// item's Value.
+// SelectID shows an interactive picker over items and returns the chosen item's
+// Value.
 func SelectID(label string, items []PickerItem) (int, error) {
 	names := make([]string, len(items))
 	for i, item := range items {
 		names[i] = item.Label
 	}
 
-	prompt := promptui.Select{
-		Label: label,
-		Items: names,
-	}
-
-	idx, _, err := prompt.Run()
+	idx, err := tui.Select(label, names)
 	if err != nil {
 		return 0, err
 	}
 
 	return items[idx].Value, nil
+}
+
+// Select shows an interactive picker over options and returns the chosen index
+// and option. Unlike ResolveID there's no flag to fall back on, so without an
+// interactive terminal it fails fast instead of waiting on a prompt.
+func Select(label string, options []string) (int, string, error) {
+	if !isInteractive() {
+		return 0, "", errNoTerminal(label)
+	}
+
+	idx, err := tui.Select(label, options)
+	if err != nil {
+		return 0, "", err
+	}
+
+	return idx, options[idx], nil
+}
+
+// Input asks for a line of text, re-prompting until validate (if non-nil)
+// passes. Without an interactive terminal it fails fast.
+func Input(label string, validate func(string) error) (string, error) {
+	if !isInteractive() {
+		return "", errNoTerminal(label)
+	}
+
+	return tui.Input(label, validate)
+}
+
+func errNoTerminal(label string) error {
+	return fmt.Errorf("%q needs an interactive terminal, but none is available", label)
 }
 
 // ResolveID returns flagValue parsed as an int when non-empty. Otherwise, if stdin

@@ -6,7 +6,8 @@ import (
 )
 
 func renderCollectionsTable(collections []linkwarden.Collection) {
-	t := utils.NewListTable("Collections",
+	t := utils.NewTable("Collections")
+	t.Columns(
 		utils.Column{Header: "ID"},
 		utils.Column{Header: "Name", Flex: true},
 		utils.Column{Header: "Description", Flex: true, HideWhenEmpty: true},
@@ -14,7 +15,7 @@ func renderCollectionsTable(collections []linkwarden.Collection) {
 	)
 
 	for _, c := range collections {
-		t.AppendRow(c.ID, c.Name, c.Description, c.Color)
+		t.Row(c.ID, c.Name, c.Description, c.Color)
 	}
 
 	t.Render()

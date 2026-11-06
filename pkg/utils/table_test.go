@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/jedib0t/go-pretty/v6/text"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,31 +19,41 @@ func TestColorEnabledFor(t *testing.T) {
 	assert.False(colorEnabledFor("1", false), "NO_COLOR set, not a terminal -> color off")
 }
 
-func TestTableStyleFor_ColorDisabled(t *testing.T) {
+func TestShouldBrowse(t *testing.T) {
 	assert := require.New(t)
 
-	style := tableStyleFor(false)
-	assert.Equal(table.StyleRounded.Box, style.Box, "borders stay rounded regardless of color")
-	assert.Empty(style.Color.Header, "no header color applied when color is disabled")
+	assert.False(shouldBrowse(5, 40), "fits on screen -> just print")
+	assert.True(shouldBrowse(100, 40), "taller than the screen -> viewer")
+	assert.False(shouldBrowse(100, 0), "unknown height -> just print")
 }
 
-func TestTableStyleFor_ColorEnabled(t *testing.T) {
+func TestTable_RendersStaticWhenNotATerminal(t *testing.T) {
 	assert := require.New(t)
 
-	style := tableStyleFor(true)
-	assert.Equal(table.StyleRounded.Box, style.Box, "borders stay rounded")
-	assert.NotEmpty(style.Color.Header, "header gets a color when color is enabled")
-}
-
-func TestNewTable_ReturnsConfiguredWriter(t *testing.T) {
-	assert := require.New(t)
-
+	var out bytes.Buffer
 	tbl := NewTable("Example")
-	assert.NotNil(tbl)
+	tbl.out = &out
+	tbl.Header("ID", "Name")
+	tbl.Row(1, "first")
+	tbl.Row(2, nil)
 
-	tbl.AppendHeader(table.Row{"A", "B"})
-	tbl.AppendRow(table.Row{1, 2})
-	assert.Equal(1, tbl.Length())
+	tbl.Render()
+
+	assert.Equal(2, tbl.Len())
+	got := out.String()
+	assert.True(strings.HasPrefix(got, "Example\n"))
+	assert.Contains(got, "╭", "rounded border, same as the viewer")
+	assert.Contains(got, "first")
+	assert.Contains(got, "<nil>")
+	assert.NotContains(got, "\x1b[", "test output isn't a terminal, so no ANSI")
+}
+
+func TestStartProgress_NoOpWithoutTerminal(t *testing.T) {
+	p := StartProgress("x", 3)
+	p.Increment()
+	p.Stop()
+
+	require.IsType(t, noProgress{}, p)
 }
 
 func TestTruncate(t *testing.T) {
@@ -71,7 +81,7 @@ func TestTruncate(t *testing.T) {
 			got := Truncate(tc.in, tc.width)
 			assert.Equal(tc.want, got)
 			if tc.width > 0 {
-				assert.LessOrEqual(text.StringWidthWithoutEscSequences(got), tc.width)
+				assert.LessOrEqual(ansi.StringWidth(got), tc.width)
 			}
 		})
 	}
@@ -79,95 +89,100 @@ func TestTruncate(t *testing.T) {
 
 func TestFitWidths(t *testing.T) {
 	t.Run("fits unchanged", func(t *testing.T) {
-		got := fitWidths([]int{2, 30, 40}, []int{2, 12, 12}, []bool{false, true, true}, 100, 0)
+		got := fitWidths([]int{2, 30, 40}, []int{2, 12, 12}, []bool{false, true, true}, 100)
 		require.Equal(t, []int{2, 30, 40}, got)
 	})
 
 	t.Run("flex columns share the remainder", func(t *testing.T) {
-		got := fitWidths([]int{2, 136, 72, 10}, []int{2, 20, 20, 10}, []bool{false, true, true, false}, 80, 0)
+		got := fitWidths([]int{2, 136, 72, 10}, []int{2, 20, 20, 10}, []bool{false, true, true, false}, 80)
 		require.Equal(t, []int{2, 34, 34, 10}, got)
 	})
 
 	t.Run("a narrow flex column gives its share away", func(t *testing.T) {
-		got := fitWidths([]int{2, 136, 10}, []int{2, 12, 10}, []bool{false, true, true}, 60, 0)
+		got := fitWidths([]int{2, 136, 10}, []int{2, 12, 10}, []bool{false, true, true}, 60)
 		require.Equal(t, []int{2, 48, 10}, got)
 	})
 
 	t.Run("minimums win when the terminal is too narrow", func(t *testing.T) {
-		got := fitWidths([]int{2, 136, 72}, []int{2, 20, 20}, []bool{false, true, true}, 20, 0)
+		got := fitWidths([]int{2, 136, 72}, []int{2, 20, 20}, []bool{false, true, true}, 20)
 		require.Equal(t, []int{2, 20, 20}, got)
 	})
 
 	t.Run("no flex columns", func(t *testing.T) {
-		got := fitWidths([]int{50, 50}, []int{50, 50}, []bool{false, false}, 20, 0)
+		got := fitWidths([]int{50, 50}, []int{50, 50}, []bool{false, false}, 20)
 		require.Equal(t, []int{50, 50}, got)
-	})
-
-	t.Run("title width is respected", func(t *testing.T) {
-		got := fitWidths([]int{2, 100}, []int{2, 12}, []bool{false, true}, 10, 30)
-		require.Equal(t, []int{2, 28}, got)
 	})
 }
 
-func TestListTable_FitsTerminal(t *testing.T) {
-	assert := require.New(t)
-
-	tbl := NewListTable("Links",
+func newLinksLikeTable(out *bytes.Buffer) *Table {
+	tbl := NewTable("Links")
+	tbl.out = out
+	tbl.Columns(
 		Column{Header: "ID"},
 		Column{Header: "Name", Flex: true, MinWidth: 20},
 		Column{Header: "URL", Flex: true, MinWidth: 20},
 		Column{Header: "Collection", Flex: true},
 		Column{Header: "Tags", Flex: true, HideWhenEmpty: true},
 	)
-	tbl.AppendRow(43, "charmbracelet/bubbles: TUI components for Bubble Tea 🫧", "https://github.com/charmbracelet/bubbles", "Work", "")
-	tbl.AppendRow(41, "refactor: move the whole TUI to Bubble Tea, Bubbles and Lip Gloss by CerealKiller97 · Pull Request #20 · CerealKiller97/linkwarden-cli · GitHub", "https://github.com/CerealKiller97/linkwarden-cli/pull/20/files?diff=split&w=1", "Work", "")
-	tbl.AppendRow(7, "Ćacilend\nwith a line break", "https://example.com", "Ćacilend", "")
+	tbl.Row(43, "charmbracelet/bubbles: TUI components for Bubble Tea 🫧", "https://github.com/charmbracelet/bubbles", "Work", "")
+	tbl.Row(41, "refactor: move the whole TUI to Bubble Tea, Bubbles and Lip Gloss by CerealKiller97 · Pull Request #20 · CerealKiller97/linkwarden-cli · GitHub", "https://github.com/CerealKiller97/linkwarden-cli/pull/20/files?diff=split&w=1", "Work", "")
+	tbl.Row(7, "Ćacilend\nwith a line break", "https://example.com", "Ćacilend", "")
 
-	var buf bytes.Buffer
-	tbl.RenderTo(&buf, 120, false)
+	return tbl
+}
 
-	lines := strings.Split(strings.TrimRight(buf.String(), "\n"), "\n")
-	assert.Len(lines, 9, "top, title, separator, header, separator, 3 rows, bottom")
+func TestTable_FitsTerminal(t *testing.T) {
+	assert := require.New(t)
 
-	tableWidth := text.StringWidthWithoutEscSequences(lines[0])
+	var out bytes.Buffer
+	newLinksLikeTable(&out).renderStatic(120, false)
+
+	lines := strings.Split(strings.TrimRight(out.String(), "\n"), "\n")
+	assert.Len(lines, tui.TableChromeHeight+3, "title, borders, header, rule and 3 rows")
+	assert.Equal("Links", lines[0])
+
+	box := lines[1:]
+	tableWidth := ansi.StringWidth(box[0])
 	assert.LessOrEqual(tableWidth, 120)
 
-	for _, line := range lines {
-		assert.Equal(tableWidth, text.StringWidthWithoutEscSequences(line), "every line is as wide as the box: %q", line)
+	for _, line := range box {
+		assert.Equal(tableWidth, ansi.StringWidth(line), "every line is as wide as the box: %q", line)
 		assert.Equal(strings.TrimRight(line, " "), line, "no trailing whitespace")
 	}
 
-	out := buf.String()
-	assert.NotContains(out, "TAGS", "empty TAGS column is dropped")
-	assert.Contains(out, "…", "long values are shortened")
-	assert.Contains(out, "Ćacilend with a line break", "line breaks become spaces")
+	got := out.String()
+	assert.NotContains(got, "Tags", "empty Tags column is dropped")
+	assert.Contains(got, "…", "long values are shortened")
+	assert.Contains(got, "Ćacilend with a line break", "line breaks become spaces")
 }
 
-func TestListTable_NoLimitKeepsFullValues(t *testing.T) {
+func TestTable_NoLimitKeepsFullValues(t *testing.T) {
 	assert := require.New(t)
 
-	long := strings.Repeat("very long name ", 20)
-	tbl := NewListTable("Tags", Column{Header: "ID"}, Column{Header: "Name", Flex: true}, Column{Header: "Tags", HideWhenEmpty: true})
-	tbl.AppendRow(1, long, "go, cli")
+	var out bytes.Buffer
+	newLinksLikeTable(&out).renderStatic(0, false)
 
-	var buf bytes.Buffer
-	tbl.RenderTo(&buf, 0, false)
-
-	assert.Contains(buf.String(), strings.TrimSpace(long))
-	assert.NotContains(buf.String(), "…")
-	assert.Contains(buf.String(), "TAGS", "non-empty columns are kept")
+	assert.Contains(out.String(), "Pull Request #20 · CerealKiller97/linkwarden-cli · GitHub")
+	assert.NotContains(out.String(), "…")
 }
 
-func TestListTable_ShortTitleTableIsNotPadded(t *testing.T) {
+func TestTable_HiddenColumnKeepsTone(t *testing.T) {
 	assert := require.New(t)
 
-	tbl := NewListTable("A much longer title than the cells", Column{Header: "ID"}, Column{Header: "Name", Flex: true})
-	tbl.AppendRow(1, strings.Repeat("x", 200))
+	tbl := NewTable("T")
+	tbl.Columns(Column{Header: "A"}, Column{Header: "Empty", HideWhenEmpty: true}, Column{Header: "C"})
+	tbl.Row("a", "", "c")
+	tbl.Tone(func(_, col int, _ string) Tone {
+		if col == 2 {
+			return ToneDanger
+		}
 
-	var buf bytes.Buffer
-	tbl.RenderTo(&buf, 30, false)
+		return ToneNone
+	})
 
-	for _, line := range strings.Split(strings.TrimRight(buf.String(), "\n"), "\n") {
-		assert.Equal(strings.TrimRight(line, " "), line, "no trailing whitespace")
-	}
+	data := tbl.visible()
+	assert.Equal([]string{"A", "C"}, data.Headers)
+	assert.Equal([][]string{{"a", "c"}}, data.Rows)
+	assert.Equal(ToneDanger, data.Tone(0, 1), "column 1 of the visible table is original column 2")
+	assert.Equal(ToneNone, data.Tone(0, 0))
 }

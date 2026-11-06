@@ -31,7 +31,7 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 | 📦 **Bulk operations**     | Import hundreds of links with a progress bar; retag, move or delete many links in one call.       |
 | 🗄️ **Archives & backups**  | Download PDF, screenshot or HTML snapshots; export and import your whole library.                 |
 | 🔄 **Easy migration**      | Import from browser bookmarks, Pocket, Wallabag, Omnivore or another Linkwarden instance.         |
-| 🎨 **Readable output**     | Rounded tables with colored headers that drop color automatically when piped or `NO_COLOR` is set. On a terminal, long names and URLs are shortened with `…` so tables fit the window; piped or redirected output keeps full values. |
+| 🎨 **Readable output**     | Colorful rounded tables; long ones open as an interactive, scrollable table. On a terminal, long names and URLs are shortened with `…` so tables fit the window. Piped output is plain text with full values; `NO_COLOR` turns color off. |
 | 🧰 **Go SDK**              | Every command is backed by [`linkwarden-go-sdk`](https://github.com/CerealKiller97/linkwarden-go-sdk), a typed API client you can use in your own code. |
 
 ---
@@ -162,7 +162,9 @@ linkwarden links create --file reading-list.json
 linkwarden links create --file reading-list.json --collection 3
 ```
 
-Each link is imported behind a progress bar, followed by a **Total / Success / Failed** summary table.
+Links already in the target collection are skipped (URLs are compared ignoring case in the scheme and host and any
+trailing `/`), as are URLs repeated within the file. The rest are imported behind a progress bar, followed by a
+**Total / Success / Already exists / Failed** summary table.
 
 ### 🚚 Migrate from Pocket, your browser or Wallabag
 
@@ -313,6 +315,12 @@ linkwarden dashboard get-v2
 ## 🤖 Interactive vs. non-interactive
 
 Any command that takes a resource ID opens a **picker** when you leave the ID out and stdin is a terminal.
+Type to filter the list, use ↑/↓ to move, Enter to select and Esc to cancel.
+
+List output that's taller than your terminal opens as an interactive table (↑/↓ or j/k, PgUp/PgDn, g/G, `q` to quit),
+based on Bubble Tea's [table example](https://github.com/charmbracelet/bubbletea/blob/main/examples/table/main.go).
+It renders inline and stays on screen when you quit. Tables that fit on screen, piped output and `--non-interactive`
+print the same table as plain text.
 When stdin isn't a terminal (scripts, CI, pipes), it **fails fast** and tells you which flag to pass:
 
 ```console
@@ -645,7 +653,7 @@ The workflow needs two repository secrets:
 
 <div align="center">
 
-Built with [Cobra](https://github.com/spf13/cobra) · [go-pretty](https://github.com/jedib0t/go-pretty) · [promptui](https://github.com/manifoldco/promptui) · [progressbar](https://github.com/schollz/progressbar)
+Built with [Cobra](https://github.com/spf13/cobra) · [Bubble Tea](https://github.com/charmbracelet/bubbletea) · [Bubbles](https://github.com/charmbracelet/bubbles) · [Lip Gloss](https://github.com/charmbracelet/lipgloss)
 
 Not affiliated with the Linkwarden project.
 

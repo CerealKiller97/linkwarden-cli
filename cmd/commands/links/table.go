@@ -10,7 +10,8 @@ func renderLinksTable(links []linkwarden.Link) {
 }
 
 func renderHighlightsTable(highlights []linkwarden.Highlight) {
-	t := utils.NewListTable("Highlights",
+	t := utils.NewTable("Highlights")
+	t.Columns(
 		utils.Column{Header: "ID"},
 		utils.Column{Header: "Text", Flex: true},
 		utils.Column{Header: "Color"},
@@ -18,7 +19,7 @@ func renderHighlightsTable(highlights []linkwarden.Highlight) {
 	)
 
 	for _, h := range highlights {
-		t.AppendRow(h.ID, h.Text, h.Color, h.Comment)
+		t.Row(h.ID, h.Text, h.Color, h.Comment)
 	}
 
 	t.Render()

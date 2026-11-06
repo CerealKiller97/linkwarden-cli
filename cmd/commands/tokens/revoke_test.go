@@ -24,9 +24,9 @@ func TestRevoke_FetchesTokensBeforePrompting(t *testing.T) {
 	cmd := Revoke()
 	err := cmd.Execute()
 	assert.True(listCalled)
-	// promptui needs an interactive terminal; in a non-interactive test run it
+	// The picker needs an interactive terminal; in a non-interactive test run it
 	// errors out immediately, which is expected here — this test only asserts that
-	// the token list is fetched before the (untestable) interactive picker runs.
+	// the token list is fetched before the interactive picker runs.
 	assert.Error(err)
 }
 
