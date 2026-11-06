@@ -2,6 +2,7 @@ package tags
 
 import (
 	"fmt"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"

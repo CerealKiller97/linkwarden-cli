@@ -2,6 +2,7 @@ package links
 
 import (
 	"fmt"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
