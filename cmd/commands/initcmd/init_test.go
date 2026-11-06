@@ -172,5 +172,5 @@ func TestBanner(t *testing.T) {
 	assert.Contains(plain, "Welcome to Linkwarden CLI")
 	assert.Len(strings.Split(plain, "\n"), len(logo))
 
-	assert.Contains(banner(true), brandBlue)
+	assert.Contains(banner(true), "\x1b[", "styled with color on")
 }

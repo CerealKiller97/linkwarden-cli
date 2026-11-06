@@ -10,9 +10,10 @@ import (
 	"net/url"
 	"strings"
 
+	"charm.land/lipgloss/v2"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/spf13/cobra"
 )
 
@@ -117,7 +118,7 @@ func run(cmd *cobra.Command, _ []string) error {
 		defaultURL = utils.DefaultInstanceURL
 	}
 
-	rawURL, err := utils.Input("Linkwarden URL", defaultURL, validateURL)
+	rawURL, err := utils.InputDefault("Linkwarden URL:", defaultURL, validateURL)
 	if err != nil {
 		return err
 	}
@@ -163,8 +164,8 @@ func run(cmd *cobra.Command, _ []string) error {
 
 	fmt.Println()
 	fmt.Printf("%s Signed in as %s. Saved to %s\n",
-		color(text.Colors{text.FgHiGreen, text.Bold}, "✔"), user.Username, path)
-	fmt.Println("You're all set. Try " + color(text.Colors{text.FgHiGreen}, "linkwarden links list") + ".")
+		color(doneStyle, "✔"), user.Username, path)
+	fmt.Println("You're all set. Try " + color(linkStyle, "linkwarden links list") + ".")
 
 	return nil
 }
@@ -189,7 +190,7 @@ func tokenFlow(instanceURL, provider string) (string, error) {
 		fmt.Println("Couldn't open a browser; open the URL above manually.")
 	}
 
-	token, err := utils.Password("Access token", required("access token"))
+	token, err := utils.Password("Access token:", required("access token"))
 	if err != nil {
 		return "", err
 	}
@@ -200,13 +201,13 @@ func tokenFlow(instanceURL, provider string) (string, error) {
 // tokenSteps is the numbered how-to tokenFlow prints, with an extra sign-in
 // step for an SSO provider.
 func tokenSteps(pageURL, provider string, colorOn bool) []string {
-	step := text.Colors{text.FgHiCyan, text.Bold}
-	link := text.Colors{text.FgHiGreen}
-	c := func(colors text.Colors, s string) string {
+	step := stepStyle
+	link := linkStyle
+	c := func(style lipgloss.Style, s string) string {
 		if !colorOn {
 			return s
 		}
-		return colors.Sprint(s)
+		return style.Render(s)
 	}
 
 	var steps []string
@@ -241,12 +242,12 @@ func tokenSteps(pageURL, provider string, colorOn bool) []string {
 // passwordFlow asks for email/username and password, then exchanges them for a
 // long-lived access token.
 func passwordFlow(ctx context.Context, instanceURL string) (string, error) {
-	username, err := utils.Input("Email or username", "", required("email or username"))
+	username, err := utils.Input("Email or username:", required("email or username"))
 	if err != nil {
 		return "", err
 	}
 
-	password, err := utils.Password("Password", required("password"))
+	password, err := utils.Password("Password:", required("password"))
 	if err != nil {
 		return "", err
 	}
@@ -323,10 +324,17 @@ func hasStatus(err error, status int) bool {
 	return errors.As(err, &apiErr) && apiErr.StatusCode == status
 }
 
-func color(colors text.Colors, s string) string {
+// Styles share pkg/tui's Linkwarden palette with the rest of the CLI.
+var (
+	stepStyle = lipgloss.NewStyle().Bold(true).Foreground(tui.Sky)
+	linkStyle = lipgloss.NewStyle().Foreground(tui.Ocean)
+	doneStyle = lipgloss.NewStyle().Bold(true).Foreground(tui.Ocean)
+)
+
+func color(style lipgloss.Style, s string) string {
 	if !utils.ColorEnabled() {
 		return s
 	}
 
-	return colors.Sprint(s)
+	return style.Render(s)
 }
