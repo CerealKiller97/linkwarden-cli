@@ -35,3 +35,4 @@ bin
 # GoReleaser output
 dist
 completions
+.dev-state/

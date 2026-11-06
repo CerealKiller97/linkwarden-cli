@@ -7,13 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ♻️ Changed
+
+- **ui:** Replace promptui with Bubble Tea for all interactive prompts. Pickers can now be filtered by typing, scroll past 10 items, and cancel with Esc.
+- **ui:** Replace go-pretty tables with Lip Gloss tables: rounded border, bold header, title badge and dimmed alternate rows. The `links create` summary colors its counts (blue / amber / red). In a terminal, tables taller than the screen open as an inline, scrollable bubbles/table that stays on screen when you quit.
+- **ui:** Replace the schollz/progressbar bar in `links create` with a bubbles/progress bar on stderr (hidden when stderr isn't a terminal). Per-link failures are logged after the bar finishes instead of interleaving with it.
+- **tokens:** `tokens generate` and `tokens revoke` now fail fast without an interactive terminal, like the other pickers.
+
 ### ✨ Added
 
 - **init:** Add `linkwarden init`, a guided setup that signs in with an access token (opening the Access Tokens page in your browser), email/password, or any SSO provider the instance offers (Google, Apple, …), verifies it and saves it to `$XDG_CONFIG_HOME/linkwarden/config.json`. Commands fall back to this file when `LINKWARDEN_TOKEN` isn't set.
+- **ui:** All prompts, tables and the progress bar use Linkwarden's own blue palette (`#8FD1F8` / `#4AA3E2`, defined once in `pkg/tui/theme.go`).
+- **links:** `links create` skips links already in the target collection (and URLs repeated in the file), and reports them in a new **Already exists** column. A 409 from accounts with "prevent duplicate links" on is counted there too.
 
 ### 🐛 Fixed
 
 - **cli:** Trim trailing slashes from `LINKWARDEN_URL`.
+- **tokens:** `tokens revoke` revokes the selected token even when several tokens share a name.
 
 ## [1.0.0] - 2026-10-06
 

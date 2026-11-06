@@ -2,7 +2,6 @@ package tokens
 
 import (
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/manifoldco/promptui"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -25,23 +24,17 @@ func executeRevoke(cmd *cobra.Command, _ []string) error {
 	}
 
 	tokenNames := make([]string, len(tokenList))
-	tokenMap := make(map[string]int, len(tokenList))
 	for i, token := range tokenList {
 		tokenNames[i] = token.Name
-		tokenMap[token.Name] = token.ID
 	}
 
-	prompt := promptui.Select{
-		Label: "Select Token",
-		Items: tokenNames,
-	}
-
-	_, result, err := prompt.Run()
+	// Revoke by index rather than by name: two tokens can share a name.
+	idx, result, err := utils.Select("Select token to revoke:", tokenNames)
 	if err != nil {
 		return err
 	}
 
-	if err := client.Tokens.Revoke(cmd.Context(), tokenMap[result]); err != nil {
+	if err := client.Tokens.Revoke(cmd.Context(), tokenList[idx].ID); err != nil {
 		log.Err(err).Msg("Error revoking token")
 		return err
 	}

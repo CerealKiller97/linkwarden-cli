@@ -10,9 +10,7 @@ import (
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/rs/zerolog/log"
-	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
 )
 
@@ -43,6 +41,11 @@ func Create() *cobra.Command {
 type item struct {
 	URL   string `json:"url"`
 	Title string `json:"title"`
+}
+
+type failure struct {
+	item item
+	err  error
 }
 
 func execute(cmd *cobra.Command, _ []string) error {
@@ -107,16 +110,33 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("%w: %d", errCollectionNotFound, collectionID)
 	}
 
+	// Linkwarden happily stores the same URL twice unless the account has
+	// "prevent duplicate links" on, so check the collection first.
+	existing, err := existingURLs(cmd.Context(), client, collection.ID)
+	if err != nil {
+		log.Err(err).Msg("Failed to list links already in the collection")
+		return err
+	}
+
+	toCreate, skipped := splitExisting(data, existing)
+
 	var (
-		wg      sync.WaitGroup
-		sem     = make(chan struct{}, concurrency)
-		success atomic.Int64
-		failed  atomic.Int64
+		wg            sync.WaitGroup
+		sem           = make(chan struct{}, concurrency)
+		success       atomic.Int64
+		alreadyExists atomic.Int64
+		mu            sync.Mutex
+		failures      []failure
 	)
+	alreadyExists.Add(int64(skipped))
 
-	bar := progressbar.Default(int64(total))
+	// Nothing new to create: no point flashing an empty bar.
+	bar := utils.NoProgress()
+	if len(toCreate) > 0 {
+		bar = utils.StartProgress("Creating links", len(toCreate))
+	}
 
-	for _, item := range data {
+	for _, item := range toCreate {
 		sem <- struct{}{}
 		wg.Go(func() {
 			defer func() { <-sem }()
@@ -129,16 +149,19 @@ func execute(cmd *cobra.Command, _ []string) error {
 				Tags:       []linkwarden.Tag{},
 			})
 
-			// A failed render of the progress bar shouldn't abort the import.
-			_ = bar.Add(1)
+			bar.Increment()
+
+			// Accounts with "prevent duplicate links" on reject them with a 409.
+			if linkwarden.IsConflict(err) {
+				alreadyExists.Add(1)
+				return
+			}
 
 			if err != nil {
-				log.Err(err).
-					Str("url", item.URL).
-					Str("title", item.Title).
-					Msg("Failed to create link")
+				mu.Lock()
+				failures = append(failures, failure{item: item, err: err})
+				mu.Unlock()
 
-				failed.Add(1)
 				return
 			}
 
@@ -147,18 +170,77 @@ func execute(cmd *cobra.Command, _ []string) error {
 	}
 
 	wg.Wait()
+	bar.Stop()
 
-	displayResults(total, int(success.Load()), int(failed.Load()))
+	// Logged only once the bar is gone, so they don't tear through its redraws.
+	for _, f := range failures {
+		log.Err(f.err).
+			Str("url", f.item.URL).
+			Str("title", f.item.Title).
+			Msg("Failed to create link")
+	}
+
+	displayResults(results{
+		total:         total,
+		success:       int(success.Load()),
+		alreadyExists: int(alreadyExists.Load()),
+		failed:        len(failures),
+	})
 
 	return nil
 }
 
-func displayResults(total int, success int, failed int) {
+// splitExisting returns the items whose URL isn't in existing yet, and how many
+// were skipped. A URL repeated within the file counts as already existing
+// after its first occurrence. existing is updated in place.
+func splitExisting(data []item, existing map[string]bool) ([]item, int) {
+	toCreate := make([]item, 0, len(data))
+	skipped := 0
+
+	for _, it := range data {
+		key := normalizeURL(it.URL)
+		if existing[key] {
+			skipped++
+			continue
+		}
+		existing[key] = true
+		toCreate = append(toCreate, it)
+	}
+
+	return toCreate, skipped
+}
+
+type results struct {
+	total, success, alreadyExists, failed int
+}
+
+// Columns of the results table.
+const (
+	colTotal = iota
+	colSuccess
+	colAlreadyExists
+	colFailed
+)
+
+func displayResults(r results) {
 	t := utils.NewTable("Linkwarden")
-	t.AppendHeader(table.Row{"Total", "Success", "Failed"})
-	t.AppendRows([]table.Row{
-		{total, success, failed},
+	t.Header("Total", "Success", "Already exists", "Failed")
+	t.Row(r.total, r.success, r.alreadyExists, r.failed)
+	t.Tone(func(_, col int, value string) utils.Tone {
+		if value == "0" {
+			return utils.ToneNone
+		}
+
+		switch col {
+		case colSuccess:
+			return utils.ToneSuccess
+		case colAlreadyExists:
+			return utils.ToneWarning
+		case colFailed:
+			return utils.ToneDanger
+		default:
+			return utils.ToneNone
+		}
 	})
-	t.AppendSeparator()
 	t.Render()
 }
