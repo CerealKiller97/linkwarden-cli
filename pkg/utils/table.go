@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"reflect"
+	"strings"
+	"time"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/charmbracelet/x/term"
@@ -17,21 +20,78 @@ type Table struct {
 	out  io.Writer
 }
 
-// NewTable starts a table titled title, written to stdout.
+// Every table in the CLI is built with NewTable (a list of records, one per
+// row, with the row count in the title) or NewSummary (a fixed set of rows,
+// such as settings or totals, without a count). Both share one look: Title
+// Case headers, ID first when there is one, and cells formatted by FormatCell.
+
+// NewTable starts a list table titled title (plural, e.g. "Links"), written to
+// stdout. Its title shows the row count: "Links (12)".
 func NewTable(title string) *Table {
+	return &Table{data: tui.Table{Title: title, ShowCount: true}, out: os.Stdout}
+}
+
+// NewSummary starts a table whose rows aren't a list of records, like a
+// key/value listing or a row of totals, so its title has no row count.
+func NewSummary(title string) *Table {
 	return &Table{data: tui.Table{Title: title}, out: os.Stdout}
 }
+
+// Caption sets a dim line shown between the title and the table, for totals
+// or other context that isn't a row.
+func (t *Table) Caption(text string) { t.data.Caption = text }
 
 // Header sets the column names.
 func (t *Table) Header(cols ...string) { t.data.Headers = cols }
 
-// Row appends a row; each cell is formatted with fmt.Sprint.
+// Row appends a row; each cell is formatted with FormatCell.
 func (t *Table) Row(cells ...any) {
 	row := make([]string, len(cells))
 	for i, c := range cells {
-		row[i] = fmt.Sprint(c)
+		row[i] = FormatCell(c)
 	}
 	t.data.Rows = append(t.data.Rows, row)
+}
+
+// EmptyCell is what a table shows for a missing or blank value.
+const EmptyCell = "-"
+
+// cellTimeLayout is how table cells show a time, in the local time zone.
+const cellTimeLayout = "2006-01-02 15:04"
+
+// FormatCell turns a value into table text the same way everywhere: nil, nil
+// pointers, blank strings and zero times become EmptyCell, booleans become
+// Yes/No, times use cellTimeLayout, and pointers show what they point to.
+// Anything else uses fmt.Sprint.
+func FormatCell(v any) string {
+	switch v := v.(type) {
+	case nil:
+		return EmptyCell
+	case string:
+		if strings.TrimSpace(v) == "" {
+			return EmptyCell
+		}
+		return v
+	case bool:
+		if v {
+			return "Yes"
+		}
+		return "No"
+	case time.Time:
+		if v.IsZero() {
+			return EmptyCell
+		}
+		return v.Local().Format(cellTimeLayout)
+	}
+
+	if rv := reflect.ValueOf(v); rv.Kind() == reflect.Pointer {
+		if rv.IsNil() {
+			return EmptyCell
+		}
+		return FormatCell(rv.Elem().Interface())
+	}
+
+	return fmt.Sprint(v)
 }
 
 // Tone colors data cells: fn gets each cell's 0-based row, column and text.
@@ -72,7 +132,14 @@ func (t *Table) Render() {
 		log.Debug().Err(err).Msg("table viewer failed, printing instead")
 	}
 
-	_ = tui.WriteStatic(t.out, t.data, ColorEnabled())
+	data := t.data
+	if t.out == os.Stdout && isatty.IsTerminal(os.Stdout.Fd()) {
+		if width, _, err := term.GetSize(os.Stdout.Fd()); err == nil {
+			data.Width = width
+		}
+	}
+
+	_ = tui.WriteStatic(t.out, data, ColorEnabled())
 }
 
 // browseSize returns the terminal size when the viewer should be used.
@@ -86,14 +153,27 @@ func (t *Table) browseSize() (width, height int, ok bool) {
 		return 0, 0, false
 	}
 
-	return width, height, shouldBrowse(len(t.data.Rows), height)
+	return width, height, shouldBrowse(len(t.data.Rows), tui.ChromeHeight(t.data), height)
 }
 
-// shouldBrowse reports whether rows data rows (plus the table's borders,
-// header and title, and a line for the next prompt) overflow a terminal
-// height rows tall.
-func shouldBrowse(rows, height int) bool {
-	return height > 0 && rows+tui.TableChromeHeight+1 > height
+// shouldBrowse reports whether rows data rows (plus chrome rows of borders,
+// header, title and caption, and a line for the next prompt) overflow a
+// terminal height rows tall.
+func shouldBrowse(rows, chrome, height int) bool {
+	return height > 0 && rows+chrome+1 > height
+}
+
+// ColorSwatch is a table cell for a #rrggbb color: a dot in that color when
+// output is colored (see ColorEnabled), otherwise the hex code itself, so
+// piped output keeps the value. Anything that isn't a hex color is shown as is.
+func ColorSwatch(hex string) string {
+	if ColorEnabled() {
+		if dot, ok := tui.Swatch(hex); ok {
+			return dot
+		}
+	}
+
+	return FormatCell(hex)
 }
 
 // ColorEnabled reports whether CLI output should include ANSI color: only

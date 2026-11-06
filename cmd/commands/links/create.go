@@ -223,7 +223,7 @@ const (
 )
 
 func displayResults(r results) {
-	t := utils.NewTable("Linkwarden")
+	t := utils.NewSummary("Import Results")
 	t.Header("Total", "Success", "Already exists", "Failed")
 	t.Row(r.total, r.success, r.alreadyExists, r.failed)
 	t.Tone(func(_, col int, value string) utils.Tone {

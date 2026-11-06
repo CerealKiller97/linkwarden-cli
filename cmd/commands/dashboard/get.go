@@ -25,7 +25,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	renderLinksTable("Dashboard (v1)", links)
+	renderLinksTable(links)
 
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strings"
 
 	"charm.land/bubbles/v2/table"
 	tea "charm.land/bubbletea/v2"
@@ -17,6 +18,18 @@ type Table struct {
 	Title   string
 	Headers []string
 	Rows    [][]string
+
+	// ShowCount appends the number of rows to the title, as in "Links (12)".
+	// List tables set it; summaries and key/value tables don't.
+	ShowCount bool
+
+	// Caption, when set, is a dim line between the title and the table, for
+	// totals or other context that isn't a row.
+	Caption string
+
+	// Width, when positive, is the terminal width static output must fit in;
+	// long cells are cut short with an ellipsis. Zero means no limit.
+	Width int
 
 	// Tone, when set, picks a color for a data cell (row and col are 0-based
 	// into Rows). Only static output uses it.
@@ -58,6 +71,7 @@ var (
 // RenderStatic returns t as text in the same style as the viewer. With color
 // false the output has no ANSI escapes at all, so piped output is clean.
 func RenderStatic(t Table, color bool) string {
+	t = fitCells(t)
 	tbl := lgtable.New().
 		Border(lipgloss.RoundedBorder()).
 		BorderStyle(borderStyle).
@@ -70,10 +84,10 @@ func RenderStatic(t Table, color bool) string {
 	// Plain output gets a bare title: the badge's padding only makes sense
 	// with its background color behind it.
 	if !color {
-		return t.Title + "\n" + ansi.Strip(tbl.String()) + "\n"
+		return ansi.Strip(header(t, false) + tbl.String() + "\n")
 	}
 
-	return titleStyle.Render(t.Title) + "\n" + tbl.String() + "\n"
+	return header(t, true) + tbl.String() + "\n"
 }
 
 func staticCellStyle(t Table, row, col int) lipgloss.Style {
@@ -94,9 +108,39 @@ func staticCellStyle(t Table, row, col int) lipgloss.Style {
 	return cellStyle
 }
 
+// header is the title line (with the row count when t.ShowCount) and the
+// caption line, if any, that go above the table.
+func header(t Table, color bool) string {
+	title := t.Title
+	if t.ShowCount {
+		title = fmt.Sprintf("%s (%d)", title, len(t.Rows))
+	}
+	if color {
+		title = titleStyle.Render(title)
+	}
+
+	out := title + "\n"
+	if t.Caption != "" {
+		out += dimStyle.Render(t.Caption) + "\n"
+	}
+
+	return out
+}
+
 // TableChromeHeight is how many terminal rows RenderStatic adds around the data
-// rows: title, top border, header, header rule and bottom border.
+// rows of a table without a caption: title, top border, header, header rule
+// and bottom border.
 const TableChromeHeight = 5
+
+// ChromeHeight is how many terminal rows RenderStatic adds around t's data
+// rows: TableChromeHeight plus the caption line, if t has one.
+func ChromeHeight(t Table) int {
+	if t.Caption != "" {
+		return TableChromeHeight + 1
+	}
+
+	return TableChromeHeight
+}
 
 // BrowseTable shows t as an interactive bubbles/table, inline in the terminal,
 // fitted to width×height (the terminal's size). It returns when the user quits
@@ -111,7 +155,9 @@ func BrowseTable(t Table, width, height int, o Options) error {
 }
 
 type browseModel struct {
-	title string
+	header string
+	// extra is how many rows the header takes beyond the title line.
+	extra int
 	table table.Model
 	done  bool
 }
@@ -124,9 +170,14 @@ const browseChrome = 7
 func newBrowseModel(t Table, width, height int) browseModel {
 	// The outer border takes two columns.
 	cols := fitColumns(t, width-2)
+	extra := ChromeHeight(t) - TableChromeHeight
 	rows := make([]table.Row, len(t.Rows))
 	for i, r := range t.Rows {
-		rows[i] = table.Row(r)
+		row := make(table.Row, len(r))
+		for j, c := range r {
+			row[j] = cleanCell(c)
+		}
+		rows[i] = row
 	}
 
 	styles := table.DefaultStyles()
@@ -148,12 +199,12 @@ func newBrowseModel(t Table, width, height int) browseModel {
 		table.WithFocused(true),
 		// Styles before height: WithHeight measures the (styled) header.
 		table.WithStyles(styles),
-		table.WithHeight(tableHeight(len(rows), height)),
+		table.WithHeight(tableHeight(len(rows), height-extra)),
 		// Without a width the viewport is zero columns wide and shows no rows.
 		table.WithWidth(tableWidth(cols)),
 	)
 
-	return browseModel{title: fmt.Sprintf("%s (%d)", t.Title, len(t.Rows)), table: tbl}
+	return browseModel{header: header(t, true), extra: extra, table: tbl}
 }
 
 // visibleRows is how many data rows fit in a terminal height rows tall
@@ -194,7 +245,7 @@ func (m browseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	case tea.WindowSizeMsg:
-		m.table.SetHeight(tableHeight(len(m.table.Rows()), msg.Height))
+		m.table.SetHeight(tableHeight(len(m.table.Rows()), msg.Height-m.extra))
 	}
 
 	var cmd tea.Cmd
@@ -204,7 +255,7 @@ func (m browseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m browseModel) View() tea.View {
-	out := titleStyle.Render(m.title) + "\n" + baseStyle.Render(m.table.View()) + "\n"
+	out := m.header + baseStyle.Render(m.table.View()) + "\n"
 	// The help line goes away on quit, so what's left behind is just the table.
 	if !m.done {
 		out += "  " + m.table.HelpView() + dimStyle.Render(" • q quit") + "\n"
@@ -213,20 +264,42 @@ func (m browseModel) View() tea.View {
 	return tea.NewView(out)
 }
 
-// fitColumns sizes each column to its widest cell, then shrinks the widest
-// columns until the table fits in width.
+// maxColumnWidth caps any one column so a long page title or URL can't
+// stretch the table across a wide terminal.
+const maxColumnWidth = 50
+
+// fitColumns sizes the viewer's columns with columnWidths.
 func fitColumns(t Table, width int) []table.Column {
+	widths := columnWidths(t, width)
+	cols := make([]table.Column, len(t.Headers))
+	for i, h := range t.Headers {
+		cols[i] = table.Column{Title: h, Width: widths[i]}
+	}
+
+	return cols
+}
+
+// columnWidths sizes each column to its widest cell (at most maxColumnWidth),
+// then, when width is positive, shrinks the widest columns until the table
+// fits in width. Each column also takes one cell of padding on both sides.
+func columnWidths(t Table, width int) []int {
 	widths := make([]int, len(t.Headers))
 	for i, h := range t.Headers {
 		widths[i] = lipgloss.Width(h)
 	}
 	for _, r := range t.Rows {
 		for i := 0; i < len(r) && i < len(widths); i++ {
-			widths[i] = max(widths[i], lipgloss.Width(r[i]))
+			widths[i] = max(widths[i], lipgloss.Width(cleanCell(r[i])))
 		}
 	}
+	for i := range widths {
+		widths[i] = min(widths[i], maxColumnWidth)
+	}
 
-	// Each column gets one cell of padding on both sides from the default styles.
+	if width <= 0 {
+		return widths
+	}
+
 	avail := width - 2*len(widths)
 	for sum(widths) > avail {
 		widest := 0
@@ -241,12 +314,42 @@ func fitColumns(t Table, width int) []table.Column {
 		widths[widest]--
 	}
 
-	cols := make([]table.Column, len(t.Headers))
+	return widths
+}
+
+// fitCells returns a copy of t with every header and cell cut to its column
+// width from columnWidths, so static output fits in t.Width. The outer border
+// takes two columns.
+func fitCells(t Table) Table {
+	width := 0
+	if t.Width > 0 {
+		width = t.Width - 2
+	}
+	widths := columnWidths(t, width)
+
+	fit := t
+	fit.Headers = make([]string, len(t.Headers))
 	for i, h := range t.Headers {
-		cols[i] = table.Column{Title: h, Width: widths[i]}
+		fit.Headers[i] = ansi.Truncate(h, widths[i], "…")
+	}
+	fit.Rows = make([][]string, len(t.Rows))
+	for r, row := range t.Rows {
+		fit.Rows[r] = make([]string, len(row))
+		for i, c := range row {
+			c = cleanCell(c)
+			if i < len(widths) {
+				c = ansi.Truncate(c, widths[i], "…")
+			}
+			fit.Rows[r][i] = c
+		}
 	}
 
-	return cols
+	return fit
+}
+
+// cleanCell flattens line breaks and tabs so one cell stays on one line.
+func cleanCell(s string) string {
+	return strings.Join(strings.Fields(s), " ")
 }
 
 func sum(xs []int) int {

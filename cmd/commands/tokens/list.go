@@ -24,7 +24,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 	}
 
 	t := utils.NewTable("Tokens")
-	t.Header("ID", "Name", "Is Session", "Expires", "Created At")
+	t.Header("ID", "Name", "Session", "Expires", "Created")
 
 	for _, token := range tokenList {
 		t.Row(token.ID, token.Name, token.IsSession, token.Expires, token.CreatedAt)
