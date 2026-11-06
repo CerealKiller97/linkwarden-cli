@@ -16,11 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ Added
 
+- **init:** Add `linkwarden init`, a guided setup that signs in with an access token (opening the Access Tokens page in your browser), email/password, or any SSO provider the instance offers (Google, Apple, …), verifies it and saves it to `$XDG_CONFIG_HOME/linkwarden/config.json`. Commands fall back to this file when `LINKWARDEN_TOKEN` isn't set.
 - **ui:** All prompts, tables and the progress bar use Linkwarden's own blue palette (`#8FD1F8` / `#4AA3E2`, defined once in `pkg/tui/theme.go`).
 - **links:** `links create` skips links already in the target collection (and URLs repeated in the file), and reports them in a new **Already exists** column. A 409 from accounts with "prevent duplicate links" on is counted there too.
 
 ### 🐛 Fixed
 
+- **cli:** Trim trailing slashes from `LINKWARDEN_URL`.
 - **tokens:** `tokens revoke` revokes the selected token even when several tokens share a name.
 
 ## [1.0.0] - 2026-10-06

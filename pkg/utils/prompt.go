@@ -98,3 +98,23 @@ func isInteractiveFor(forcedNonInteractive, isTerminal bool) bool {
 
 	return isTerminal
 }
+
+// InputDefault is Input with def pre-filled as a placeholder: pressing Enter on
+// an empty field accepts def. Without an interactive terminal it fails fast.
+func InputDefault(label, def string, validate func(string) error) (string, error) {
+	if !isInteractive() {
+		return "", errNoTerminal(label)
+	}
+
+	return tui.InputDefault(label, def, validate)
+}
+
+// Password is Input with the typed characters masked. Without an interactive
+// terminal it fails fast.
+func Password(label string, validate func(string) error) (string, error) {
+	if !isInteractive() {
+		return "", errNoTerminal(label)
+	}
+
+	return tui.Password(label, validate)
+}

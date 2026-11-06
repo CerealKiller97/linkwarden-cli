@@ -1,5 +1,7 @@
 package utils
 
+import "strings"
+
 var (
 	LinkwardenToken string
 	InstanceURL     string
@@ -28,4 +30,19 @@ func SetNonInteractive(nonInteractive bool) {
 
 func GetNonInteractive() bool {
 	return NonInteractive
+}
+
+// DefaultInstanceURL is used when no instance URL is configured.
+const DefaultInstanceURL = "https://cloud.linkwarden.app"
+
+// NormalizeInstanceURL drops surrounding whitespace and trailing slashes (so
+// "https://links.example.com/" works) and falls back to DefaultInstanceURL when
+// nothing is left.
+func NormalizeInstanceURL(raw string) string {
+	u := strings.TrimRight(strings.TrimSpace(raw), "/")
+	if u == "" {
+		return DefaultInstanceURL
+	}
+
+	return u
 }

@@ -21,17 +21,67 @@ func InputWith(label string, validate func(string) error, o Options) (string, er
 		return "", err
 	}
 
+	return inputResult(final)
+}
+
+// InputDefault is Input with def shown as a placeholder; pressing Enter on an
+// empty field accepts def.
+func InputDefault(label, def string, validate func(string) error) (string, error) {
+	m := newInputModel(label, validate)
+	m.def = def
+	m.input.Placeholder = def
+
+	final, err := run(m, Options{})
+	if err != nil {
+		return "", err
+	}
+
+	return inputResult(final)
+}
+
+// Password is Input with the typed characters masked, on screen and in the
+// confirmation line left behind.
+func Password(label string, validate func(string) error) (string, error) {
+	final, err := run(newPasswordModel(label, validate), Options{})
+	if err != nil {
+		return "", err
+	}
+
+	return inputResult(final)
+}
+
+func inputResult(final tea.Model) (string, error) {
 	m := final.(inputModel)
 	if m.aborted {
 		return "", ErrAborted
 	}
 
-	return m.input.Value(), nil
+	return m.value(), nil
+}
+
+func newPasswordModel(label string, validate func(string) error) inputModel {
+	m := newInputModel(label, validate)
+	m.masked = true
+	m.input.EchoMode = textinput.EchoPassword
+	m.input.EchoCharacter = '•'
+
+	return m
+}
+
+// value is what the user entered, or def when they left the field empty.
+func (m inputModel) value() string {
+	if m.def != "" && strings.TrimSpace(m.input.Value()) == "" {
+		return m.def
+	}
+
+	return m.input.Value()
 }
 
 type inputModel struct {
 	label    string
 	validate func(string) error
+	def      string // accepted when Enter is pressed on an empty field
+	masked   bool   // password input: never echo the value
 	input    textinput.Model
 	err      error
 	done     bool
@@ -59,7 +109,7 @@ func (m inputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "enter":
 			if m.validate != nil {
-				if err := m.validate(m.input.Value()); err != nil {
+				if err := m.validate(m.value()); err != nil {
 					m.err = err
 					return m, nil
 				}
@@ -83,7 +133,11 @@ func (m inputModel) View() tea.View {
 
 	switch {
 	case m.done:
-		b.WriteString(doneStyle.Render("✔") + " " + labelStyle.Render(m.label) + " " + m.input.Value() + "\n")
+		shown := m.value()
+		if m.masked {
+			shown = strings.Repeat("•", min(len([]rune(shown)), 8))
+		}
+		b.WriteString(doneStyle.Render("✔") + " " + labelStyle.Render(m.label) + " " + shown + "\n")
 	case m.aborted:
 	default:
 		b.WriteString(labelStyle.Render(m.label) + " " + m.input.View() + "\n")
