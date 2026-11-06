@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/archives"
@@ -10,6 +11,7 @@ import (
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/dashboard"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/favicon"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/highlights"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/initcmd"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/migrations"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/rss"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/search"
@@ -23,6 +25,7 @@ import (
 )
 
 func registerCommands(root *cobra.Command) {
+	root.AddCommand(initcmd.Command())
 	root.AddCommand(links.Command())
 	root.AddCommand(tokens.Command())
 	root.AddCommand(collections.Command())
@@ -48,21 +51,21 @@ func registerCommands(root *cobra.Command) {
 		}
 		utils.SetNonInteractive(nonInteractive)
 
-		linkwardenToken, exists := os.LookupEnv("LINKWARDEN_TOKEN")
-
-		if !exists {
-			return errors.New("environment variable LINKWARDEN_TOKEN is not set")
+		if cmd.Annotations[initcmd.SkipAuthAnnotation] != "" {
+			return nil
 		}
 
-		// TODO: Trim / if present from URL
-		instanceURL, exists := os.LookupEnv("LINKWARDEN_URL")
-		if !exists {
-			instanceURL = "https://cloud.linkwarden.app"
+		cfg, err := utils.LoadConfig()
+		if err != nil {
+			return fmt.Errorf("reading config file: %w", err)
 		}
 
-		utils.SetVars(linkwardenToken, instanceURL)
+		token, instanceURL, err := resolveCredentials(os.Getenv("LINKWARDEN_TOKEN"), os.Getenv("LINKWARDEN_URL"), cfg)
+		if err != nil {
+			return err
+		}
 
-		// INSTANCE_URL env var if not set use https://cloud.linkwarden.app/
+		utils.SetVars(token, instanceURL)
 
 		// TODO: App set
 		// configure logger
@@ -81,6 +84,31 @@ func registerCommands(root *cobra.Command) {
 	//root.PersistentPostRunE = cmd.PersistentPostRunE(func(cmd *cobra.Command, _ []string) error {
 	//	return cmd.Context().Value(constants.ContextKeyContainer).(*container.Container).Close()
 	//})
+}
+
+// errNotLoggedIn is returned when neither LINKWARDEN_TOKEN nor the config file
+// provides a token.
+var errNotLoggedIn = errors.New(`not logged in: run "linkwarden init" or set LINKWARDEN_TOKEN`)
+
+// resolveCredentials picks the token and instance URL to use. LINKWARDEN_TOKEN
+// wins over the config file; with it, the URL comes from LINKWARDEN_URL or the
+// default, as before the config file existed. Without it, the config file's token
+// is used, with its URL unless LINKWARDEN_URL overrides it.
+func resolveCredentials(envToken, envURL string, cfg utils.Config) (string, string, error) {
+	if envToken != "" {
+		return envToken, utils.NormalizeInstanceURL(envURL), nil
+	}
+
+	if cfg.Token == "" {
+		return "", "", errNotLoggedIn
+	}
+
+	instanceURL := cfg.URL
+	if envURL != "" {
+		instanceURL = envURL
+	}
+
+	return cfg.Token, utils.NormalizeInstanceURL(instanceURL), nil
 }
 
 // version is the released version, set at build time by GoReleaser (.goreleaser.yaml) via

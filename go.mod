@@ -3,6 +3,7 @@ module github.com/CerealKiller97/linkwarden-cli
 go 1.27
 
 require (
+	github.com/CerealKiller97/linkwarden-go-sdk v1.0.0
 	github.com/jedib0t/go-pretty/v6 v6.7.8
 	github.com/manifoldco/promptui v0.9.0
 	github.com/mattn/go-isatty v0.0.20
@@ -13,7 +14,6 @@ require (
 )
 
 require (
-	github.com/CerealKiller97/linkwarden-go-sdk v1.0.0 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/clipperhouse/uax29/v2 v2.6.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

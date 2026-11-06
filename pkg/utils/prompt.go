@@ -73,3 +73,43 @@ func isInteractiveFor(forcedNonInteractive, isTerminal bool) bool {
 
 	return isTerminal
 }
+
+// Select shows a promptui select over options and returns the chosen index and
+// option. Without an interactive terminal it fails fast instead of hanging.
+func Select(label string, options []string) (int, string, error) {
+	if !isInteractive() {
+		return 0, "", errNoTerminal(label)
+	}
+
+	prompt := promptui.Select{Label: label, Items: options}
+
+	return prompt.Run()
+}
+
+// Input asks for a line of text. def, when non-empty, is pre-filled and used if
+// the user just presses Enter. validate (if non-nil) must pass before the prompt
+// accepts the value. Without an interactive terminal it fails fast.
+func Input(label, def string, validate func(string) error) (string, error) {
+	if !isInteractive() {
+		return "", errNoTerminal(label)
+	}
+
+	prompt := promptui.Prompt{Label: label, Default: def, AllowEdit: def != "", Validate: validate}
+
+	return prompt.Run()
+}
+
+// Password is Input with the typed characters masked and no default.
+func Password(label string, validate func(string) error) (string, error) {
+	if !isInteractive() {
+		return "", errNoTerminal(label)
+	}
+
+	prompt := promptui.Prompt{Label: label, Mask: '*', Validate: validate}
+
+	return prompt.Run()
+}
+
+func errNoTerminal(label string) error {
+	return fmt.Errorf("%q needs an interactive terminal, but none is available", label)
+}

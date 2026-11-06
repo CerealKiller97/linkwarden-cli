@@ -96,7 +96,26 @@ go install github.com/CerealKiller97/linkwarden-cli@latest
 
 ### 2. Authenticate
 
-Create an API token in **Linkwarden → Settings → Access Tokens**, then export it:
+Run the guided setup:
+
+```bash
+linkwarden init
+```
+
+After a welcome banner with the Linkwarden logo, it asks for your instance URL (defaults to `https://cloud.linkwarden.app`) and how you'd like to sign in:
+
+- **Access Token (Recommended):** opens **Settings → Access Tokens** in your browser, walks you through
+  creating a token, and asks you to paste it.
+- **Email / Password:** signs in once, creates a `linkwarden-cli` access token with that session, and
+  saves the token. Your password is never stored. Hidden if your instance turned password sign-in off.
+- **Sign in with Google / Apple / …:** listed for each single sign-on provider your instance has
+  enabled. Sign-in happens in your browser (the CLI can't take part in that OAuth redirect), then you
+  create an access token there and paste it back.
+
+The token is checked against your instance, then saved to `$XDG_CONFIG_HOME/linkwarden/config.json`
+(readable only by you). Run `linkwarden init` again any time to switch accounts or instances.
+
+Prefer environment variables (CI, scripts, containers)? They override the config file:
 
 ```bash
 export LINKWARDEN_TOKEN="eyJhbGciOi..."
@@ -105,15 +124,15 @@ export LINKWARDEN_URL="https://links.example.com"   # only for self-hosted insta
 
 | Variable           | Required | Default                        | Description                                  |
 | ------------------ | :------: | ------------------------------ | -------------------------------------------- |
-| `LINKWARDEN_TOKEN` |    ✅    | —                              | API token used as a `Bearer` token           |
-| `LINKWARDEN_URL`   |          | `https://cloud.linkwarden.app` | Base URL of your Linkwarden instance         |
+| `LINKWARDEN_TOKEN` |          | token from `linkwarden init`   | API token used as a `Bearer` token           |
+| `LINKWARDEN_URL`   |          | URL from `linkwarden init`, else `https://cloud.linkwarden.app` | Base URL of your Linkwarden instance |
 | `NO_COLOR`         |          | —                              | Set to any value to disable colored output   |
 | `XDG_STATE_HOME`   |          | `~/.local/state`               | Where the CLI keeps its cache (see below)    |
-| `XDG_CONFIG_HOME`  |          | `~/.config`                    | Where `tokens generate` finds fish's config  |
+| `XDG_CONFIG_HOME`  |          | `~/.config`                    | Where `init` saves its config (and `tokens generate` finds fish's config) |
 
 > [!NOTE]
 > 📁 The CLI follows the [XDG Base Directory spec](https://specifications.freedesktop.org/basedir-spec/latest/)
-> on **Linux, macOS and Windows** alike. Its only file is a small cache in `$XDG_STATE_HOME/linkwarden/`.
+> on **Linux, macOS and Windows** alike: `init` saves `$XDG_CONFIG_HOME/linkwarden/config.json`, and a small cache lives in `$XDG_STATE_HOME/linkwarden/`.
 > If a variable is unset, empty or not an absolute path, the default under your home directory is used
 > (`$HOME` on Linux/macOS, `%USERPROFILE%` on Windows, e.g. `C:\Users\you\.local\state\linkwarden`).
 
