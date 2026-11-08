@@ -1,6 +1,8 @@
 package tags
 
 import (
+	"fmt"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -25,15 +27,16 @@ func BulkDelete() *cobra.Command {
 func executeBulkDelete(cmd *cobra.Command, _ []string) error {
 	ids, err := parseIDs(cmd.Flag("ids").Value.String())
 	if err != nil {
-		log.Err(err).Msg("Failed to parse --ids")
-		return err
+		return fmt.Errorf("parse --ids: %w", err)
 	}
 
 	client := utils.NewLinkwardenClient()
 
-	if err := client.Tags.BulkDelete(cmd.Context(), ids); err != nil {
-		log.Err(err).Msg("Failed to delete tags")
-		return err
+	spinner := utils.StartSpinner("Deleting tags…")
+	err = client.Tags.BulkDelete(cmd.Context(), ids)
+	spinner.Stop()
+	if err != nil {
+		return fmt.Errorf("delete tags: %w", err)
 	}
 
 	log.Info().Ints("ids", ids).Msg("Tags deleted successfully")

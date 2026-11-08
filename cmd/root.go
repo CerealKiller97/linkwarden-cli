@@ -12,11 +12,10 @@ import (
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/favicon"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/highlights"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/initcmd"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/links"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/migrations"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/rss"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/search"
-
-	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/links"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tags"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tokens"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -43,7 +42,9 @@ func registerCommands(root *cobra.Command) {
 		"On by default when stdin isn't a terminal.")
 
 	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
-		utils.ConfigureDefaultLogger("info")
+		// Flags and args have parsed by now, so any error from here on is a runtime
+		// failure, not a usage mistake: don't bury it under the help text.
+		cmd.SilenceUsage = true
 
 		nonInteractive, err := cmd.Flags().GetBool("non-interactive")
 		if err != nil {
@@ -67,23 +68,8 @@ func registerCommands(root *cobra.Command) {
 
 		utils.SetVars(token, instanceURL)
 
-		// TODO: App set
-		// configure logger
-		// initialize DI container
-
 		return nil
 	}
-
-	//	appLogger.ConfigureDefaultLogger(cfg.Logging.Level, cfg.Logging.PrettyPrint)
-	//	//nolint:all
-	//	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-	//	command.SetContext(context.WithValue(ctx, constants.ContextKeyContainer, container.New(ctx, cfg)))
-	//	return nil
-	//})
-
-	//root.PersistentPostRunE = cmd.PersistentPostRunE(func(cmd *cobra.Command, _ []string) error {
-	//	return cmd.Context().Value(constants.ContextKeyContainer).(*container.Container).Close()
-	//})
 }
 
 // errNotLoggedIn is returned when neither LINKWARDEN_TOKEN nor the config file
@@ -118,9 +104,11 @@ var version = "dev"
 func Root() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:     "linkwarden",
-		Short:   "Linkwarden is a CLI and SDK for the Linkwarden platform",
-		Long:    `Linkwarden is a CLI and SDK for the Linkwarden platform`,
+		Short:   "Linkwarden is a CLI for the Linkwarden platform",
+		Long:    `Linkwarden is a CLI for the Linkwarden platform`,
 		Version: version,
+		// Execute prints the error itself, once.
+		SilenceErrors: true,
 	}
 
 	registerCommands(rootCmd)
@@ -129,7 +117,12 @@ func Root() *cobra.Command {
 }
 
 func Execute() {
+	// Configured here rather than in PersistentPreRunE so flag and argument
+	// errors, which fail before any PreRun hook, are logged the same way.
+	utils.ConfigureDefaultLogger("info")
+
 	if err := Root().Execute(); err != nil {
-		log.Fatal().Err(err).Msg("Failed to execute CLI command")
+		log.Error().Msg(err.Error())
+		os.Exit(1)
 	}
 }

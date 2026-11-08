@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/mattn/go-isatty"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -13,7 +14,7 @@ import (
 const DateTimeFormat = "2006-01-02 15:04:05"
 
 // ConfigureDefaultLogger Set default options for Zerolog with log level and pretty print
-// If pretty print is false, it will write to Standard Output
+// Logs always go to stderr so they never mix with command output on stdout.
 func ConfigureDefaultLogger(level string, output ...io.Writer) {
 	zerologLevel, err := zerolog.ParseLevel(level)
 	if err != nil {
@@ -27,9 +28,7 @@ func ConfigureDefaultLogger(level string, output ...io.Writer) {
 		return time.Now().UTC()
 	}
 
-	var w io.Writer
-
-	w = zerolog.NewConsoleWriter()
+	var w io.Writer = newStderrConsoleWriter()
 
 	if len(output) > 0 {
 		w = zerolog.MultiLevelWriter(w, output[0])
@@ -38,8 +37,18 @@ func ConfigureDefaultLogger(level string, output ...io.Writer) {
 	log.Logger = log.Output(w)
 }
 
+// newStderrConsoleWriter returns a human-readable log writer on stderr, coloured
+// only when stderr is a terminal and NO_COLOR is unset, so redirected logs
+// (2> err.log) don't fill up with escape codes.
+func newStderrConsoleWriter() zerolog.ConsoleWriter {
+	return zerolog.NewConsoleWriter(func(cw *zerolog.ConsoleWriter) {
+		cw.Out = os.Stderr
+		cw.NoColor = !colorEnabledFor(os.Getenv("NO_COLOR"), isatty.IsTerminal(os.Stderr.Fd()))
+	})
+}
+
 // New Returns an instance of zerolog.Logger with configured log level and pretty print flag
-// If pretty print is false, it will write to Standard Output
+// Logs always go to stderr so they never mix with command output on stdout.
 func New(level string, prettyPrint bool) zerolog.Logger {
 	var logger zerolog.Logger
 
@@ -51,9 +60,9 @@ func New(level string, prettyPrint bool) zerolog.Logger {
 	var w io.Writer
 
 	if prettyPrint {
-		w = zerolog.NewConsoleWriter()
+		w = newStderrConsoleWriter()
 	} else {
-		w = os.Stdout
+		w = os.Stderr
 	}
 
 	logger = zerolog.New(w).

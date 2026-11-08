@@ -1,8 +1,9 @@
 package tokens
 
 import (
+	"fmt"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -17,14 +18,15 @@ func List() *cobra.Command {
 func executeList(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching tokens…")
 	tokenList, err := client.Tokens.List(cmd.Context())
+	spinner.Stop()
 	if err != nil {
-		log.Err(err).Msg("Error getting tokens")
-		return err
+		return fmt.Errorf("get tokens: %w", err)
 	}
 
 	t := utils.NewTable("Tokens")
-	t.Header("ID", "Name", "Is Session", "Expires", "Created At")
+	t.Header("ID", "Name", "Session", "Expires", "Created")
 
 	for _, token := range tokenList {
 		t.Row(token.ID, token.Name, token.IsSession, token.Expires, token.CreatedAt)

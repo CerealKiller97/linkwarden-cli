@@ -38,10 +38,11 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching favicon…")
 	favicon, err := client.Favicon.Get(cmd.Context(), targetURL)
+	spinner.Stop()
 	if err != nil {
-		log.Err(err).Msg("Failed to fetch favicon")
-		return err
+		return fmt.Errorf("fetch favicon: %w", err)
 	}
 
 	if output == "" {
@@ -50,8 +51,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 	}
 
 	if err := os.WriteFile(output, favicon.Data, 0o600); err != nil {
-		log.Err(err).Msg("Failed to write favicon file")
-		return err
+		return fmt.Errorf("write favicon file: %w", err)
 	}
 
 	log.Info().Str("path", output).Msg("Favicon saved successfully")

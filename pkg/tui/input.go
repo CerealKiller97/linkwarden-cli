@@ -24,14 +24,11 @@ func InputWith(label string, validate func(string) error, o Options) (string, er
 	return inputResult(final)
 }
 
-// InputDefault is Input with def shown as a placeholder; pressing Enter on an
-// empty field accepts def.
+// InputDefault is Input with the field pre-filled with def, ready to accept
+// with Enter or edit (Ctrl+U clears it). Clearing the field and pressing Enter
+// also accepts def.
 func InputDefault(label, def string, validate func(string) error) (string, error) {
-	m := newInputModel(label, validate)
-	m.def = def
-	m.input.Placeholder = def
-
-	final, err := run(m, Options{})
+	final, err := run(newDefaultInputModel(label, def, validate), Options{})
 	if err != nil {
 		return "", err
 	}
@@ -57,6 +54,18 @@ func inputResult(final tea.Model) (string, error) {
 	}
 
 	return m.value(), nil
+}
+
+// newDefaultInputModel is an input pre-filled with def. def goes in as the
+// value rather than a placeholder: bubbles' textinput only draws the first
+// character of a placeholder when no width is set.
+func newDefaultInputModel(label, def string, validate func(string) error) inputModel {
+	m := newInputModel(label, validate)
+	m.def = def
+	m.input.SetValue(def)
+	m.input.CursorEnd()
+
+	return m
 }
 
 func newPasswordModel(label string, validate func(string) error) inputModel {
@@ -144,9 +153,19 @@ func (m inputModel) View() tea.View {
 		if m.err != nil {
 			b.WriteString(errorStyle.Render("✘ "+m.err.Error()) + "\n")
 		} else {
-			b.WriteString(dimStyle.Render("enter confirm · esc cancel") + "\n")
+			b.WriteString(dimStyle.Render(m.hint()) + "\n")
 		}
 	}
 
 	return tea.NewView(b.String())
+}
+
+// hint is the key help under the field; a pre-filled field also says how to
+// clear it.
+func (m inputModel) hint() string {
+	if m.def != "" {
+		return "enter confirm · ctrl+u clear · esc cancel"
+	}
+
+	return "enter confirm · esc cancel"
 }

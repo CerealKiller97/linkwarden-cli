@@ -1,9 +1,10 @@
 package links
 
 import (
+	"fmt"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -29,14 +30,14 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		linksPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve link ID")
-		return err
+		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
+	spinner := utils.StartSpinner("Fetching link…")
 	link, err := client.Links.Get(cmd.Context(), id)
+	spinner.Stop()
 	if err != nil {
-		log.Err(err).Msg("Failed to get link")
-		return err
+		return fmt.Errorf("get link: %w", err)
 	}
 
 	renderLinksTable([]linkwarden.Link{*link})

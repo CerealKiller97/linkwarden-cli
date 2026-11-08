@@ -10,7 +10,7 @@ func renderCollectionsTable(collections []linkwarden.Collection) {
 	t.Header("ID", "Name", "Description", "Color")
 
 	for _, c := range collections {
-		t.Row(c.ID, c.Name, c.Description, c.Color)
+		t.Row(c.ID, c.Name, c.Description, utils.ColorSwatch(c.Color))
 	}
 
 	t.Render()

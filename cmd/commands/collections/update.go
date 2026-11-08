@@ -1,6 +1,8 @@
 package collections
 
 import (
+	"fmt"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
@@ -36,8 +38,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		collectionsPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve collection ID")
-		return err
+		return fmt.Errorf("resolve collection ID: %w", err)
 	}
 
 	parentID, err := cmd.Flags().GetInt("parent-id")
@@ -53,6 +54,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		isPublic = &v
 	}
 
+	spinner := utils.StartSpinner("Updating collection…")
 	collection, err := client.Collections.Update(cmd.Context(), id, linkwarden.UpdateCollectionRequest{
 		Name:        cmd.Flag("name").Value.String(),
 		Description: cmd.Flag("description").Value.String(),
@@ -62,9 +64,9 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		ParentID:    parentID,
 		IsPublic:    isPublic,
 	})
+	spinner.Stop()
 	if err != nil {
-		log.Err(err).Msg("Failed to update collection")
-		return err
+		return fmt.Errorf("update collection: %w", err)
 	}
 
 	log.Info().Int("id", collection.ID).Msg("Collection updated successfully")

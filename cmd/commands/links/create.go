@@ -61,14 +61,12 @@ func execute(cmd *cobra.Command, _ []string) error {
 	filePath := cmd.Flag("file").Value.String()
 	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		log.Err(err).Msg("failed to read file")
-		return err
+		return fmt.Errorf("read file: %w", err)
 	}
 
 	var data []item
 	if err := json.Unmarshal(fileBytes, &data); err != nil {
-		log.Err(err).Msg("failed to unmarshal file")
-		return err
+		return fmt.Errorf("unmarshal file: %w", err)
 	}
 
 	total := len(data)
@@ -79,10 +77,11 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching collections…")
 	collections, err := client.Collections.List(cmd.Context())
+	spinner.Stop()
 	if err != nil {
-		log.Err(err).Msg("Failed to get collections")
-		return err
+		return fmt.Errorf("get collections: %w", err)
 	}
 
 	collectionByID := make(map[int]linkwarden.Collection, len(collections))
@@ -99,8 +98,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		func() ([]utils.PickerItem, error) { return items, nil },
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve collection")
-		return err
+		return fmt.Errorf("resolve collection: %w", err)
 	}
 
 	// An unknown ID would otherwise be sent as an empty collection, which makes
@@ -112,10 +110,11 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	// Linkwarden happily stores the same URL twice unless the account has
 	// "prevent duplicate links" on, so check the collection first.
+	spinner = utils.StartSpinner("Checking for links already saved…")
 	existing, err := existingURLs(cmd.Context(), client, collection.ID)
+	spinner.Stop()
 	if err != nil {
-		log.Err(err).Msg("Failed to list links already in the collection")
-		return err
+		return fmt.Errorf("list links already in the collection: %w", err)
 	}
 
 	toCreate, skipped := splitExisting(data, existing)
@@ -223,7 +222,7 @@ const (
 )
 
 func displayResults(r results) {
-	t := utils.NewTable("Linkwarden")
+	t := utils.NewSummary("Import Results")
 	t.Header("Total", "Success", "Already exists", "Failed")
 	t.Row(r.total, r.success, r.alreadyExists, r.failed)
 	t.Tone(func(_, col int, value string) utils.Tone {

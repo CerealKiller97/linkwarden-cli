@@ -1,9 +1,10 @@
 package tags
 
 import (
+	"fmt"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -36,10 +37,11 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Creating tags…")
 	createdTags, err := client.Tags.CreateOrUpdateBulk(cmd.Context(), inputs)
+	spinner.Stop()
 	if err != nil {
-		log.Err(err).Msg("Failed to create tags")
-		return err
+		return fmt.Errorf("create tags: %w", err)
 	}
 
 	renderTagsTable(createdTags)

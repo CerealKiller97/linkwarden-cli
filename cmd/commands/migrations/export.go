@@ -1,6 +1,7 @@
 package migrations
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -39,15 +40,15 @@ func executeExport(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Exporting data…")
 	data, err := client.Migrations.Export(cmd.Context())
+	spinner.Stop()
 	if err != nil {
-		log.Err(err).Msg("Failed to export data")
-		return err
+		return fmt.Errorf("export data: %w", err)
 	}
 
 	if err := os.WriteFile(output, data, 0o600); err != nil {
-		log.Err(err).Msg("Failed to write export file")
-		return err
+		return fmt.Errorf("write export file: %w", err)
 	}
 
 	log.Info().Str("path", output).Msg("Exported successfully")

@@ -1,6 +1,8 @@
 package rss
 
 import (
+	"fmt"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -28,13 +30,14 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 		rssPickerFetch(cmd.Context(), client),
 	)
 	if err != nil {
-		log.Err(err).Msg("Failed to resolve RSS subscription ID")
-		return err
+		return fmt.Errorf("resolve RSS subscription ID: %w", err)
 	}
 
-	if err := client.RSS.Delete(cmd.Context(), id); err != nil {
-		log.Err(err).Msg("Failed to delete RSS subscription")
-		return err
+	spinner := utils.StartSpinner("Deleting RSS subscription…")
+	err = client.RSS.Delete(cmd.Context(), id)
+	spinner.Stop()
+	if err != nil {
+		return fmt.Errorf("delete RSS subscription: %w", err)
 	}
 
 	log.Info().Int("id", id).Msg("RSS subscription deleted successfully")

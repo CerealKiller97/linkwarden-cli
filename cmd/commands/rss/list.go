@@ -1,8 +1,9 @@
 package rss
 
 import (
+	"fmt"
+
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -19,10 +20,11 @@ func List() *cobra.Command {
 func executeList(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching RSS subscriptions…")
 	subs, err := client.RSS.List(cmd.Context())
+	spinner.Stop()
 	if err != nil {
-		log.Err(err).Msg("Failed to list RSS subscriptions")
-		return err
+		return fmt.Errorf("list RSS subscriptions: %w", err)
 	}
 
 	renderRSSTable(subs)

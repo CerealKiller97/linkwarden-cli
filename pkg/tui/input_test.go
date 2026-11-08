@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	tea "charm.land/bubbletea/v2"
 	"github.com/stretchr/testify/require"
 )
 
@@ -40,24 +41,40 @@ func TestInput_Esc_Aborts(t *testing.T) {
 	require.True(t, m.aborted)
 }
 
-func TestInputDefault_EmptyEnterAcceptsDefault(t *testing.T) {
+func TestInputDefault_PrefilledWithDefault(t *testing.T) {
 	assert := require.New(t)
 
-	m := newInputModel("URL", nil)
-	m.def = "https://cloud.linkwarden.app"
+	m := newDefaultInputModel("URL", "https://cloud.linkwarden.app", nil)
+	assert.Contains(m.View().Content, "ttps://cloud.linkwarden.app", "the whole default is on screen, not just its first letter")
+	assert.Contains(m.View().Content, "ctrl+u clear")
 
 	m = press(m, keyEnter).(inputModel)
 	assert.True(m.done)
 	assert.Equal("https://cloud.linkwarden.app", m.value())
 }
 
-func TestInputDefault_TypedValueWins(t *testing.T) {
-	m := newInputModel("URL", nil)
-	m.def = "https://cloud.linkwarden.app"
+func TestInputDefault_ClearedFieldAcceptsDefault(t *testing.T) {
+	m := newDefaultInputModel("URL", "https://cloud.linkwarden.app", nil)
 
-	m = press(m, append(typeText("http://localhost:3000"), keyEnter)...).(inputModel)
+	m = press(m, keyCtrlU, keyEnter).(inputModel)
+	require.Equal(t, "https://cloud.linkwarden.app", m.value())
+}
+
+func TestInputDefault_TypedValueWins(t *testing.T) {
+	m := newDefaultInputModel("URL", "https://cloud.linkwarden.app", nil)
+
+	m = press(m, append([]tea.KeyPressMsg{keyCtrlU}, append(typeText("http://localhost:3000"), keyEnter)...)...).(inputModel)
 	require.Equal(t, "http://localhost:3000", m.value())
 }
+
+func TestInputDefault_EditsDefault(t *testing.T) {
+	m := newDefaultInputModel("URL", "https://cloud.linkwarden.app", nil)
+
+	m = press(m, append(typeText("/"), keyEnter)...).(inputModel)
+	require.Equal(t, "https://cloud.linkwarden.app/", m.value(), "the cursor starts at the end of the default")
+}
+
+var keyCtrlU = tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl}
 
 func TestPassword_NeverEchoesValue(t *testing.T) {
 	assert := require.New(t)
