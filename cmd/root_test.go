@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/stretchr/testify/require"
 )
@@ -78,4 +81,22 @@ func TestOtherCommandsRequireCredentials(t *testing.T) {
 	root.SetArgs([]string{"tags", "list"})
 
 	require.ErrorIs(t, root.Execute(), errNotLoggedIn)
+}
+
+func TestExitCode(t *testing.T) {
+	cases := map[string]struct {
+		err  error
+		want int
+	}{
+		"success":         {err: nil, want: 0},
+		"failure":         {err: errors.New("boom"), want: 1},
+		"aborted":         {err: tui.ErrAborted, want: exitAborted},
+		"wrapped aborted": {err: fmt.Errorf("resolve collection ID: %w", tui.ErrAborted), want: exitAborted},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			require.Equal(t, tc.want, exitCode(tc.err))
+		})
+	}
 }
