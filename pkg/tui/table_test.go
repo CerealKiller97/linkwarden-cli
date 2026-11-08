@@ -17,7 +17,7 @@ var sample = Table{
 	ShowCount: true,
 }
 
-func TestRenderStatic_Plain(t *testing.T) {
+func TestRenderStaticPlain(t *testing.T) {
 	assert := require.New(t)
 
 	out := RenderStatic(sample, false)
@@ -29,11 +29,11 @@ func TestRenderStatic_Plain(t *testing.T) {
 	assert.NotContains(out, "\x1b[")
 }
 
-func TestRenderStatic_Color(t *testing.T) {
+func TestRenderStaticColor(t *testing.T) {
 	require.Contains(t, RenderStatic(sample, true), "\x1b[")
 }
 
-func TestFitColumns_ShrinksToWidth(t *testing.T) {
+func TestFitColumnsShrinksToWidth(t *testing.T) {
 	assert := require.New(t)
 
 	wide := Table{Headers: []string{"ID", "URL"}, Rows: [][]string{{"1", strings.Repeat("x", 200)}}}
@@ -47,7 +47,7 @@ func TestFitColumns_ShrinksToWidth(t *testing.T) {
 	assert.Equal(2, cols[0].Width, "narrow columns keep their natural width")
 }
 
-func TestBrowse_ScrollAndQuit(t *testing.T) {
+func TestBrowseScrollAndQuit(t *testing.T) {
 	assert := require.New(t)
 
 	var m tea.Model = newBrowseModel(sample, 80, 24)
@@ -75,7 +75,7 @@ func TestVisibleRows(t *testing.T) {
 	assert.Equal(10, visibleRows(10, 24), "never more rows than there are")
 }
 
-func TestBrowse_ShowsAsManyRowsAsFit(t *testing.T) {
+func TestBrowseShowsAsManyRowsAsFit(t *testing.T) {
 	assert := require.New(t)
 
 	big := Table{Title: "T", Headers: []string{"N"}}
@@ -91,13 +91,13 @@ func TestBrowse_ShowsAsManyRowsAsFit(t *testing.T) {
 	assert.Len(lines, 24-1, "fills the terminal, leaving one line for the prompt")
 }
 
-func TestNewBrowseModel_WidthFitsContent(t *testing.T) {
+func TestNewBrowseModelWidthFitsContent(t *testing.T) {
 	m := newBrowseModel(sample, 200, 24)
 	// "ID"(2) + "Bubble Tea"(10), each with 2 cells of padding.
 	require.Equal(t, 2+2+10+2, tableWidth(m.table.Columns()))
 }
 
-func TestRenderStatic_TonesColorCells(t *testing.T) {
+func TestRenderStaticTonesColorCells(t *testing.T) {
 	assert := require.New(t)
 
 	tbl := Table{
@@ -117,7 +117,7 @@ func TestRenderStatic_TonesColorCells(t *testing.T) {
 	assert.NotContains(RenderStatic(tbl, false), "\x1b[", "tones disappear without color")
 }
 
-func TestRenderStatic_FitsWidth(t *testing.T) {
+func TestRenderStaticFitsWidth(t *testing.T) {
 	assert := require.New(t)
 
 	long := Table{
@@ -136,7 +136,7 @@ func TestRenderStatic_FitsWidth(t *testing.T) {
 	assert.Contains(out, "…", "cut cells end in an ellipsis")
 }
 
-func TestRenderStatic_CapsColumnsWithoutWidth(t *testing.T) {
+func TestRenderStaticCapsColumnsWithoutWidth(t *testing.T) {
 	assert := require.New(t)
 
 	long := Table{Headers: []string{"URL"}, Rows: [][]string{{strings.Repeat("x", 200)}}}
@@ -147,7 +147,7 @@ func TestRenderStatic_CapsColumnsWithoutWidth(t *testing.T) {
 	}
 }
 
-func TestRenderStatic_FlattensMultilineCells(t *testing.T) {
+func TestRenderStaticFlattensMultilineCells(t *testing.T) {
 	assert := require.New(t)
 
 	tbl := Table{Title: "T", Headers: []string{"Name"}, Rows: [][]string{{"one\ntwo\tthree"}}}
@@ -157,7 +157,7 @@ func TestRenderStatic_FlattensMultilineCells(t *testing.T) {
 	assert.Len(strings.Split(strings.TrimRight(out, "\n"), "\n"), TableChromeHeight+1)
 }
 
-func TestRenderStatic_CountIsOptIn(t *testing.T) {
+func TestRenderStaticCountIsOptIn(t *testing.T) {
 	noCount := sample
 	noCount.ShowCount = false
 
@@ -165,7 +165,7 @@ func TestRenderStatic_CountIsOptIn(t *testing.T) {
 	require.Equal(t, "Links", lines[0])
 }
 
-func TestRenderStatic_Caption(t *testing.T) {
+func TestRenderStaticCaption(t *testing.T) {
 	assert := require.New(t)
 
 	captioned := sample
@@ -177,7 +177,7 @@ func TestRenderStatic_Caption(t *testing.T) {
 	assert.Equal(TableChromeHeight+1, ChromeHeight(captioned))
 }
 
-func TestBrowse_CaptionLeavesRoomForRows(t *testing.T) {
+func TestBrowseCaptionLeavesRoomForRows(t *testing.T) {
 	assert := require.New(t)
 
 	big := Table{Title: "T", Headers: []string{"N"}, Caption: "note"}

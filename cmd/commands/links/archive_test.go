@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestArchive_UsesIDFlag(t *testing.T) {
+func TestArchiveUsesIDFlag(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +26,7 @@ func TestArchive_UsesIDFlag(t *testing.T) {
 	assert.NoError(cmd.Execute())
 }
 
-func TestArchive_PropagatesAPIError(t *testing.T) {
+func TestArchivePropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

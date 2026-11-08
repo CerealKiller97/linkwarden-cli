@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestProgressModel_CountsAndCaps(t *testing.T) {
+func TestProgressModelCountsAndCaps(t *testing.T) {
 	assert := require.New(t)
 
 	m := newProgressModel("Work", 2)
@@ -22,7 +22,7 @@ func TestProgressModel_CountsAndCaps(t *testing.T) {
 	assert.InDelta(1.0, m.percent(), 0.0001)
 }
 
-func TestProgress_ConcurrentIncrementsThenStop(t *testing.T) {
+func TestProgressConcurrentIncrementsThenStop(t *testing.T) {
 	var out bytes.Buffer
 	// A bytes.Buffer has no size to detect, so give the renderer one.
 	p := startProgress("Work", 50, &out, tea.WithWindowSize(80, 24))
@@ -35,5 +35,11 @@ func TestProgress_ConcurrentIncrementsThenStop(t *testing.T) {
 	p.Stop()
 	p.Stop() // idempotent
 
-	require.Contains(t, out.String(), "50/50")
+	// Check the final model, not the output: Bubble Tea redraws only the cells
+	// that changed, so "50/50" is on screen but rarely appears in the raw bytes.
+	final, ok := p.final.(progressModel)
+	require.True(t, ok)
+	require.Equal(t, 50, final.current, "every increment arrives before Stop returns")
+	require.True(t, final.stopped)
+	require.NotEmpty(t, out.String(), "the bar was drawn")
 }

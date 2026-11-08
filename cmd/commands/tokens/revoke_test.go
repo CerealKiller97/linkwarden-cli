@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRevoke_FetchesTokensBeforePrompting(t *testing.T) {
+func TestRevokeFetchesTokensBeforePrompting(t *testing.T) {
 	assert := require.New(t)
 
 	var listCalled bool
@@ -30,7 +30,7 @@ func TestRevoke_FetchesTokensBeforePrompting(t *testing.T) {
 	assert.Error(err)
 }
 
-func TestRevoke_PropagatesListError(t *testing.T) {
+func TestRevokePropagatesListError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

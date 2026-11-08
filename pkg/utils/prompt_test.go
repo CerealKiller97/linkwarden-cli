@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestResolveID_UsesFlagValueWithoutFetching(t *testing.T) {
+func TestResolveIDUsesFlagValueWithoutFetching(t *testing.T) {
 	assert := require.New(t)
 
 	called := false
@@ -21,7 +21,7 @@ func TestResolveID_UsesFlagValueWithoutFetching(t *testing.T) {
 	assert.False(called)
 }
 
-func TestResolveID_InvalidFlagValue(t *testing.T) {
+func TestResolveIDInvalidFlagValue(t *testing.T) {
 	assert := require.New(t)
 
 	_, err := ResolveID("not-a-number", "--id", "Pick", func() ([]PickerItem, error) {
@@ -31,12 +31,12 @@ func TestResolveID_InvalidFlagValue(t *testing.T) {
 	assert.Error(err)
 }
 
-// TestResolveID_NonInteractive_ReturnsErrorWithoutFetching covers the scripting/CI
+// TestResolveIDNonInteractiveReturnsErrorWithoutFetching covers the scripting/CI
 // case: with no flag value and no interactive terminal to prompt from (true for any
 // automated test run), ResolveID must fail fast with an actionable error naming the
 // flag, rather than calling fetch (a network round-trip) or blocking on a picker
 // nobody can answer.
-func TestResolveID_NonInteractive_ReturnsErrorWithoutFetching(t *testing.T) {
+func TestResolveIDNonInteractiveReturnsErrorWithoutFetching(t *testing.T) {
 	assert := require.New(t)
 
 	called := false
@@ -60,10 +60,10 @@ func TestIsInteractiveFor(t *testing.T) {
 	assert.False(isInteractiveFor(false, false), "no override, not a terminal -> not interactive")
 }
 
-// TestResolveID_NonInteractiveOverride_ReturnsErrorWithoutFetching exercises the
+// TestResolveIDNonInteractiveOverrideReturnsErrorWithoutFetching exercises the
 // --non-interactive root flag's plumbing end-to-end through SetNonInteractive, the
 // same path cmd/root.go's PersistentPreRunE uses.
-func TestResolveID_NonInteractiveOverride_ReturnsErrorWithoutFetching(t *testing.T) {
+func TestResolveIDNonInteractiveOverrideReturnsErrorWithoutFetching(t *testing.T) {
 	assert := require.New(t)
 
 	SetNonInteractive(true)

@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreate_UsesParentIDFlagWithoutListing(t *testing.T) {
+func TestCreateUsesParentIDFlagWithoutListing(t *testing.T) {
 	assert := require.New(t)
 
 	var listCalled bool
@@ -43,7 +43,7 @@ func TestCreate_UsesParentIDFlagWithoutListing(t *testing.T) {
 	assert.Equal(5, gotBody.ParentID)
 }
 
-func TestCreate_LooksUpUnorganizedWhenParentIDOmitted(t *testing.T) {
+func TestCreateLooksUpUnorganizedWhenParentIDOmitted(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody linkwarden.CreateCollectionRequest
@@ -98,49 +98,89 @@ func newUnorganizedServer(t *testing.T, unorganizedID int, listCalls *int, gotPa
 	utils.SetVars("test-token", server.URL)
 }
 
-func TestCreate_CachesUnorganizedIDInXDGStateHome(t *testing.T) {
+func TestCreateCachesUnorganizedIDPerInstance(t *testing.T) {
 	assert := require.New(t)
-
-	var listCalls, gotParentID int
-	newUnorganizedServer(t, 7, &listCalls, &gotParentID)
 
 	stateHome := t.TempDir()
 	t.Setenv("XDG_STATE_HOME", stateHome)
 
-	cmd := Create()
-	cmd.SetArgs([]string{"--name", "First"})
-	assert.NoError(cmd.Execute())
-	assert.Equal(1, listCalls)
-	assert.Equal(7, gotParentID)
+	createIn := func(name string) {
+		cmd := Create()
+		cmd.SetArgs([]string{"--name", name})
+		assert.NoError(cmd.Execute())
+	}
 
-	cached, err := os.ReadFile(filepath.Join(stateHome, "linkwarden", "unorganized"))
-	assert.NoError(err)
-	assert.Equal("7", string(cached))
+	// Two instances whose Unorganized collections have different IDs.
+	var localLists, localParent, cloudLists, cloudParent int
+	newUnorganizedServer(t, 8, &localLists, &localParent)
+	localURL := utils.GetInstanceURL()
+	newUnorganizedServer(t, 38899, &cloudLists, &cloudParent)
+	cloudURL := utils.GetInstanceURL()
 
-	// The second run reads the cached ID back instead of listing collections again.
-	cmd = Create()
-	cmd.SetArgs([]string{"--name", "Second"})
-	assert.NoError(cmd.Execute())
-	assert.Equal(1, listCalls)
-	assert.Equal(7, gotParentID)
+	utils.SetVars("test-token", localURL)
+	createIn("First")
+	createIn("Second")
+	assert.Equal(1, localLists, "the second run reads the cached ID")
+	assert.Equal(8, localParent)
+
+	// Switching instances must not reuse the other instance's ID.
+	utils.SetVars("test-token", cloudURL)
+	createIn("Third")
+	assert.Equal(1, cloudLists)
+	assert.Equal(38899, cloudParent)
+
+	for url, want := range map[string]string{localURL: "8", cloudURL: "38899"} {
+		file, err := utils.InstanceStateFile("unorganized", url)
+		assert.NoError(err)
+		assert.Equal(filepath.Join(stateHome, "linkwarden", "unorganized"), filepath.Dir(file))
+
+		cached, err := os.ReadFile(file)
+		assert.NoError(err)
+		assert.Equal(want, string(cached))
+	}
 }
 
-func TestCreate_EmptyXDGStateHomeFallsBackToHome(t *testing.T) {
+func TestCreateReplacesOldSingleCacheFile(t *testing.T) {
 	assert := require.New(t)
 
-	var listCalls, gotParentID int
-	newUnorganizedServer(t, 3, &listCalls, &gotParentID)
+	// Older versions kept one ID for every instance in this file. Using it sent
+	// another instance's collection ID as the parent, which Linkwarden rejects.
+	stateHome := t.TempDir()
+	t.Setenv("XDG_STATE_HOME", stateHome)
+	legacy := filepath.Join(stateHome, "linkwarden", "unorganized")
+	assert.NoError(os.MkdirAll(filepath.Dir(legacy), 0o750))
+	assert.NoError(os.WriteFile(legacy, []byte("8"), 0o600))
 
-	home := t.TempDir()
-	t.Setenv("HOME", home)
-	t.Setenv("USERPROFILE", home) // os.UserHomeDir on Windows
-	t.Setenv("XDG_STATE_HOME", "")
+	var listCalls, gotParentID int
+	newUnorganizedServer(t, 38899, &listCalls, &gotParentID)
 
 	cmd := Create()
 	cmd.SetArgs([]string{"--name", "New Collection"})
 	assert.NoError(cmd.Execute())
+	assert.Equal(1, listCalls, "the old file is ignored, not trusted")
+	assert.Equal(38899, gotParentID)
 
-	cached, err := os.ReadFile(filepath.Join(home, ".local", "state", "linkwarden", "unorganized"))
+	info, err := os.Stat(legacy)
 	assert.NoError(err)
-	assert.Equal("3", string(cached))
+	assert.True(info.IsDir(), "the old file is replaced by the per-instance directory")
+}
+
+func TestUnorganizedParentID(t *testing.T) {
+	assert := require.New(t)
+
+	collections := []linkwarden.Collection{
+		{ID: 1, Name: "Unorganized"},
+		{ID: 2, Name: "Reading"},
+	}
+
+	id, err := unorganizedParentID(collections, "New")
+	assert.NoError(err)
+	assert.Equal(1, id)
+
+	_, err = unorganizedParentID(collections, "Reading")
+	assert.ErrorContains(err, `collection "Reading" already exists`, "listed after Unorganized, still caught")
+
+	id, err = unorganizedParentID([]linkwarden.Collection{{ID: 2, Name: "Reading"}}, "New")
+	assert.NoError(err)
+	assert.Zero(id, "no Unorganized collection means a top-level collection")
 }

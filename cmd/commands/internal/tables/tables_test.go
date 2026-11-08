@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLinks_OneRowPerLink(t *testing.T) {
+func TestLinksOneRowPerLink(t *testing.T) {
 	links := []linkwarden.Link{
 		{ID: 1, Name: "Bubble Tea", URL: "https://github.com/charmbracelet/bubbletea", Tags: []linkwarden.Tag{{Name: "go"}, {Name: "tui"}}},
 		{ID: 2, Name: "Lip Gloss"},
@@ -23,6 +23,6 @@ func TestTagNames(t *testing.T) {
 	assert.Empty(tagNames(nil), "no tags is blank, which the table shows as a dash")
 }
 
-func TestHighlights_OneRowPerHighlight(t *testing.T) {
+func TestHighlightsOneRowPerHighlight(t *testing.T) {
 	require.Equal(t, 1, Highlights("Highlights", []linkwarden.Highlight{{ID: 1, LinkID: 9, Text: "quote"}}).Len())
 }

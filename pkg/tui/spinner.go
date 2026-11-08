@@ -23,6 +23,8 @@ type Spinner struct {
 	program *tea.Program
 	done    chan struct{}
 	once    sync.Once
+	// final is the model the program ended with; set before done is closed.
+	final tea.Model
 }
 
 // StartSpinner draws a spinner next to label on out (normally stderr, so
@@ -42,7 +44,7 @@ func startSpinner(label string, delay time.Duration, out io.Writer, extra ...tea
 
 	go func() {
 		defer close(s.done)
-		_, _ = s.program.Run()
+		s.final, _ = s.program.Run()
 	}()
 
 	return s

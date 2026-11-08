@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestExecute_UsesQueryFlags(t *testing.T) {
+func TestExecuteUsesQueryFlags(t *testing.T) {
 	assert := require.New(t)
 
 	var gotQuery string
@@ -29,7 +29,7 @@ func TestExecute_UsesQueryFlags(t *testing.T) {
 	assert.Equal("cursor=3&searchQueryString=go&sort=2", gotQuery)
 }
 
-func TestExecute_OmitsUnsetSort(t *testing.T) {
+func TestExecuteOmitsUnsetSort(t *testing.T) {
 	assert := require.New(t)
 
 	var gotQuery string
@@ -47,7 +47,7 @@ func TestExecute_OmitsUnsetSort(t *testing.T) {
 	assert.Equal("", gotQuery)
 }
 
-func TestExecute_PropagatesAPIError(t *testing.T) {
+func TestExecutePropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

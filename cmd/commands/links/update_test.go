@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUpdate_SendsFlagsAsRequestBody(t *testing.T) {
+func TestUpdateSendsFlagsAsRequestBody(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody map[string]any
@@ -36,7 +36,7 @@ func TestUpdate_SendsFlagsAsRequestBody(t *testing.T) {
 	assert.Equal("https://example.com", gotBody["url"])
 }
 
-func TestUpdate_PropagatesAPIError(t *testing.T) {
+func TestUpdatePropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

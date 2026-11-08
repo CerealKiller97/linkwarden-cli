@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreate_SendsRequestedFields(t *testing.T) {
+func TestCreateSendsRequestedFields(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody linkwarden.CreateRSSRequest
@@ -32,7 +32,7 @@ func TestCreate_SendsRequestedFields(t *testing.T) {
 	assert.Equal(7, gotBody.CollectionID)
 }
 
-func TestCreate_PropagatesAPIError(t *testing.T) {
+func TestCreatePropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

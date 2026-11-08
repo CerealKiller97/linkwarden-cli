@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestList_RendersLinks(t *testing.T) {
+func TestListRendersLinks(t *testing.T) {
 	assert := require.New(t)
 
 	var gotQuery string
@@ -29,7 +29,7 @@ func TestList_RendersLinks(t *testing.T) {
 	assert.Equal("collectionId=2&pinnedOnly=true", gotQuery)
 }
 
-func TestList_PropagatesAPIError(t *testing.T) {
+func TestListPropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestUploadStandalone_SendsFileAndURL(t *testing.T) {
+func TestUploadStandaloneSendsFileAndURL(t *testing.T) {
 	assert := require.New(t)
 
 	var gotURLField string
@@ -38,7 +38,7 @@ func TestUploadStandalone_SendsFileAndURL(t *testing.T) {
 	assert.Equal("https://example.com/page", gotURLField)
 }
 
-func TestUploadStandalone_PropagatesAPIError(t *testing.T) {
+func TestUploadStandalonePropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

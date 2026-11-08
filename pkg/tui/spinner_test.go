@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSpinnerModel_HiddenUntilShownAndAfterStop(t *testing.T) {
+func TestSpinnerModelHiddenUntilShownAndAfterStop(t *testing.T) {
 	assert := require.New(t)
 
 	m := newSpinnerModel("Fetching links", time.Hour)
@@ -25,21 +25,30 @@ func TestSpinnerModel_HiddenUntilShownAndAfterStop(t *testing.T) {
 	assert.NotNil(cmd, "stopping quits the program")
 }
 
-func TestSpinner_StopIsIdempotent(t *testing.T) {
+func TestSpinnerStopIsIdempotent(t *testing.T) {
 	var out bytes.Buffer
 	s := startSpinner("Work", 0, &out, tea.WithWindowSize(80, 24))
 
-	time.Sleep(50 * time.Millisecond)
+	// Wait until the spinner is visible rather than sleeping a fixed time, which
+	// is too short under -race on a slow CI runner.
+	s.program.Send(spinnerShowMsg{})
 	s.Stop()
 	s.Stop()
 
-	require.Contains(t, out.String(), "Work")
+	final, ok := s.final.(spinnerModel)
+	require.True(t, ok)
+	require.True(t, final.shown)
+	require.True(t, final.stopped)
+	require.Empty(t, final.View().Content, "the spinner is erased once stopped")
 }
 
-func TestSpinner_StopBeforeDelayDrawsNothing(t *testing.T) {
+func TestSpinnerStopBeforeDelayDrawsNothing(t *testing.T) {
 	var out bytes.Buffer
 	s := startSpinner("Work", time.Hour, &out, tea.WithWindowSize(80, 24))
 	s.Stop()
 
+	final, ok := s.final.(spinnerModel)
+	require.True(t, ok)
+	require.False(t, final.shown, "stopped before the delay passed")
 	require.NotContains(t, out.String(), "Work")
 }

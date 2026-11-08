@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestAppendTokenToShellFile_AppendsToExistingFile(t *testing.T) {
+func TestAppendTokenToShellFileAppendsToExistingFile(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("SHELL", "/bin/zsh")
@@ -25,7 +25,7 @@ func TestAppendTokenToShellFile_AppendsToExistingFile(t *testing.T) {
 	assert.Contains(string(contents), `export LINKWARDEN_TOKEN="TOKEN1"`)
 }
 
-func TestAppendTokenToShellFile_CreatesMissingFile(t *testing.T) {
+func TestAppendTokenToShellFileCreatesMissingFile(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("SHELL", "/bin/bash")
@@ -38,7 +38,7 @@ func TestAppendTokenToShellFile_CreatesMissingFile(t *testing.T) {
 	assert.Contains(string(contents), `export LINKWARDEN_TOKEN="TOKEN2"`)
 }
 
-func TestAppendTokenToShellFile_CreatesFishConfigDir(t *testing.T) {
+func TestAppendTokenToShellFileCreatesFishConfigDir(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("SHELL", "/usr/local/bin/fish")
@@ -52,7 +52,7 @@ func TestAppendTokenToShellFile_CreatesFishConfigDir(t *testing.T) {
 	assert.Contains(string(contents), `export LINKWARDEN_TOKEN="TOKEN3"`)
 }
 
-func TestAppendTokenToShellFile_FishHonorsXDGConfigHome(t *testing.T) {
+func TestAppendTokenToShellFileFishHonorsXDGConfigHome(t *testing.T) {
 	assert := require.New(t)
 
 	configHome := t.TempDir()
@@ -67,7 +67,7 @@ func TestAppendTokenToShellFile_FishHonorsXDGConfigHome(t *testing.T) {
 	assert.Contains(string(contents), `export LINKWARDEN_TOKEN="TOKEN5"`)
 }
 
-func TestAppendTokenToShellFile_UnrecognizedShellErrors(t *testing.T) {
+func TestAppendTokenToShellFileUnrecognizedShellErrors(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("SHELL", "/bin/tcsh")
@@ -76,7 +76,7 @@ func TestAppendTokenToShellFile_UnrecognizedShellErrors(t *testing.T) {
 	assert.Error(AppendTokenToShellFile("TOKEN4"))
 }
 
-func TestShellConfigPath_ResolvesNonStandardShellPaths(t *testing.T) {
+func TestShellConfigPathResolvesNonStandardShellPaths(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("SHELL", "/opt/homebrew/bin/zsh")

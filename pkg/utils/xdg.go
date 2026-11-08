@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 )
 
 // appDirName is the subdirectory the CLI uses inside each XDG base directory.
@@ -27,6 +30,44 @@ func StateFile(name string) (string, error) {
 	}
 
 	return filepath.Join(dir, appDirName, name), nil
+}
+
+// InstanceStateFile returns the path of the state file for one Linkwarden
+// instance, $XDG_STATE_HOME/linkwarden/<name>/<instance>, so state such as a
+// collection ID from one instance is never used against another. <instance> is
+// instanceURL's host, port and path (see instanceKey). It does not create the
+// directory.
+func InstanceStateFile(name, instanceURL string) (string, error) {
+	dir, err := StateFile(name)
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(dir, instanceKey(instanceURL)), nil
+}
+
+// unsafeFileNameChars matches anything that isn't safe in a file name on every
+// OS (":" isn't allowed on Windows, "/" separates directories).
+var unsafeFileNameChars = regexp.MustCompile(`[^a-z0-9.-]+`)
+
+// instanceKey turns an instance URL into a file name: its host, port and path,
+// lowercased, with every other character run replaced by "_". The scheme is
+// dropped, since http and https on one host are the same instance:
+// "https://cloud.linkwarden.app" is "cloud.linkwarden.app", and
+// "http://localhost:3100" is "localhost_3100".
+func instanceKey(instanceURL string) string {
+	key := instanceURL
+	if u, err := url.Parse(instanceURL); err == nil && u.Host != "" {
+		key = u.Host + u.Path
+	}
+
+	key = unsafeFileNameChars.ReplaceAllString(strings.ToLower(key), "_")
+	key = strings.Trim(key, "_.")
+	if key == "" {
+		return "default"
+	}
+
+	return key
 }
 
 // xdgBaseDir resolves an XDG base directory the same way on every OS, Windows

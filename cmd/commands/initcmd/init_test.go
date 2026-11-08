@@ -55,7 +55,7 @@ func fakeLinkwarden(t *testing.T, sessionToken, apiToken string) *httptest.Serve
 	return srv
 }
 
-func TestLoginForToken_MintsAccessTokenFromSession(t *testing.T) {
+func TestLoginForTokenMintsAccessTokenFromSession(t *testing.T) {
 	assert := require.New(t)
 	srv := fakeLinkwarden(t, "session-jwt", "api-token")
 
@@ -64,7 +64,7 @@ func TestLoginForToken_MintsAccessTokenFromSession(t *testing.T) {
 	assert.Equal("api-token", token)
 }
 
-func TestLoginForToken_WrongPassword(t *testing.T) {
+func TestLoginForTokenWrongPassword(t *testing.T) {
 	assert := require.New(t)
 	srv := fakeLinkwarden(t, "session-jwt", "api-token")
 
@@ -99,7 +99,7 @@ func TestValidateURL(t *testing.T) {
 	assert.Error(validateURL(""))
 }
 
-func TestCommand_FailsWithoutInteractiveTerminal(t *testing.T) {
+func TestCommandFailsWithoutInteractiveTerminal(t *testing.T) {
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	utils.SetNonInteractive(true)
 	t.Cleanup(func() { utils.SetNonInteractive(false) })

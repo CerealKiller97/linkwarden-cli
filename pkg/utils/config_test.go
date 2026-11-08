@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestConfigFile_IsNamespacedUnderLinkwarden(t *testing.T) {
+func TestConfigFileIsNamespacedUnderLinkwarden(t *testing.T) {
 	assert := require.New(t)
 
 	dir := t.TempDir()
@@ -20,7 +20,7 @@ func TestConfigFile_IsNamespacedUnderLinkwarden(t *testing.T) {
 	assert.Equal(filepath.Join(dir, "linkwarden", "config.json"), got)
 }
 
-func TestLoadConfig_MissingFileReturnsEmpty(t *testing.T) {
+func TestLoadConfigMissingFileReturnsEmpty(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
@@ -30,7 +30,7 @@ func TestLoadConfig_MissingFileReturnsEmpty(t *testing.T) {
 	assert.Equal(Config{}, cfg)
 }
 
-func TestSaveConfig_RoundTripsWithOwnerOnlyPermissions(t *testing.T) {
+func TestSaveConfigRoundTripsWithOwnerOnlyPermissions(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
@@ -50,7 +50,7 @@ func TestSaveConfig_RoundTripsWithOwnerOnlyPermissions(t *testing.T) {
 	}
 }
 
-func TestLoadConfig_InvalidJSONErrors(t *testing.T) {
+func TestLoadConfigInvalidJSONErrors(t *testing.T) {
 	assert := require.New(t)
 
 	dir := t.TempDir()

@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBulkDelete_ParsesIDs(t *testing.T) {
+func TestBulkDeleteParsesIDs(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody struct {
@@ -32,7 +32,7 @@ func TestBulkDelete_ParsesIDs(t *testing.T) {
 	assert.Equal([]int{1, 2}, gotBody.TagIDs)
 }
 
-func TestBulkDelete_InvalidIDsErrors(t *testing.T) {
+func TestBulkDeleteInvalidIDsErrors(t *testing.T) {
 	assert := require.New(t)
 
 	utils.SetVars("test-token", "http://unused.invalid")
