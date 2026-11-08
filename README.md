@@ -334,7 +334,9 @@ linkwarden dashboard get-v2
 ## 🤖 Interactive vs. non-interactive
 
 Any command that takes a resource ID opens a **picker** when you leave the ID out and stdin is a terminal.
-Type to filter the list, use ↑/↓ to move, Enter to select and Esc to cancel.
+Type to filter the list, use ↑/↓ to move, ←/→ (or PgUp/PgDn) to change page, Enter to select and Esc to cancel.
+The link picker shows each link's shortened URL next to its name (you can filter on either) and loads more
+links as you page past the ones loaded so far, or as you filter for one that isn't loaded yet.
 
 List output that's taller than your terminal opens as an interactive table (↑/↓ or j/k, PgUp/PgDn, g/G, `q` to quit),
 based on Bubble Tea's [table example](https://github.com/charmbracelet/bubbletea/blob/main/examples/table/main.go).

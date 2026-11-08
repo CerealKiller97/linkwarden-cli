@@ -3,6 +3,7 @@ package links
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
@@ -30,11 +31,11 @@ func Update() *cobra.Command {
 func executeUpdate(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
-	id, err := utils.ResolveID(
+	id, err := utils.ResolveIDPaged(
 		cmd.Flag("id").Value.String(),
 		"--id",
 		"Select Link to update:",
-		linksPickerFetch(cmd.Context(), client),
+		pickers.Links(cmd.Context(), client),
 	)
 	if err != nil {
 		return fmt.Errorf("resolve link ID: %w", err)
