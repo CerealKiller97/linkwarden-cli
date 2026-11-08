@@ -14,6 +14,11 @@ import (
 // response doesn't flash a frame of it on screen.
 const spinnerDelay = 150 * time.Millisecond
 
+// spinnerMinVisible is the shortest time the spinner stays on screen once it
+// has appeared, so a call that ends just after spinnerDelay doesn't flash the
+// label too briefly to read.
+const spinnerMinVisible = time.Second
+
 // Spinner is a bubbles/spinner running as its own Bubble Tea program while
 // something without a known length runs, such as an API request.
 //
@@ -30,17 +35,17 @@ type Spinner struct {
 // StartSpinner draws a spinner next to label on out (normally stderr, so
 // stdout stays clean for results). It clears itself when stopped.
 func StartSpinner(label string, out io.Writer) *Spinner {
-	return startSpinner(label, spinnerDelay, out)
+	return startSpinner(label, spinnerDelay, spinnerMinVisible, out)
 }
 
-func startSpinner(label string, delay time.Duration, out io.Writer, extra ...tea.ProgramOption) *Spinner {
+func startSpinner(label string, delay, minVisible time.Duration, out io.Writer, extra ...tea.ProgramOption) *Spinner {
 	s := &Spinner{done: make(chan struct{})}
 	opts := append([]tea.ProgramOption{
 		tea.WithInput(nil),
 		tea.WithOutput(out),
 		tea.WithoutSignalHandler(),
 	}, extra...)
-	s.program = tea.NewProgram(newSpinnerModel(label, delay), opts...)
+	s.program = tea.NewProgram(newSpinnerModel(label, delay, minVisible), opts...)
 
 	go func() {
 		defer close(s.done)
@@ -51,7 +56,8 @@ func startSpinner(label string, delay time.Duration, out io.Writer, extra ...tea
 }
 
 // Stop removes the spinner and waits until it's gone from the screen, so
-// whatever is printed next starts on a clean line.
+// whatever is printed next starts on a clean line. If the spinner has only just
+// appeared, Stop first keeps it up for the rest of its minimum visible time.
 func (s *Spinner) Stop() {
 	s.once.Do(func() {
 		s.program.Send(spinnerStopMsg{})
@@ -65,17 +71,20 @@ type (
 )
 
 type spinnerModel struct {
-	label   string
-	delay   time.Duration
-	spinner spinner.Model
-	shown   bool
-	stopped bool
+	label      string
+	delay      time.Duration
+	minVisible time.Duration
+	spinner    spinner.Model
+	shown      bool
+	shownAt    time.Time
+	stopped    bool
 }
 
-func newSpinnerModel(label string, delay time.Duration) spinnerModel {
+func newSpinnerModel(label string, delay, minVisible time.Duration) spinnerModel {
 	return spinnerModel{
-		label: label,
-		delay: delay,
+		label:      label,
+		delay:      delay,
+		minVisible: minVisible,
 		spinner: spinner.New(
 			spinner.WithSpinner(spinner.Dot),
 			spinner.WithStyle(lipgloss.NewStyle().Foreground(Sky)),
@@ -93,8 +102,18 @@ func (m spinnerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case spinnerShowMsg:
 		m.shown = true
+		m.shownAt = time.Now()
 		return m, nil
 	case spinnerStopMsg:
+		// Once visible, stay up long enough to be read; Stop retries when the
+		// remaining time has passed.
+		if m.shown {
+			if remaining := m.minVisible - time.Since(m.shownAt); remaining > 0 {
+				return m, tea.Tick(remaining, func(time.Time) tea.Msg {
+					return spinnerStopMsg{}
+				})
+			}
+		}
 		m.stopped = true
 		return m, tea.Quit
 	case spinner.TickMsg:
