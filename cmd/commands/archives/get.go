@@ -67,8 +67,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 	}
 
 	if output == "" {
-		fmt.Printf("Content-Type: %s, Size: %d bytes\n", file.ContentType, len(file.Data))
-		return nil
+		return utils.PrintFileInfo(file.ContentType, len(file.Data))
 	}
 
 	if err := os.WriteFile(output, file.Data, 0o600); err != nil {

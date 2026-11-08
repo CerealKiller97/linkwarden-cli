@@ -185,6 +185,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		success:       int(success.Load()),
 		alreadyExists: int(alreadyExists.Load()),
 		failed:        len(failures),
+		failures:      failures,
 	})
 
 	// Fail the command so scripts and cron jobs notice links that weren't saved.
@@ -217,6 +218,38 @@ func splitExisting(data []item, existing map[string]bool) ([]item, int) {
 
 type results struct {
 	total, success, alreadyExists, failed int
+	failures                              []failure
+}
+
+// importReport is what --json prints for an import: the totals, and each link
+// that failed with the reason.
+type importReport struct {
+	Total         int             `json:"total"`
+	Success       int             `json:"success"`
+	AlreadyExists int             `json:"alreadyExists"`
+	Failed        int             `json:"failed"`
+	Failures      []importFailure `json:"failures"`
+}
+
+type importFailure struct {
+	URL   string `json:"url"`
+	Title string `json:"title"`
+	Error string `json:"error"`
+}
+
+func (r results) report() importReport {
+	failures := make([]importFailure, len(r.failures))
+	for i, f := range r.failures {
+		failures[i] = importFailure{URL: f.item.URL, Title: f.item.Title, Error: f.err.Error()}
+	}
+
+	return importReport{
+		Total:         r.total,
+		Success:       r.success,
+		AlreadyExists: r.alreadyExists,
+		Failed:        r.failed,
+		Failures:      failures,
+	}
 }
 
 // Columns of the results table.
@@ -231,6 +264,7 @@ func displayResults(r results) {
 	t := utils.NewSummary("Import Results")
 	t.Header("Total", "Success", "Already exists", "Failed")
 	t.Row(r.total, r.success, r.alreadyExists, r.failed)
+	t.JSON(r.report())
 	t.Tone(func(_, col int, value string) utils.Tone {
 		if value == "0" {
 			return utils.ToneNone

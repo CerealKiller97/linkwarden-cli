@@ -6,5 +6,5 @@ import (
 )
 
 func renderLinkTable(link linkwarden.Link) {
-	tables.Links("Links", []linkwarden.Link{link}).Render()
+	tables.Links("Links", []linkwarden.Link{link}).JSON(link).Render()
 }

@@ -13,6 +13,7 @@ func renderLinksTable(links []linkwarden.Link) {
 
 func renderDashboardV2Stats(data *linkwarden.DashboardV2Data) {
 	t := tables.Links("Dashboard", data.Links)
+	t.JSON(data)
 	t.Caption(fmt.Sprintf("Pinned links: %d · Tags: %d", data.NumberOfPinnedLinks, data.NumberOfTags))
 	t.Render()
 }

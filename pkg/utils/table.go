@@ -17,8 +17,19 @@ import (
 
 // Table collects rows for one of the CLI's result tables.
 type Table struct {
-	data tui.Table
-	out  io.Writer
+	data   tui.Table
+	out    io.Writer
+	source any
+	mode   *OutputMode // nil: the global mode; tests set it
+}
+
+// JSON sets the value --json prints instead of the table: the API's own
+// records (e.g. []linkwarden.Link, or one *linkwarden.Link for a get), so
+// scripts see every field, not just the columns shown. Without it, --json
+// prints the rows as objects keyed by header.
+func (t *Table) JSON(v any) *Table {
+	t.source = v
+	return t
 }
 
 // Every table in the CLI is built with NewTable (a list of records, one per
@@ -148,7 +159,27 @@ func (t *Table) Len() int { return len(t.data.Rows) }
 // of Bubble Tea's table example) that stays on screen after you quit.
 // Otherwise (it fits, output is piped, or --non-interactive is set) it prints
 // the table in the same style, in color only when ColorEnabled.
+//
+// With --json it prints the value set with JSON instead, and with --quiet only
+// the ID column.
 func (t *Table) Render() {
+	mode := outputMode
+	if t.mode != nil {
+		mode = *t.mode
+	}
+
+	switch mode {
+	case OutputJSON:
+		if err := WriteJSON(t.out, t.jsonValue()); err != nil {
+			log.Error().Err(err).Msg("write JSON")
+		}
+		return
+	case OutputIDs:
+		t.writeIDs()
+		return
+	case OutputTable:
+	}
+
 	if width, height, ok := t.browseSize(); ok {
 		err := tui.BrowseTable(t.data, width, height, tui.Options{})
 		if err == nil {
@@ -165,6 +196,48 @@ func (t *Table) Render() {
 	}
 
 	_ = tui.WriteStatic(t.out, data, ColorEnabled())
+}
+
+// jsonValue is what --json prints: the source set with JSON, or else the rows
+// as objects keyed by header.
+func (t *Table) jsonValue() any {
+	if t.source != nil {
+		return t.source
+	}
+
+	rows := make([]map[string]string, len(t.data.Rows))
+	for i, row := range t.data.Rows {
+		obj := make(map[string]string, len(row))
+		for j, cell := range row {
+			if j < len(t.data.Headers) {
+				obj[t.data.Headers[j]] = cell
+			}
+		}
+		rows[i] = obj
+	}
+
+	return rows
+}
+
+// writeIDs prints the ID column, one value per line. A table without an ID
+// column (a summary) prints nothing.
+func (t *Table) writeIDs() {
+	col := -1
+	for i, h := range t.data.Headers {
+		if h == "ID" {
+			col = i
+			break
+		}
+	}
+	if col < 0 {
+		return
+	}
+
+	for _, row := range t.data.Rows {
+		if col < len(row) {
+			_, _ = fmt.Fprintln(t.out, row[col])
+		}
+	}
 }
 
 // browseSize returns the terminal size when the viewer should be used.

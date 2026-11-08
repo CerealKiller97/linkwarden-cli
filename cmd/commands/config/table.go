@@ -18,5 +18,6 @@ func renderConfigTable(cfg *linkwarden.PublicConfig) {
 	t.Row("AI_ENABLED", cfg.AIEnabled)
 	t.Row("INSTANCE_VERSION", cfg.InstanceVersion)
 
+	t.JSON(cfg)
 	t.Render()
 }

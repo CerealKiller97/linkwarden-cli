@@ -5,7 +5,9 @@ import (
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
-func renderTagsTable(tags []linkwarden.TagInfo) {
+// renderTagsTable prints tags; --json prints jsonValue, the whole list or the one
+// record a get or create returned.
+func renderTagsTable(tags []linkwarden.TagInfo, jsonValue any) {
 	t := utils.NewTable("Tags")
 	t.Header("ID", "Name")
 
@@ -13,5 +15,6 @@ func renderTagsTable(tags []linkwarden.TagInfo) {
 		t.Row(tag.ID, tag.Name)
 	}
 
+	t.JSON(jsonValue)
 	t.Render()
 }

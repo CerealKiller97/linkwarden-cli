@@ -71,5 +71,5 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 
 	log.Info().Int("id", collection.ID).Msg("Collection updated successfully")
 
-	return nil
+	return utils.PrintRecord(collection, collection.ID)
 }
