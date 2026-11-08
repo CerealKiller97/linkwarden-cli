@@ -43,3 +43,11 @@ func TestRevokePropagatesListError(t *testing.T) {
 	cmd := Revoke()
 	assert.Error(cmd.Execute())
 }
+
+func TestRevokeHasYesFlag(t *testing.T) {
+	assert := require.New(t)
+
+	flag := Revoke().Flags().Lookup("yes")
+	assert.NotNil(flag)
+	assert.Equal("y", flag.Shorthand)
+}

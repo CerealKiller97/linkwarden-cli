@@ -16,6 +16,7 @@ func BulkDelete() *cobra.Command {
 	}
 
 	cmd.Flags().String("ids", "", "Comma-separated list of link IDs.")
+	utils.AddYesFlag(cmd)
 
 	if err := cmd.MarkFlagRequired("ids"); err != nil {
 		return nil
@@ -28,6 +29,16 @@ func executeBulkDelete(cmd *cobra.Command, _ []string) error {
 	ids, err := parseIDs(cmd.Flag("ids").Value.String())
 	if err != nil {
 		return fmt.Errorf("parse --ids: %w", err)
+	}
+
+	ok, err := utils.Confirm(cmd, fmt.Sprintf("Delete %s (%s)? This can't be undone.",
+		utils.Plural(len(ids), "link"), utils.JoinIDs(ids)))
+	if err != nil {
+		return err
+	}
+	if !ok {
+		log.Info().Msg("Cancelled; nothing was deleted")
+		return nil
 	}
 
 	client := utils.NewLinkwardenClient()

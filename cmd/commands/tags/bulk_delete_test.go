@@ -27,7 +27,7 @@ func TestBulkDeleteParsesIDs(t *testing.T) {
 	utils.SetVars("test-token", server.URL)
 
 	cmd := BulkDelete()
-	cmd.SetArgs([]string{"--ids", "1,2"})
+	cmd.SetArgs([]string{"--ids", "1,2", "--yes"})
 	assert.NoError(cmd.Execute())
 	assert.Equal([]int{1, 2}, gotBody.TagIDs)
 }
@@ -38,6 +38,24 @@ func TestBulkDeleteInvalidIDsErrors(t *testing.T) {
 	utils.SetVars("test-token", "http://unused.invalid")
 
 	cmd := BulkDelete()
-	cmd.SetArgs([]string{"--ids", "not-a-number"})
+	cmd.SetArgs([]string{"--ids", "not-a-number", "--yes"})
 	assert.Error(cmd.Execute())
+}
+
+func TestBulkDeleteRequiresYesWithoutTerminal(t *testing.T) {
+	assert := require.New(t)
+
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+	utils.SetVars("test-token", server.URL)
+
+	cmd := BulkDelete()
+	cmd.SetArgs([]string{"--ids", "1,2"})
+	err := cmd.Execute()
+	assert.ErrorIs(err, utils.ErrConfirmationRequired)
+	assert.Zero(requests, "nothing may reach the API without --yes")
 }

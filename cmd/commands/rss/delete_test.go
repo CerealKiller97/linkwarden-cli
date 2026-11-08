@@ -22,7 +22,7 @@ func TestDeleteUsesIDFlag(t *testing.T) {
 	utils.SetVars("test-token", server.URL)
 
 	cmd := Delete()
-	cmd.SetArgs([]string{"--id", "5"})
+	cmd.SetArgs([]string{"--id", "5", "--yes"})
 	assert.NoError(cmd.Execute())
 }
 
@@ -32,6 +32,24 @@ func TestDeleteInvalidIDErrors(t *testing.T) {
 	utils.SetVars("test-token", "http://unused.invalid")
 
 	cmd := Delete()
-	cmd.SetArgs([]string{"--id", "not-a-number"})
+	cmd.SetArgs([]string{"--id", "not-a-number", "--yes"})
 	assert.Error(cmd.Execute())
+}
+
+func TestDeleteRequiresYesWithoutTerminal(t *testing.T) {
+	assert := require.New(t)
+
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+	utils.SetVars("test-token", server.URL)
+
+	cmd := Delete()
+	cmd.SetArgs([]string{"--id", "5"})
+	err := cmd.Execute()
+	assert.ErrorIs(err, utils.ErrConfirmationRequired)
+	assert.Zero(requests, "nothing may reach the API without --yes")
 }
