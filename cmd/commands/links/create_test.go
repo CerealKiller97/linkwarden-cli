@@ -187,6 +187,43 @@ func TestCreateConflictCountsAsAlreadyExists(t *testing.T) {
 	assert.Equal(int64(1), creates.Load())
 }
 
+func TestCreateFailedLinksReturnError(t *testing.T) {
+	assert := require.New(t)
+
+	var creates atomic.Int64
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/collections":
+			_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Go"}]}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/search":
+			// No links in the collection yet: the search route sends "data": [].
+			_, _ = w.Write([]byte(`{"message":"Success","data":[]}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/links":
+			body, _ := io.ReadAll(r.Body)
+			if strings.Contains(string(body), "broken.example") {
+				w.WriteHeader(http.StatusInternalServerError)
+				_, _ = w.Write([]byte(`{"response":"boom"}`))
+				return
+			}
+			creates.Add(1)
+			_, _ = w.Write([]byte(`{"response":{"id":100,"url":"x"}}`))
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	t.Cleanup(server.Close)
+	utils.SetVars("test-token", server.URL)
+
+	file := writeLinksFile(t, "https://ok.example", "https://broken.example")
+	cmd := Create()
+	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
+
+	err := cmd.Execute()
+	assert.ErrorIs(err, errLinksFailed)
+	assert.ErrorContains(err, "1 of 2")
+	assert.Equal(int64(1), creates.Load(), "the working link is still created")
+}
+
 func TestSplitExisting(t *testing.T) {
 	assert := require.New(t)
 

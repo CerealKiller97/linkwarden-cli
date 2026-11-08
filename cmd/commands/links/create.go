@@ -17,6 +17,7 @@ import (
 var (
 	errFileEmpty          = errors.New("file is empty")
 	errCollectionNotFound = errors.New("collection not found")
+	errLinksFailed        = errors.New("some links could not be created")
 )
 
 const defaultConcurrency = 4
@@ -185,6 +186,11 @@ func execute(cmd *cobra.Command, _ []string) error {
 		alreadyExists: int(alreadyExists.Load()),
 		failed:        len(failures),
 	})
+
+	// Fail the command so scripts and cron jobs notice links that weren't saved.
+	if len(failures) > 0 {
+		return fmt.Errorf("%w: %d of %d", errLinksFailed, len(failures), total)
+	}
 
 	return nil
 }
