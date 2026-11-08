@@ -97,3 +97,29 @@ func TestColorSwatchHexWithoutColor(t *testing.T) {
 	assert.Equal("#00bba7", ColorSwatch("#00bba7"))
 	assert.Equal(EmptyCell, ColorSwatch(""))
 }
+
+func TestLinkTarget(t *testing.T) {
+	assert := require.New(t)
+
+	assert.Equal("https://go.dev/doc", linkTarget("https://go.dev/doc"))
+	assert.Equal("http://example.com", linkTarget(" http://example.com "))
+	assert.Empty(linkTarget(EmptyCell), "the empty-cell dash isn't a link")
+	assert.Empty(linkTarget("go.dev/doc"), "no scheme")
+	assert.Empty(linkTarget("javascript:alert(1)"), "only http and https")
+	assert.Empty(linkTarget("file:///etc/passwd"))
+}
+
+func TestLinkColumnLinksOnlyThatColumn(t *testing.T) {
+	assert := require.New(t)
+
+	tbl := NewTable("Links")
+	tbl.Header("ID", "URL")
+	tbl.Row(1, "https://go.dev")
+	tbl.Row(2, "")
+	tbl.LinkColumn(1)
+
+	assert.Equal("https://go.dev", tbl.data.Link(0, 1))
+	assert.Empty(tbl.data.Link(0, 0), "other columns aren't linked")
+	assert.Empty(tbl.data.Link(1, 1), "a blank URL shows as a dash and isn't linked")
+	assert.Empty(tbl.data.Link(5, 1), "out of range")
+}

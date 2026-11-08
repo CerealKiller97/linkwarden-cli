@@ -9,6 +9,9 @@ import (
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
+// colLinkURL is the URL column of the Links table.
+const colLinkURL = 2
+
 // Links builds the table of links that links, search, dashboard and archives
 // print. Call Render on it, after adding a Caption if needed.
 func Links(title string, links []linkwarden.Link) *utils.Table {
@@ -18,6 +21,7 @@ func Links(title string, links []linkwarden.Link) *utils.Table {
 	for _, l := range links {
 		t.Row(l.ID, l.Name, l.URL, l.Collection.Name, tagNames(l.Tags))
 	}
+	t.LinkColumn(colLinkURL)
 
 	return t
 }
