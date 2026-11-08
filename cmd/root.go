@@ -12,14 +12,14 @@ import (
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/favicon"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/highlights"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/initcmd"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/links"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/migrations"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/rss"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/search"
-
-	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/links"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tags"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tokens"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -46,8 +46,6 @@ func registerCommands(root *cobra.Command) {
 		// failure, not a usage mistake: don't bury it under the help text.
 		cmd.SilenceUsage = true
 
-		utils.ConfigureDefaultLogger("info")
-
 		nonInteractive, err := cmd.Flags().GetBool("non-interactive")
 		if err != nil {
 			return err
@@ -70,23 +68,8 @@ func registerCommands(root *cobra.Command) {
 
 		utils.SetVars(token, instanceURL)
 
-		// TODO: App set
-		// configure logger
-		// initialize DI container
-
 		return nil
 	}
-
-	//	appLogger.ConfigureDefaultLogger(cfg.Logging.Level, cfg.Logging.PrettyPrint)
-	//	//nolint:all
-	//	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-	//	command.SetContext(context.WithValue(ctx, constants.ContextKeyContainer, container.New(ctx, cfg)))
-	//	return nil
-	//})
-
-	//root.PersistentPostRunE = cmd.PersistentPostRunE(func(cmd *cobra.Command, _ []string) error {
-	//	return cmd.Context().Value(constants.ContextKeyContainer).(*container.Container).Close()
-	//})
 }
 
 // errNotLoggedIn is returned when neither LINKWARDEN_TOKEN nor the config file
@@ -134,8 +117,12 @@ func Root() *cobra.Command {
 }
 
 func Execute() {
+	// Configured here rather than in PersistentPreRunE so flag and argument
+	// errors, which fail before any PreRun hook, are logged the same way.
+	utils.ConfigureDefaultLogger("info")
+
 	if err := Root().Execute(); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "Error:", err)
+		log.Error().Msg(err.Error())
 		os.Exit(1)
 	}
 }
