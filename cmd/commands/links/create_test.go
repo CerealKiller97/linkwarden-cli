@@ -26,9 +26,10 @@ func TestCreateUploadsLinksFromFile(t *testing.T) {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/collections":
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Unorganized"}]}`))
-		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/links":
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/search":
+			// With no matches the search route sends "data": [] instead of {"links": [...]}.
 			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"response":[]}`))
+			_, _ = w.Write([]byte(`{"message":"Success","data":[]}`))
 		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/links":
 			createCount++
 			w.WriteHeader(http.StatusOK)
@@ -103,7 +104,7 @@ func fakeLinkServer(t *testing.T, existing []string, pageSize int, conflict stri
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/collections":
 			_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Go"}]}`))
-		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/links":
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/search":
 			lists.Add(1)
 			assert.Equal(t, "1", r.URL.Query().Get("collectionId"))
 			// IDs count down from len(existing), newest first, like the API.
@@ -115,7 +116,11 @@ func fakeLinkServer(t *testing.T, existing []string, pageSize int, conflict stri
 				}
 				page = append(page, fmt.Sprintf(`{"id":%d,"url":%q}`, i, existing[i-1]))
 			}
-			_, _ = w.Write([]byte(`{"response":[` + strings.Join(page, ",") + `]}`))
+			if len(page) == 0 {
+				_, _ = w.Write([]byte(`{"message":"Success","data":[]}`))
+				return
+			}
+			_, _ = w.Write([]byte(`{"message":"Success","data":{"links":[` + strings.Join(page, ",") + `]}}`))
 		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/links":
 			body, _ := io.ReadAll(r.Body)
 			if conflict != "" && strings.Contains(string(body), conflict) {

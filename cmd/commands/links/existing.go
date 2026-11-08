@@ -9,7 +9,7 @@ import (
 )
 
 // existingURLs returns the normalized URLs of every link already in
-// collectionID. The links endpoint is cursor-paginated (the cursor is the last
+// collectionID. Listing links is cursor-paginated (the cursor is the last
 // link ID seen), so it keeps fetching until a page comes back empty.
 func existingURLs(ctx context.Context, client *linkwarden.Client, collectionID int) (map[string]bool, error) {
 	seen := make(map[string]bool)
