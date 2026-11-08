@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"io"
+	"net/url"
 	"os"
 	"reflect"
 	"strings"
@@ -103,6 +104,30 @@ func (t *Table) Tone(fn func(row, col int, value string) Tone) {
 		}
 		return fn(row, col, t.data.Rows[row][col])
 	}
+}
+
+// LinkColumn makes the http(s) URLs in column col (0-based) clickable in
+// terminals that support hyperlinks. A long URL is still cut short with an
+// ellipsis to fit, but the link opens the whole URL. Cells that aren't an
+// http(s) URL, such as EmptyCell, stay plain text.
+func (t *Table) LinkColumn(col int) {
+	t.data.Link = func(row, c int) string {
+		if c != col || row < 0 || row >= len(t.data.Rows) || col >= len(t.data.Rows[row]) {
+			return ""
+		}
+
+		return linkTarget(t.data.Rows[row][col])
+	}
+}
+
+// linkTarget returns s when it's an absolute http or https URL, else "".
+func linkTarget(s string) string {
+	u, err := url.Parse(strings.TrimSpace(s))
+	if err != nil || u.Host == "" || (u.Scheme != "http" && u.Scheme != "https") {
+		return ""
+	}
+
+	return u.String()
 }
 
 // Tone is a semantic cell color; see Table.Tone.

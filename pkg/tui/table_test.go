@@ -7,6 +7,7 @@ import (
 
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/stretchr/testify/require"
 )
 
@@ -189,4 +190,53 @@ func TestBrowseCaptionLeavesRoomForRows(t *testing.T) {
 	lines := strings.Split(strings.TrimRight(m.View().Content, "\n"), "\n")
 	assert.LessOrEqual(len(lines), 24-1, "caption plus table still leaves a line for the prompt")
 	assert.Contains(m.View().Content, "note")
+}
+
+const longURL = "https://stolicefotelje.rs/namestaj/kancelarijske-stolice/radna-stolica-mirra-2"
+
+func linkedTable() Table {
+	return Table{
+		Headers: []string{"ID", "URL"},
+		Rows:    [][]string{{"1", longURL}, {"2", "-"}},
+		Width:   40,
+		Link: func(row, col int) string {
+			if row == 0 && col == 1 {
+				return longURL
+			}
+			return ""
+		},
+	}
+}
+
+func TestRenderStaticLinksTruncatedCellToFullURL(t *testing.T) {
+	assert := require.New(t)
+
+	out := RenderStatic(linkedTable(), true)
+
+	assert.Contains(out, "\x1b]8;;"+longURL, "the link carries the whole URL")
+	assert.NotContains(ansi.Strip(out), longURL, "the visible text is still cut short")
+	assert.Contains(ansi.Strip(out), "…")
+	assert.Equal(1, strings.Count(out, "\x1b]8;;"+longURL), "only the cell with a URL is linked")
+	for _, line := range strings.Split(strings.TrimRight(out, "\n"), "\n") {
+		assert.LessOrEqual(lipgloss.Width(line), 40, "the link takes no columns: %q", line)
+	}
+}
+
+func TestRenderStaticPlainHasNoLinks(t *testing.T) {
+	assert := require.New(t)
+
+	out := RenderStatic(linkedTable(), false)
+
+	assert.NotContains(out, "\x1b]8;")
+	assert.NotContains(out, longURL)
+}
+
+func TestBrowseLinksTruncatedCellToFullURL(t *testing.T) {
+	assert := require.New(t)
+
+	m := newBrowseModel(linkedTable(), 40, 20)
+	view := m.View().Content
+
+	assert.Contains(view, "\x1b]8;;"+longURL)
+	assert.NotContains(ansi.Strip(view), longURL)
 }

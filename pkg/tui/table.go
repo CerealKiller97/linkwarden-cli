@@ -34,6 +34,12 @@ type Table struct {
 	// Tone, when set, picks a color for a data cell (row and col are 0-based
 	// into Rows). Only static output uses it.
 	Tone func(row, col int) Tone
+
+	// Link, when set, returns the URL a data cell links to, or "" for none. In
+	// color output the cell becomes a terminal hyperlink (OSC 8) to that URL,
+	// so clicking it opens the whole URL even when the cell shows it cut short
+	// with an ellipsis. Plain output has no links.
+	Link func(row, col int) string
 }
 
 // Tone is a semantic color for a table cell.
@@ -175,7 +181,13 @@ func newBrowseModel(t Table, width, height int) browseModel {
 	for i, r := range t.Rows {
 		row := make(table.Row, len(r))
 		for j, c := range r {
-			row[j] = cleanCell(c)
+			c = cleanCell(c)
+			// Cut to the column here, before adding the link, so the
+			// viewer's own truncation never has to cut through it.
+			if j < len(cols) {
+				c = ansi.Truncate(c, cols[j].Width, "…")
+			}
+			row[j] = linkCell(t, i, j, c)
 		}
 		rows[i] = row
 	}
@@ -340,11 +352,28 @@ func fitCells(t Table) Table {
 			if i < len(widths) {
 				c = ansi.Truncate(c, widths[i], "…")
 			}
-			fit.Rows[r][i] = c
+			fit.Rows[r][i] = linkCell(t, r, i, c)
 		}
 	}
 
 	return fit
+}
+
+// linkCell wraps text, the visible (possibly shortened) text of data cell
+// row, col, in a terminal hyperlink to t.Link's URL for it, if any. The link
+// escapes take no columns, so table widths are unchanged; RenderStatic's plain
+// output strips them along with colors.
+func linkCell(t Table, row, col int, text string) string {
+	if t.Link == nil {
+		return text
+	}
+
+	url := t.Link(row, col)
+	if url == "" {
+		return text
+	}
+
+	return ansi.SetHyperlink(url) + text + ansi.ResetHyperlink()
 }
 
 // cleanCell flattens line breaks and tabs so one cell stays on one line.
