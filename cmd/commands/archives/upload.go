@@ -2,6 +2,7 @@ package archives
 
 import (
 	"fmt"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
 	"os"
 	"path/filepath"
 
@@ -34,11 +35,11 @@ func Upload() *cobra.Command {
 func executeUpload(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
-	linkID, err := utils.ResolveID(
+	linkID, err := utils.ResolveIDPaged(
 		cmd.Flag("link-id").Value.String(),
 		"--link-id",
 		"Select Link:",
-		linksPickerFetch(cmd.Context(), client),
+		pickers.Links(cmd.Context(), client),
 	)
 	if err != nil {
 		return fmt.Errorf("resolve link ID: %w", err)

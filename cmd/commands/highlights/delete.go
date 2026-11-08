@@ -2,6 +2,7 @@ package highlights
 
 import (
 	"fmt"
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
 	"strconv"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -51,11 +52,11 @@ func resolveHighlightID(cmd *cobra.Command, client *linkwarden.Client, idFlag st
 		return strconv.Atoi(idFlag)
 	}
 
-	linkID, err := utils.ResolveID(
+	linkID, err := utils.ResolveIDPaged(
 		cmd.Flag("link-id").Value.String(),
 		"--link-id",
 		"Select Link:",
-		linksPickerFetch(cmd.Context(), client),
+		pickers.Links(cmd.Context(), client),
 	)
 	if err != nil {
 		return 0, err
