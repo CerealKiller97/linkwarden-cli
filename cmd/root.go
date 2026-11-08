@@ -18,6 +18,7 @@ import (
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/search"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tags"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tokens"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -121,8 +122,30 @@ func Execute() {
 	// errors, which fail before any PreRun hook, are logged the same way.
 	utils.ConfigureDefaultLogger("info")
 
-	if err := Root().Execute(); err != nil {
+	err := Root().Execute()
+	if err != nil && !errors.Is(err, tui.ErrAborted) {
 		log.Error().Msg(err.Error())
-		os.Exit(1)
+	}
+
+	if code := exitCode(err); code != 0 {
+		os.Exit(code)
+	}
+}
+
+// exitAborted is the exit status when the user cancels a prompt with Esc or
+// Ctrl+C: 128+SIGINT, as shells report an interrupted command.
+const exitAborted = 130
+
+// exitCode maps the error Execute got back to the process exit status. A
+// cancelled prompt is the user stopping the command, not a failure, so it exits
+// quietly with exitAborted rather than logging an error.
+func exitCode(err error) int {
+	switch {
+	case err == nil:
+		return 0
+	case errors.Is(err, tui.ErrAborted):
+		return exitAborted
+	default:
+		return 1
 	}
 }
