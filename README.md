@@ -239,9 +239,9 @@ linkwarden tags create --label golang --label k8s --label architecture
 # Rename a tag (no --id given, so it opens a picker)
 linkwarden tags update --name kubernetes
 
-# Clean up
+# Clean up (asks before deleting; --yes skips the question)
 linkwarden tags bulk-delete --ids 14,15,22
-linkwarden links bulk-delete --ids 301,302
+linkwarden links bulk-delete --ids 301,302 --yes
 ```
 
 ### 📄 Find an article and save it as a PDF
@@ -356,6 +356,23 @@ linkwarden collections get --id 42                 # never prompts
 linkwarden --non-interactive collections get       # fails fast, even in a terminal
 ```
 
+### 🛑 Confirming deletes
+
+Commands that delete or revoke something ask **No / Yes** first, with **No** selected, so a stray Enter
+(for example right after a picker) cancels. `collections delete` names the collection and how many links go
+with it. Pass `--yes` (`-y`) to skip the question.
+
+Without a terminal, or with `--non-interactive`, there's no one to ask, so these commands refuse to run unless
+you pass `--yes`:
+
+```console
+$ linkwarden links delete --id 412 < /dev/null
+Error: this can't be undone and needs confirmation, but there's no interactive terminal: pass --yes (-y) to go ahead
+```
+
+This applies to `links delete`, `links bulk-delete`, `links delete-archive`, `collections delete`, `tags delete`,
+`tags bulk-delete`, `rss delete`, `highlights delete` and `tokens revoke`.
+
 ---
 
 ## 📚 Command reference
@@ -371,12 +388,12 @@ linkwarden links create         --file FILE [--collection ID]
 linkwarden links list           [--collection-id ID] [--tag-id ID] [--pinned-only] [--search QUERY] [--cursor N]
 linkwarden links get            [--id ID]
 linkwarden links update         [--id ID] [--name NAME] [--url URL] [--description TEXT] [--color HEX] [--icon NAME] [--icon-weight W]
-linkwarden links delete         [--id ID]
+linkwarden links delete         [--id ID] [--yes]
 linkwarden links archive        [--id ID]
 linkwarden links get-highlights [--id ID]
 linkwarden links bulk-update    --ids 1,2,3 [--collection-id ID] [--tag NAME ...] [--remove-previous-tags]
-linkwarden links bulk-delete    --ids 1,2,3
-linkwarden links delete-archive --ids 1,2,3
+linkwarden links bulk-delete    --ids 1,2,3 [--yes]
+linkwarden links delete-archive --ids 1,2,3 [--yes]
 ```
 </details>
 
@@ -388,7 +405,7 @@ linkwarden collections create [--name NAME] [--description TEXT] [--color HEX] [
 linkwarden collections list
 linkwarden collections get    [--id ID]
 linkwarden collections update [--id ID] [--name NAME] [--description TEXT] [--color HEX] [--icon NAME] [--parent-id ID] [--public]
-linkwarden collections delete [--id ID]
+linkwarden collections delete [--id ID] [--yes]
 ```
 
 `create` defaults to color `#00bba7` and description `Managed by: Linkwarden CLI`.
@@ -402,8 +419,8 @@ linkwarden tags list        [--search QUERY] [--cursor N]
 linkwarden tags get         [--id ID]
 linkwarden tags create      --label LABEL [--label LABEL ...]
 linkwarden tags update      [--id ID] --name NAME
-linkwarden tags delete      [--id ID]
-linkwarden tags bulk-delete --ids 1,2,3
+linkwarden tags delete      [--id ID] [--yes]
+linkwarden tags bulk-delete --ids 1,2,3 [--yes]
 ```
 </details>
 
@@ -413,7 +430,7 @@ linkwarden tags bulk-delete --ids 1,2,3
 ```bash
 linkwarden tokens generate   # prompts for a name and expiry (7/30/60/90 days or never)
 linkwarden tokens list
-linkwarden tokens revoke     # picker
+linkwarden tokens revoke     [--yes]   # picker
 ```
 </details>
 
@@ -423,7 +440,7 @@ linkwarden tokens revoke     # picker
 ```bash
 linkwarden rss list
 linkwarden rss create --name NAME --url FEED_URL [--collection-id ID | --collection-name NAME]
-linkwarden rss delete [--id ID]
+linkwarden rss delete [--id ID] [--yes]
 ```
 </details>
 
@@ -432,7 +449,7 @@ linkwarden rss delete [--id ID]
 
 ```bash
 linkwarden highlights create --link-id ID --text TEXT --color COLOR --start-offset N --end-offset N [--comment TEXT]
-linkwarden highlights delete [--id ID] [--link-id ID]
+linkwarden highlights delete [--id ID] [--link-id ID] [--yes]
 ```
 
 The API has no list-all endpoint, so `delete` without `--id` asks for a link first, then a highlight on it.

@@ -27,7 +27,7 @@ func TestBulkDeleteParsesIDs(t *testing.T) {
 	utils.SetVars("test-token", server.URL)
 
 	cmd := BulkDelete()
-	cmd.SetArgs([]string{"--ids", "4,5"})
+	cmd.SetArgs([]string{"--ids", "4,5", "-y"})
 	assert.NoError(cmd.Execute())
 	assert.Equal([]int{4, 5}, gotBody.LinkIDs)
 }
@@ -43,6 +43,24 @@ func TestBulkDeletePropagatesAPIError(t *testing.T) {
 	utils.SetVars("test-token", server.URL)
 
 	cmd := BulkDelete()
-	cmd.SetArgs([]string{"--ids", "4"})
+	cmd.SetArgs([]string{"--ids", "4", "-y"})
 	assert.Error(cmd.Execute())
+}
+
+func TestBulkDeleteRequiresYesWithoutTerminal(t *testing.T) {
+	assert := require.New(t)
+
+	requests := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+	utils.SetVars("test-token", server.URL)
+
+	cmd := BulkDelete()
+	cmd.SetArgs([]string{"--ids", "4,5"})
+	err := cmd.Execute()
+	assert.ErrorIs(err, utils.ErrConfirmationRequired)
+	assert.Zero(requests, "nothing may reach the API without --yes")
 }

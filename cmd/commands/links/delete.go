@@ -16,6 +16,7 @@ func Delete() *cobra.Command {
 	}
 
 	cmd.Flags().String("id", "", "Link ID.")
+	utils.AddYesFlag(cmd)
 
 	return cmd
 }
@@ -31,6 +32,15 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 	)
 	if err != nil {
 		return fmt.Errorf("resolve link ID: %w", err)
+	}
+
+	ok, err := utils.Confirm(cmd, fmt.Sprintf("Delete link %d? This can't be undone.", id))
+	if err != nil {
+		return err
+	}
+	if !ok {
+		log.Info().Msg("Cancelled; nothing was deleted")
+		return nil
 	}
 
 	spinner := utils.StartSpinner("Deleting link…")

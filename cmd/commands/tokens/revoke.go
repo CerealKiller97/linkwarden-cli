@@ -9,11 +9,15 @@ import (
 )
 
 func Revoke() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "revoke",
 		Short: "Revoke a token",
 		RunE:  executeRevoke,
 	}
+
+	utils.AddYesFlag(cmd)
+
+	return cmd
 }
 
 func executeRevoke(cmd *cobra.Command, _ []string) error {
@@ -35,6 +39,15 @@ func executeRevoke(cmd *cobra.Command, _ []string) error {
 	idx, result, err := utils.Select("Select token to revoke:", tokenNames)
 	if err != nil {
 		return err
+	}
+
+	ok, err := utils.Confirm(cmd, fmt.Sprintf("Revoke token %q? Anything using it will stop working.", result))
+	if err != nil {
+		return err
+	}
+	if !ok {
+		log.Info().Msg("Cancelled; nothing was revoked")
+		return nil
 	}
 
 	spinner = utils.StartSpinner("Revoking token…")

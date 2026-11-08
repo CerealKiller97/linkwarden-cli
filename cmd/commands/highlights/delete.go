@@ -19,6 +19,7 @@ func Delete() *cobra.Command {
 
 	cmd.Flags().String("id", "", "Highlight ID.")
 	cmd.Flags().String("link-id", "", "Link ID (used to pick a highlight when --id is not set).")
+	utils.AddYesFlag(cmd)
 
 	return cmd
 }
@@ -29,6 +30,15 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 	id, err := resolveHighlightID(cmd, client, cmd.Flag("id").Value.String())
 	if err != nil {
 		return fmt.Errorf("resolve highlight ID: %w", err)
+	}
+
+	ok, err := utils.Confirm(cmd, fmt.Sprintf("Delete highlight %d? This can't be undone.", id))
+	if err != nil {
+		return err
+	}
+	if !ok {
+		log.Info().Msg("Cancelled; nothing was deleted")
+		return nil
 	}
 
 	spinner := utils.StartSpinner("Deleting highlight…")
