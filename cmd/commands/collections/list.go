@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -26,6 +27,15 @@ func executeList(cmd *cobra.Command, _ []string) error {
 	}
 
 	renderCollectionsTable(collections)
+
+	// The list already holds the Unorganized collection, so refresh this
+	// instance's cached ID for "collections create" at no extra cost. A cache
+	// that can't be written isn't worth failing the list over.
+	if id := unorganizedID(collections); id != 0 {
+		if err := persistUnorganizedCollectionID(utils.GetInstanceURL(), id); err != nil {
+			log.Warn().Err(err).Msg("Failed to cache the Unorganized collection ID")
+		}
+	}
 
 	return nil
 }

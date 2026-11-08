@@ -3,6 +3,8 @@ package collections
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -20,9 +22,49 @@ func TestList_RendersCollections(t *testing.T) {
 	}))
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
 	cmd := List()
 	assert.NoError(cmd.Execute())
+}
+
+func TestList_CachesUnorganizedIDForCreate(t *testing.T) {
+	assert := require.New(t)
+
+	t.Setenv("XDG_STATE_HOME", t.TempDir())
+
+	var listCalls, gotParentID int
+	newUnorganizedServer(t, 38899, &listCalls, &gotParentID)
+
+	assert.NoError(List().Execute())
+	assert.Equal(1, listCalls)
+
+	file, err := utils.InstanceStateFile("unorganized", utils.GetInstanceURL())
+	assert.NoError(err)
+	cached, err := os.ReadFile(file)
+	assert.NoError(err)
+	assert.Equal("38899", string(cached))
+
+	// create then uses the ID list cached, without listing again.
+	cmd := Create()
+	cmd.SetArgs([]string{"--name", "New Collection"})
+	assert.NoError(cmd.Execute())
+	assert.Equal(1, listCalls)
+	assert.Equal(38899, gotParentID)
+}
+
+func TestList_SucceedsWhenCacheCantBeWritten(t *testing.T) {
+	assert := require.New(t)
+
+	// A file where the state directory should be makes the cache unwritable.
+	stateHome := t.TempDir()
+	t.Setenv("XDG_STATE_HOME", stateHome)
+	assert.NoError(os.WriteFile(filepath.Join(stateHome, "linkwarden"), nil, 0o600))
+
+	var listCalls, gotParentID int
+	newUnorganizedServer(t, 1, &listCalls, &gotParentID)
+
+	assert.NoError(List().Execute())
 }
 
 func TestList_PropagatesAPIError(t *testing.T) {
