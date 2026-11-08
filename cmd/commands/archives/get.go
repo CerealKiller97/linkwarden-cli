@@ -2,9 +2,9 @@ package archives
 
 import (
 	"fmt"
-	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
 	"os"
 
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
