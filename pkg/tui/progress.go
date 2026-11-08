@@ -18,6 +18,8 @@ type Progress struct {
 	program *tea.Program
 	done    chan struct{}
 	once    sync.Once
+	// final is the model the program ended with; set before done is closed.
+	final tea.Model
 }
 
 // StartProgress draws a bar for total units of work under label on out
@@ -37,7 +39,7 @@ func startProgress(label string, total int, out io.Writer, extra ...tea.ProgramO
 
 	go func() {
 		defer close(p.done)
-		_, _ = p.program.Run()
+		p.final, _ = p.program.Run()
 	}()
 
 	return p

@@ -35,5 +35,11 @@ func TestProgressConcurrentIncrementsThenStop(t *testing.T) {
 	p.Stop()
 	p.Stop() // idempotent
 
-	require.Contains(t, out.String(), "50/50")
+	// Check the final model, not the output: Bubble Tea redraws only the cells
+	// that changed, so "50/50" is on screen but rarely appears in the raw bytes.
+	final, ok := p.final.(progressModel)
+	require.True(t, ok)
+	require.Equal(t, 50, final.current, "every increment arrives before Stop returns")
+	require.True(t, final.stopped)
+	require.NotEmpty(t, out.String(), "the bar was drawn")
 }
