@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestList_RendersTokens(t *testing.T) {
+func TestListRendersTokens(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +25,7 @@ func TestList_RendersTokens(t *testing.T) {
 	assert.NoError(cmd.Execute())
 }
 
-func TestList_PropagatesAPIError(t *testing.T) {
+func TestListPropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

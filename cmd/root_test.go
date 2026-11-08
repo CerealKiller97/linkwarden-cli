@@ -53,7 +53,7 @@ func TestResolveCredentials(t *testing.T) {
 	}
 }
 
-func TestInit_SkipsCredentialCheck(t *testing.T) {
+func TestInitSkipsCredentialCheck(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("LINKWARDEN_TOKEN", "")
@@ -70,7 +70,7 @@ func TestInit_SkipsCredentialCheck(t *testing.T) {
 	assert.ErrorContains(err, "interactive terminal")
 }
 
-func TestOtherCommands_RequireCredentials(t *testing.T) {
+func TestOtherCommandsRequireCredentials(t *testing.T) {
 	t.Setenv("LINKWARDEN_TOKEN", "")
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 

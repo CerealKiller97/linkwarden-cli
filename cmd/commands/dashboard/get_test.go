@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGet_RendersLinks(t *testing.T) {
+func TestGetRendersLinks(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +25,7 @@ func TestGet_RendersLinks(t *testing.T) {
 	assert.NoError(cmd.Execute())
 }
 
-func TestGet_PropagatesAPIError(t *testing.T) {
+func TestGetPropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

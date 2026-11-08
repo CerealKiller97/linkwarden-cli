@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreate_SendsLabelsAsTags(t *testing.T) {
+func TestCreateSendsLabelsAsTags(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody struct {
@@ -35,7 +35,7 @@ func TestCreate_SendsLabelsAsTags(t *testing.T) {
 	assert.Equal("Reading", gotBody.Tags[0].Label)
 }
 
-func TestCreate_PropagatesAPIError(t *testing.T) {
+func TestCreatePropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

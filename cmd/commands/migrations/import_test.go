@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestImport_SendsFileContentsAndFormat(t *testing.T) {
+func TestImportSendsFileContentsAndFormat(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody struct {
@@ -39,7 +39,7 @@ func TestImport_SendsFileContentsAndFormat(t *testing.T) {
 	assert.Equal("<html>bookmarks</html>", gotBody.Data)
 }
 
-func TestImport_MissingFileErrors(t *testing.T) {
+func TestImportMissingFileErrors(t *testing.T) {
 	assert := require.New(t)
 
 	utils.SetVars("test-token", "http://unused.invalid")

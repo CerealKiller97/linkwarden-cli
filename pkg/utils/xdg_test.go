@@ -15,7 +15,7 @@ func setHome(t *testing.T, dir string) {
 	t.Setenv("USERPROFILE", dir)
 }
 
-func TestStateHome_UsesAbsoluteEnvVar(t *testing.T) {
+func TestStateHomeUsesAbsoluteEnvVar(t *testing.T) {
 	assert := require.New(t)
 
 	stateDir := t.TempDir()
@@ -26,7 +26,7 @@ func TestStateHome_UsesAbsoluteEnvVar(t *testing.T) {
 	assert.Equal(stateDir, got)
 }
 
-func TestStateHome_FallsBackWhenUnsetEmptyOrRelative(t *testing.T) {
+func TestStateHomeFallsBackWhenUnsetEmptyOrRelative(t *testing.T) {
 	for name, value := range map[string]string{
 		"empty":    "",
 		"relative": filepath.Join("relative", "state"),
@@ -45,7 +45,7 @@ func TestStateHome_FallsBackWhenUnsetEmptyOrRelative(t *testing.T) {
 	}
 }
 
-func TestConfigHome_UsesEnvVarOrDefault(t *testing.T) {
+func TestConfigHomeUsesEnvVarOrDefault(t *testing.T) {
 	assert := require.New(t)
 
 	home := t.TempDir()
@@ -63,7 +63,7 @@ func TestConfigHome_UsesEnvVarOrDefault(t *testing.T) {
 	assert.Equal(configDir, got)
 }
 
-func TestStateFile_IsNamespacedUnderLinkwarden(t *testing.T) {
+func TestStateFileIsNamespacedUnderLinkwarden(t *testing.T) {
 	assert := require.New(t)
 
 	stateDir := t.TempDir()
@@ -74,7 +74,7 @@ func TestStateFile_IsNamespacedUnderLinkwarden(t *testing.T) {
 	assert.Equal(filepath.Join(stateDir, "linkwarden", "unorganized"), got)
 }
 
-func TestInstanceStateFile_OneFilePerInstance(t *testing.T) {
+func TestInstanceStateFileOneFilePerInstance(t *testing.T) {
 	assert := require.New(t)
 
 	stateDir := t.TempDir()

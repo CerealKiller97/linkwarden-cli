@@ -28,7 +28,7 @@ func TestShouldBrowse(t *testing.T) {
 	assert.True(shouldBrowse(34, 6, 40), "a caption line tips it over")
 }
 
-func TestTable_RendersStaticWhenNotATerminal(t *testing.T) {
+func TestTableRendersStaticWhenNotATerminal(t *testing.T) {
 	assert := require.New(t)
 
 	var out bytes.Buffer
@@ -49,7 +49,7 @@ func TestTable_RendersStaticWhenNotATerminal(t *testing.T) {
 	assert.NotContains(got, "\x1b[", "test output isn't a terminal, so no ANSI")
 }
 
-func TestNewSummary_HasNoCount(t *testing.T) {
+func TestNewSummaryHasNoCount(t *testing.T) {
 	var out bytes.Buffer
 	tbl := NewSummary("Totals")
 	tbl.out = &out
@@ -82,7 +82,7 @@ func TestFormatCell(t *testing.T) {
 	assert.Equal("0", FormatCell(0), "zero numbers are real values, not blanks")
 }
 
-func TestStartProgress_NoOpWithoutTerminal(t *testing.T) {
+func TestStartProgressNoOpWithoutTerminal(t *testing.T) {
 	p := StartProgress("x", 3)
 	p.Increment()
 	p.Stop()
@@ -90,7 +90,7 @@ func TestStartProgress_NoOpWithoutTerminal(t *testing.T) {
 	require.IsType(t, noProgress{}, p)
 }
 
-func TestColorSwatch_HexWithoutColor(t *testing.T) {
+func TestColorSwatchHexWithoutColor(t *testing.T) {
 	// Tests don't run on a terminal, so color is off: the hex code stays.
 	assert := require.New(t)
 

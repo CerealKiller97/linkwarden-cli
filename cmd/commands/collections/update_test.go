@@ -28,7 +28,7 @@ func updateServer(t *testing.T, current string, gotBody *map[string]any) *httpte
 	}))
 }
 
-func TestUpdate_SendsFlagsAsRequestBody(t *testing.T) {
+func TestUpdateSendsFlagsAsRequestBody(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody map[string]any
@@ -43,7 +43,7 @@ func TestUpdate_SendsFlagsAsRequestBody(t *testing.T) {
 	assert.Equal(true, gotBody["isPublic"])
 }
 
-func TestUpdate_PublicFalseMakesPrivate(t *testing.T) {
+func TestUpdatePublicFalseMakesPrivate(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody map[string]any
@@ -58,7 +58,7 @@ func TestUpdate_PublicFalseMakesPrivate(t *testing.T) {
 	assert.Equal(false, gotBody["isPublic"])
 }
 
-func TestUpdate_OmittedPublicKeepsCurrent(t *testing.T) {
+func TestUpdateOmittedPublicKeepsCurrent(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody map[string]any
@@ -72,7 +72,7 @@ func TestUpdate_OmittedPublicKeepsCurrent(t *testing.T) {
 	assert.Equal(true, gotBody["isPublic"])
 }
 
-func TestUpdate_PropagatesAPIError(t *testing.T) {
+func TestUpdatePropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

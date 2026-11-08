@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestList_RendersCollections(t *testing.T) {
+func TestListRendersCollections(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +28,7 @@ func TestList_RendersCollections(t *testing.T) {
 	assert.NoError(cmd.Execute())
 }
 
-func TestList_CachesUnorganizedIDForCreate(t *testing.T) {
+func TestListCachesUnorganizedIDForCreate(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
@@ -53,7 +53,7 @@ func TestList_CachesUnorganizedIDForCreate(t *testing.T) {
 	assert.Equal(38899, gotParentID)
 }
 
-func TestList_SucceedsWhenCacheCantBeWritten(t *testing.T) {
+func TestListSucceedsWhenCacheCantBeWritten(t *testing.T) {
 	assert := require.New(t)
 
 	// A file where the state directory should be makes the cache unwritable.
@@ -67,7 +67,7 @@ func TestList_SucceedsWhenCacheCantBeWritten(t *testing.T) {
 	assert.NoError(List().Execute())
 }
 
-func TestList_PropagatesAPIError(t *testing.T) {
+func TestListPropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreate_UploadsLinksFromFile(t *testing.T) {
+func TestCreateUploadsLinksFromFile(t *testing.T) {
 	assert := require.New(t)
 
 	var createCount int
@@ -49,7 +49,7 @@ func TestCreate_UploadsLinksFromFile(t *testing.T) {
 	assert.Equal(1, createCount)
 }
 
-func TestCreate_EmptyFileErrors(t *testing.T) {
+func TestCreateEmptyFileErrors(t *testing.T) {
 	assert := require.New(t)
 
 	file := filepath.Join(t.TempDir(), "links.json")
@@ -61,7 +61,7 @@ func TestCreate_EmptyFileErrors(t *testing.T) {
 	assert.ErrorIs(err, errFileEmpty)
 }
 
-func TestCreate_UnknownCollectionErrorsWithoutCreatingLinks(t *testing.T) {
+func TestCreateUnknownCollectionErrorsWithoutCreatingLinks(t *testing.T) {
 	assert := require.New(t)
 
 	var createCount atomic.Int64
@@ -148,7 +148,7 @@ func writeLinksFile(t *testing.T, urls ...string) string {
 	return file
 }
 
-func TestCreate_SkipsLinksAlreadyInCollection(t *testing.T) {
+func TestCreateSkipsLinksAlreadyInCollection(t *testing.T) {
 	assert := require.New(t)
 
 	// Five existing links served two per page, so the check has to paginate.
@@ -170,7 +170,7 @@ func TestCreate_SkipsLinksAlreadyInCollection(t *testing.T) {
 	assert.Equal(int64(4), lists.Load(), "3 pages of links plus the empty page that ends paging")
 }
 
-func TestCreate_ConflictCountsAsAlreadyExists(t *testing.T) {
+func TestCreateConflictCountsAsAlreadyExists(t *testing.T) {
 	assert := require.New(t)
 
 	_, creates, _ := fakeLinkServer(t, nil, 50, "dup.example")

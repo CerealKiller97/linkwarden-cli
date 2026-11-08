@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestList_RendersTags(t *testing.T) {
+func TestListRendersTags(t *testing.T) {
 	assert := require.New(t)
 
 	var gotQuery string
@@ -29,7 +29,7 @@ func TestList_RendersTags(t *testing.T) {
 	assert.Equal("search=tech", gotQuery)
 }
 
-func TestList_PropagatesAPIError(t *testing.T) {
+func TestListPropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

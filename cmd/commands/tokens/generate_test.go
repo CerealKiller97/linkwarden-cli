@@ -18,7 +18,7 @@ func TestStringToInt(t *testing.T) {
 	assert.Equal(NoExpiry, stringToInt("unrecognized value"))
 }
 
-func TestExecute_FailsWithoutInteractiveTerminal(t *testing.T) {
+func TestExecuteFailsWithoutInteractiveTerminal(t *testing.T) {
 	assert := require.New(t)
 
 	// generate has no flags at all (name/expiration are always prompted), so with

@@ -35,7 +35,7 @@ var (
 	keyBack  = tea.KeyPressMsg{Code: tea.KeyBackspace}
 )
 
-func TestSelect_MoveAndPick(t *testing.T) {
+func TestSelectMoveAndPick(t *testing.T) {
 	assert := require.New(t)
 
 	m := press(newSelectModel("Pick", []string{"a", "b", "c"}), keyDown, keyDown, keyDown, keyUp, keyEnter).(selectModel)
@@ -44,7 +44,7 @@ func TestSelect_MoveAndPick(t *testing.T) {
 	assert.Equal(1, m.choice, "cursor clamps at the last item, then moves back up one")
 }
 
-func TestSelect_FilterNarrowsAndMapsBackToOriginalIndex(t *testing.T) {
+func TestSelectFilterNarrowsAndMapsBackToOriginalIndex(t *testing.T) {
 	assert := require.New(t)
 
 	opts := []string{"Go docs", "Rust book", "golang blog"}
@@ -55,7 +55,7 @@ func TestSelect_FilterNarrowsAndMapsBackToOriginalIndex(t *testing.T) {
 	assert.Equal(2, m.choice)
 }
 
-func TestSelect_BackspaceWidensFilter(t *testing.T) {
+func TestSelectBackspaceWidensFilter(t *testing.T) {
 	assert := require.New(t)
 
 	m := press(newSelectModel("Pick", []string{"ab", "ac"}), typeText("ab")...).(selectModel)
@@ -65,7 +65,7 @@ func TestSelect_BackspaceWidensFilter(t *testing.T) {
 	assert.Len(m.matches, 2)
 }
 
-func TestSelect_EnterWithNoMatchesDoesNothing(t *testing.T) {
+func TestSelectEnterWithNoMatchesDoesNothing(t *testing.T) {
 	assert := require.New(t)
 
 	m := press(newSelectModel("Pick", []string{"a"}), append(typeText("zzz"), keyEnter)...).(selectModel)
@@ -73,14 +73,14 @@ func TestSelect_EnterWithNoMatchesDoesNothing(t *testing.T) {
 	assert.Contains(m.View().Content, "no matches")
 }
 
-func TestSelect_Esc_Aborts(t *testing.T) {
+func TestSelectEscAborts(t *testing.T) {
 	assert := require.New(t)
 
 	m := press(newSelectModel("Pick", []string{"a"}), keyEsc).(selectModel)
 	assert.True(m.aborted)
 }
 
-func TestSelect_ScrollsPastPageSize(t *testing.T) {
+func TestSelectScrollsPastPageSize(t *testing.T) {
 	assert := require.New(t)
 
 	opts := make([]string, 25)
@@ -99,14 +99,14 @@ func TestSelect_ScrollsPastPageSize(t *testing.T) {
 	assert.Contains(sm.View().Content, "16/25")
 }
 
-func TestSelectWith_EmptyOptions(t *testing.T) {
+func TestSelectWithEmptyOptions(t *testing.T) {
 	_, err := SelectWith("Pick:", nil, Options{})
 	require.Error(t, err)
 }
 
-// TestSelectWith_RunsProgram drives a real Bubble Tea program end-to-end through
+// TestSelectWithRunsProgram drives a real Bubble Tea program end-to-end through
 // a fake terminal: "down, enter" picks the second option.
-func TestSelectWith_RunsProgram(t *testing.T) {
+func TestSelectWithRunsProgram(t *testing.T) {
 	assert := require.New(t)
 
 	in := strings.NewReader("\x1b[B\r")

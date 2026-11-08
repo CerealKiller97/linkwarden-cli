@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBulkDelete_ParsesIDs(t *testing.T) {
+func TestBulkDeleteParsesIDs(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody struct {
@@ -32,7 +32,7 @@ func TestBulkDelete_ParsesIDs(t *testing.T) {
 	assert.Equal([]int{4, 5}, gotBody.LinkIDs)
 }
 
-func TestBulkDelete_PropagatesAPIError(t *testing.T) {
+func TestBulkDeletePropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

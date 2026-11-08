@@ -20,7 +20,7 @@ func writeTempFile(t *testing.T, name, contents string) string {
 	return path
 }
 
-func TestUpload_SendsFile(t *testing.T) {
+func TestUploadSendsFile(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +47,7 @@ func TestUpload_SendsFile(t *testing.T) {
 	assert.NoError(cmd.Execute())
 }
 
-func TestUpload_MissingFileErrors(t *testing.T) {
+func TestUploadMissingFileErrors(t *testing.T) {
 	assert := require.New(t)
 
 	utils.SetVars("test-token", "http://unused.invalid")

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestGet_UsesIDFlag(t *testing.T) {
+func TestGetUsesIDFlag(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +26,7 @@ func TestGet_UsesIDFlag(t *testing.T) {
 	assert.NoError(cmd.Execute())
 }
 
-func TestGet_InvalidIDErrors(t *testing.T) {
+func TestGetInvalidIDErrors(t *testing.T) {
 	assert := require.New(t)
 
 	utils.SetVars("test-token", "http://unused.invalid")

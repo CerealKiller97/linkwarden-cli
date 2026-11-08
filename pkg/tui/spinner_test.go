@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSpinnerModel_HiddenUntilShownAndAfterStop(t *testing.T) {
+func TestSpinnerModelHiddenUntilShownAndAfterStop(t *testing.T) {
 	assert := require.New(t)
 
 	m := newSpinnerModel("Fetching links", time.Hour)
@@ -25,7 +25,7 @@ func TestSpinnerModel_HiddenUntilShownAndAfterStop(t *testing.T) {
 	assert.NotNil(cmd, "stopping quits the program")
 }
 
-func TestSpinner_StopIsIdempotent(t *testing.T) {
+func TestSpinnerStopIsIdempotent(t *testing.T) {
 	var out bytes.Buffer
 	s := startSpinner("Work", 0, &out, tea.WithWindowSize(80, 24))
 
@@ -36,7 +36,7 @@ func TestSpinner_StopIsIdempotent(t *testing.T) {
 	require.Contains(t, out.String(), "Work")
 }
 
-func TestSpinner_StopBeforeDelayDrawsNothing(t *testing.T) {
+func TestSpinnerStopBeforeDelayDrawsNothing(t *testing.T) {
 	var out bytes.Buffer
 	s := startSpinner("Work", time.Hour, &out, tea.WithWindowSize(80, 24))
 	s.Stop()

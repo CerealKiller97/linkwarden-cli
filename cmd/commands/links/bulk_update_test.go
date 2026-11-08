@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestBulkUpdate_BuildsRequestFromFlags(t *testing.T) {
+func TestBulkUpdateBuildsRequestFromFlags(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody linkwarden.BulkUpdateLinksRequest
@@ -41,7 +41,7 @@ func TestBulkUpdate_BuildsRequestFromFlags(t *testing.T) {
 	assert.True(gotBody.RemovePreviousTags)
 }
 
-func TestBulkUpdate_InvalidIDsErrors(t *testing.T) {
+func TestBulkUpdateInvalidIDsErrors(t *testing.T) {
 	assert := require.New(t)
 
 	utils.SetVars("test-token", "http://unused.invalid")

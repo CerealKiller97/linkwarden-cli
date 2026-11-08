@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDelete_UsesIDFlag(t *testing.T) {
+func TestDeleteUsesIDFlag(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +26,7 @@ func TestDelete_UsesIDFlag(t *testing.T) {
 	assert.NoError(cmd.Execute())
 }
 
-func TestDelete_PropagatesAPIError(t *testing.T) {
+func TestDeletePropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

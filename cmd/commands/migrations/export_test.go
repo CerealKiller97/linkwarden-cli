@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestExport_WritesOutputFile(t *testing.T) {
+func TestExportWritesOutputFile(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +34,7 @@ func TestExport_WritesOutputFile(t *testing.T) {
 	assert.JSONEq(`{"username":"bob","collections":[]}`, string(data))
 }
 
-func TestExport_PropagatesAPIError(t *testing.T) {
+func TestExportPropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreate_UsesParentIDFlagWithoutListing(t *testing.T) {
+func TestCreateUsesParentIDFlagWithoutListing(t *testing.T) {
 	assert := require.New(t)
 
 	var listCalled bool
@@ -43,7 +43,7 @@ func TestCreate_UsesParentIDFlagWithoutListing(t *testing.T) {
 	assert.Equal(5, gotBody.ParentID)
 }
 
-func TestCreate_LooksUpUnorganizedWhenParentIDOmitted(t *testing.T) {
+func TestCreateLooksUpUnorganizedWhenParentIDOmitted(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody linkwarden.CreateCollectionRequest
@@ -98,7 +98,7 @@ func newUnorganizedServer(t *testing.T, unorganizedID int, listCalls *int, gotPa
 	utils.SetVars("test-token", server.URL)
 }
 
-func TestCreate_CachesUnorganizedIDPerInstance(t *testing.T) {
+func TestCreateCachesUnorganizedIDPerInstance(t *testing.T) {
 	assert := require.New(t)
 
 	stateHome := t.TempDir()
@@ -140,7 +140,7 @@ func TestCreate_CachesUnorganizedIDPerInstance(t *testing.T) {
 	}
 }
 
-func TestCreate_ReplacesOldSingleCacheFile(t *testing.T) {
+func TestCreateReplacesOldSingleCacheFile(t *testing.T) {
 	assert := require.New(t)
 
 	// Older versions kept one ID for every instance in this file. Using it sent

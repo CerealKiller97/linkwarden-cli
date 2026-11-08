@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewLinkwardenClient_UsesConfiguredURLAndToken(t *testing.T) {
+func TestNewLinkwardenClientUsesConfiguredURLAndToken(t *testing.T) {
 	assert := require.New(t)
 
 	var gotAuth string

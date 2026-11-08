@@ -22,7 +22,7 @@ func writeLayoutFile(t *testing.T, contents string) string {
 	return path
 }
 
-func TestUpdateV2_SendsParsedLayout(t *testing.T) {
+func TestUpdateV2SendsParsedLayout(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody []linkwarden.DashboardLayoutItem
@@ -45,7 +45,7 @@ func TestUpdateV2_SendsParsedLayout(t *testing.T) {
 	assert.Equal("STATS", gotBody[0].Type)
 }
 
-func TestUpdateV2_MissingFileErrors(t *testing.T) {
+func TestUpdateV2MissingFileErrors(t *testing.T) {
 	assert := require.New(t)
 
 	utils.SetVars("test-token", "http://unused.invalid")

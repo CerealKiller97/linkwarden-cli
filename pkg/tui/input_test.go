@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestInput_TypeAndConfirm(t *testing.T) {
+func TestInputTypeAndConfirm(t *testing.T) {
 	assert := require.New(t)
 
 	m := press(newInputModel("Name", nil), append(typeText("ci"), keyEnter)...).(inputModel)
@@ -17,7 +17,7 @@ func TestInput_TypeAndConfirm(t *testing.T) {
 	assert.Equal("ci", m.input.Value())
 }
 
-func TestInput_ValidationBlocksUntilFixed(t *testing.T) {
+func TestInputValidationBlocksUntilFixed(t *testing.T) {
 	assert := require.New(t)
 
 	validate := func(s string) error {
@@ -36,12 +36,12 @@ func TestInput_ValidationBlocksUntilFixed(t *testing.T) {
 	assert.Equal("x", m.input.Value())
 }
 
-func TestInput_Esc_Aborts(t *testing.T) {
+func TestInputEscAborts(t *testing.T) {
 	m := press(newInputModel("Name", nil), keyEsc).(inputModel)
 	require.True(t, m.aborted)
 }
 
-func TestInputDefault_PrefilledWithDefault(t *testing.T) {
+func TestInputDefaultPrefilledWithDefault(t *testing.T) {
 	assert := require.New(t)
 
 	m := newDefaultInputModel("URL", "https://cloud.linkwarden.app", nil)
@@ -53,21 +53,21 @@ func TestInputDefault_PrefilledWithDefault(t *testing.T) {
 	assert.Equal("https://cloud.linkwarden.app", m.value())
 }
 
-func TestInputDefault_ClearedFieldAcceptsDefault(t *testing.T) {
+func TestInputDefaultClearedFieldAcceptsDefault(t *testing.T) {
 	m := newDefaultInputModel("URL", "https://cloud.linkwarden.app", nil)
 
 	m = press(m, keyCtrlU, keyEnter).(inputModel)
 	require.Equal(t, "https://cloud.linkwarden.app", m.value())
 }
 
-func TestInputDefault_TypedValueWins(t *testing.T) {
+func TestInputDefaultTypedValueWins(t *testing.T) {
 	m := newDefaultInputModel("URL", "https://cloud.linkwarden.app", nil)
 
 	m = press(m, append([]tea.KeyPressMsg{keyCtrlU}, append(typeText("http://localhost:3000"), keyEnter)...)...).(inputModel)
 	require.Equal(t, "http://localhost:3000", m.value())
 }
 
-func TestInputDefault_EditsDefault(t *testing.T) {
+func TestInputDefaultEditsDefault(t *testing.T) {
 	m := newDefaultInputModel("URL", "https://cloud.linkwarden.app", nil)
 
 	m = press(m, append(typeText("/"), keyEnter)...).(inputModel)
@@ -76,7 +76,7 @@ func TestInputDefault_EditsDefault(t *testing.T) {
 
 var keyCtrlU = tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl}
 
-func TestPassword_NeverEchoesValue(t *testing.T) {
+func TestPasswordNeverEchoesValue(t *testing.T) {
 	assert := require.New(t)
 
 	m := press(newPasswordModel("Password", nil), typeText("hunter2")...).(inputModel)

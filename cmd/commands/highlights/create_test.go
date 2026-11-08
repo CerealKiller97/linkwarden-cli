@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreate_UsesLinkIDFlag(t *testing.T) {
+func TestCreateUsesLinkIDFlag(t *testing.T) {
 	assert := require.New(t)
 
 	var gotBody linkwarden.CreateHighlightRequest
@@ -38,7 +38,7 @@ func TestCreate_UsesLinkIDFlag(t *testing.T) {
 	assert.Equal("quoted", gotBody.Text)
 }
 
-func TestCreate_PropagatesAPIError(t *testing.T) {
+func TestCreatePropagatesAPIError(t *testing.T) {
 	assert := require.New(t)
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
