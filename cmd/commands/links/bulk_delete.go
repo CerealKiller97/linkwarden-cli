@@ -32,7 +32,10 @@ func executeBulkDelete(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
-	if err := client.Links.BulkDelete(cmd.Context(), ids); err != nil {
+	spinner := utils.StartSpinner("Deleting links…")
+	err = client.Links.BulkDelete(cmd.Context(), ids)
+	spinner.Stop()
+	if err != nil {
 		return fmt.Errorf("delete links: %w", err)
 	}
 

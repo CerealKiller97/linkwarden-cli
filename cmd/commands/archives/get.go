@@ -58,7 +58,9 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
+	spinner := utils.StartSpinner("Downloading archive…")
 	file, err := client.Archives.Get(cmd.Context(), linkID, format, preview)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("get archive: %w", err)
 	}

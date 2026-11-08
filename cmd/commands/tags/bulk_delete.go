@@ -32,7 +32,10 @@ func executeBulkDelete(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
-	if err := client.Tags.BulkDelete(cmd.Context(), ids); err != nil {
+	spinner := utils.StartSpinner("Deleting tags…")
+	err = client.Tags.BulkDelete(cmd.Context(), ids)
+	spinner.Stop()
+	if err != nil {
 		return fmt.Errorf("delete tags: %w", err)
 	}
 

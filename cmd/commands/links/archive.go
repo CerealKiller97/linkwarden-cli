@@ -33,7 +33,10 @@ func executeArchive(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
-	if err := client.Links.Archive(cmd.Context(), id); err != nil {
+	spinner := utils.StartSpinner("Archiving link…")
+	err = client.Links.Archive(cmd.Context(), id)
+	spinner.Stop()
+	if err != nil {
 		return fmt.Errorf("archive link: %w", err)
 	}
 

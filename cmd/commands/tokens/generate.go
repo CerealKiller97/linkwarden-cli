@@ -54,7 +54,9 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Creating token…")
 	created, err := client.Tokens.Create(cmd.Context(), promptResult, int(stringToInt(expirationResult)))
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("prompt for token confirmation: %w", err)
 	}

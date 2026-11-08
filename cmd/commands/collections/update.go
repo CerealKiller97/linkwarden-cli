@@ -54,6 +54,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		isPublic = &v
 	}
 
+	spinner := utils.StartSpinner("Updating collection…")
 	collection, err := client.Collections.Update(cmd.Context(), id, linkwarden.UpdateCollectionRequest{
 		Name:        cmd.Flag("name").Value.String(),
 		Description: cmd.Flag("description").Value.String(),
@@ -63,6 +64,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		ParentID:    parentID,
 		IsPublic:    isPublic,
 	})
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("update collection: %w", err)
 	}

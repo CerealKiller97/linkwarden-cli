@@ -33,7 +33,10 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve RSS subscription ID: %w", err)
 	}
 
-	if err := client.RSS.Delete(cmd.Context(), id); err != nil {
+	spinner := utils.StartSpinner("Deleting RSS subscription…")
+	err = client.RSS.Delete(cmd.Context(), id)
+	spinner.Stop()
+	if err != nil {
 		return fmt.Errorf("delete RSS subscription: %w", err)
 	}
 

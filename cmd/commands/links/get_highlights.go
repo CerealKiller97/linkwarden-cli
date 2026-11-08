@@ -32,7 +32,9 @@ func executeGetHighlights(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
+	spinner := utils.StartSpinner("Fetching highlights…")
 	highlights, err := client.Links.Highlights(cmd.Context(), id)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("get highlights: %w", err)
 	}

@@ -49,7 +49,9 @@ func executeImport(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Importing bookmarks…")
 	message, err := client.Migrations.Import(cmd.Context(), linkwarden.ImportFormat(format), string(fileBytes))
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("import data: %w", err)
 	}

@@ -18,7 +18,9 @@ func List() *cobra.Command {
 func executeList(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching collections…")
 	collections, err := client.Collections.List(cmd.Context())
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("list collections: %w", err)
 	}

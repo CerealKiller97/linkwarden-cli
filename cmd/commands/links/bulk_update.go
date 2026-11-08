@@ -59,6 +59,7 @@ func executeBulkUpdate(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Updating links…")
 	err = client.Links.BulkUpdate(cmd.Context(), linkwarden.BulkUpdateLinksRequest{
 		Links:              links,
 		RemovePreviousTags: removePreviousTags,
@@ -67,6 +68,7 @@ func executeBulkUpdate(cmd *cobra.Command, _ []string) error {
 			Tags:         tags,
 		},
 	})
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("bulk update links: %w", err)
 	}

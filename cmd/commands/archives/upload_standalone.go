@@ -57,7 +57,9 @@ func executeUploadStandalone(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Uploading archive…")
 	link, err := client.Archives.UploadStandalone(cmd.Context(), linkwarden.ArchiveFormat(format), preview, linkURL, filepath.Base(filePath), f)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("upload standalone archive: %w", err)
 	}

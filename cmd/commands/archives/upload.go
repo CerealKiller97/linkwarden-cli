@@ -63,7 +63,9 @@ func executeUpload(cmd *cobra.Command, _ []string) error {
 	}
 	defer f.Close()
 
+	spinner := utils.StartSpinner("Uploading archive…")
 	link, err := client.Archives.Upload(cmd.Context(), linkID, linkwarden.ArchiveFormat(format), preview, filepath.Base(filePath), f)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("upload archive: %w", err)
 	}

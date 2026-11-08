@@ -20,7 +20,9 @@ func Get() *cobra.Command {
 func executeGet(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching instance config…")
 	cfg, err := client.Config.Get(cmd.Context())
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("get configuration: %w", err)
 	}

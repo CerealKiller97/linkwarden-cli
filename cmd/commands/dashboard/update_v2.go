@@ -45,7 +45,9 @@ func executeUpdateV2(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Updating dashboard layout…")
 	data, err := client.Dashboard.UpdateV2Layout(cmd.Context(), layout)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("update dashboard layout: %w", err)
 	}

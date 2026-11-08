@@ -33,7 +33,9 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve collection ID: %w", err)
 	}
 
+	spinner := utils.StartSpinner("Fetching collection…")
 	collection, err := client.Collections.Get(cmd.Context(), id)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("get collection: %w", err)
 	}

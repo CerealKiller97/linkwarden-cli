@@ -50,12 +50,14 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Adding RSS subscription…")
 	sub, err := client.RSS.Create(cmd.Context(), linkwarden.CreateRSSRequest{
 		Name:           name,
 		URL:            url,
 		CollectionID:   collectionID,
 		CollectionName: collectionName,
 	})
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("create RSS subscription: %w", err)
 	}

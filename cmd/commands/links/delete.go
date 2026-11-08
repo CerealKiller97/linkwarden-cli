@@ -33,7 +33,10 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
-	if err := client.Links.Delete(cmd.Context(), id); err != nil {
+	spinner := utils.StartSpinner("Deleting link…")
+	err = client.Links.Delete(cmd.Context(), id)
+	spinner.Stop()
+	if err != nil {
 		return fmt.Errorf("delete link: %w", err)
 	}
 

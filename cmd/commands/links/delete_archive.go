@@ -32,7 +32,10 @@ func executeDeleteArchive(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
-	if err := client.Links.DeleteArchive(cmd.Context(), ids); err != nil {
+	spinner := utils.StartSpinner("Deleting archives…")
+	err = client.Links.DeleteArchive(cmd.Context(), ids)
+	spinner.Stop()
+	if err != nil {
 		return fmt.Errorf("delete archived files: %w", err)
 	}
 

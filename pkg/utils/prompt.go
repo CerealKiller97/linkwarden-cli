@@ -76,7 +76,9 @@ func ResolveID(flagValue, flagHint, label string, fetch func() ([]PickerItem, er
 		return 0, fmt.Errorf("no %s given and no interactive terminal available; pass %s explicitly for non-interactive use", flagHint, flagHint)
 	}
 
+	spinner := StartSpinner("Loading choices…")
 	items, err := fetch()
+	spinner.Stop()
 	if err != nil {
 		return 0, err
 	}

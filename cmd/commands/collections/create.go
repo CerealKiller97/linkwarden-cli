@@ -64,7 +64,9 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 
 	// When unorganized collection ID is 0, find Unorganized collection
 	if unorganizedCollectionID == 0 {
+		spinner := utils.StartSpinner("Checking existing collections…")
 		collections, err := client.Collections.List(cmd.Context())
+		spinner.Stop()
 		if err != nil {
 			return fmt.Errorf("get collections: %w", err)
 		}
@@ -102,7 +104,9 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		request.ParentID = unorganizedCollectionID
 	}
 
+	spinner := utils.StartSpinner("Creating collection…")
 	collection, err := client.Collections.Create(cmd.Context(), request)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("create collection: %w", err)
 	}

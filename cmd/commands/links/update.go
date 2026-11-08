@@ -40,6 +40,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
+	spinner := utils.StartSpinner("Updating link…")
 	link, err := client.Links.Update(cmd.Context(), id, linkwarden.UpdateLinkRequest{
 		Name:        cmd.Flag("name").Value.String(),
 		URL:         cmd.Flag("url").Value.String(),
@@ -48,6 +49,7 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		IconWeight:  cmd.Flag("icon-weight").Value.String(),
 		Color:       cmd.Flag("color").Value.String(),
 	})
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("update link: %w", err)
 	}

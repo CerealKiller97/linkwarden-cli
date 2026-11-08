@@ -19,7 +19,9 @@ func Revoke() *cobra.Command {
 func executeRevoke(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching tokens…")
 	tokenList, err := client.Tokens.List(cmd.Context())
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("get tokens: %w", err)
 	}
@@ -35,7 +37,10 @@ func executeRevoke(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	if err := client.Tokens.Revoke(cmd.Context(), tokenList[idx].ID); err != nil {
+	spinner = utils.StartSpinner("Revoking token…")
+	err = client.Tokens.Revoke(cmd.Context(), tokenList[idx].ID)
+	spinner.Stop()
+	if err != nil {
 		return fmt.Errorf("revoke token: %w", err)
 	}
 

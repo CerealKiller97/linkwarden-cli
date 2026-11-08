@@ -31,7 +31,10 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve highlight ID: %w", err)
 	}
 
-	if err := client.Highlights.Delete(cmd.Context(), id); err != nil {
+	spinner := utils.StartSpinner("Deleting highlight…")
+	err = client.Highlights.Delete(cmd.Context(), id)
+	spinner.Stop()
+	if err != nil {
 		return fmt.Errorf("delete highlight: %w", err)
 	}
 

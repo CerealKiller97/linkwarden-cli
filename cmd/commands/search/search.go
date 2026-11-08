@@ -43,11 +43,13 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Searching links…")
 	links, err := client.Search.Links(cmd.Context(), linkwarden.SearchOptions{
 		SearchQueryString: query,
 		Sort:              sort,
 		Cursor:            cursor,
 	})
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("search links: %w", err)
 	}

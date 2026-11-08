@@ -33,7 +33,10 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve collection ID: %w", err)
 	}
 
-	if err := client.Collections.Delete(cmd.Context(), id); err != nil {
+	spinner := utils.StartSpinner("Deleting collection…")
+	err = client.Collections.Delete(cmd.Context(), id)
+	spinner.Stop()
+	if err != nil {
 		return fmt.Errorf("delete collection: %w", err)
 	}
 

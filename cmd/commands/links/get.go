@@ -33,7 +33,9 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
+	spinner := utils.StartSpinner("Fetching link…")
 	link, err := client.Links.Get(cmd.Context(), id)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("get link: %w", err)
 	}

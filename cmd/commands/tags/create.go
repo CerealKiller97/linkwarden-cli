@@ -37,7 +37,9 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Creating tags…")
 	createdTags, err := client.Tags.CreateOrUpdateBulk(cmd.Context(), inputs)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("create tags: %w", err)
 	}

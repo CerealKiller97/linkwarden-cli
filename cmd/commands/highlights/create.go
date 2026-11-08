@@ -65,6 +65,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
+	spinner := utils.StartSpinner("Creating highlight…")
 	highlight, err := client.Highlights.Create(cmd.Context(), linkwarden.CreateHighlightRequest{
 		LinkID:      linkID,
 		Text:        text,
@@ -73,6 +74,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		StartOffset: startOffset,
 		EndOffset:   endOffset,
 	})
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("create highlight: %w", err)
 	}

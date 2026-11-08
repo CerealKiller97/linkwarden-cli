@@ -38,7 +38,9 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve tag ID: %w", err)
 	}
 
+	spinner := utils.StartSpinner("Updating tag…")
 	tag, err := client.Tags.Update(cmd.Context(), id, cmd.Flag("name").Value.String())
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("update tag: %w", err)
 	}

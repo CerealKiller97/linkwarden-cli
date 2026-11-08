@@ -33,10 +33,12 @@ func executeList(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching tags…")
 	tagList, err := client.Tags.List(cmd.Context(), linkwarden.ListTagsOptions{
 		Search: search,
 		Cursor: cursor,
 	})
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("list tags: %w", err)
 	}

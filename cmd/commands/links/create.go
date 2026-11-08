@@ -77,7 +77,9 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching collections…")
 	collections, err := client.Collections.List(cmd.Context())
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("get collections: %w", err)
 	}
@@ -108,7 +110,9 @@ func execute(cmd *cobra.Command, _ []string) error {
 
 	// Linkwarden happily stores the same URL twice unless the account has
 	// "prevent duplicate links" on, so check the collection first.
+	spinner = utils.StartSpinner("Checking for links already saved…")
 	existing, err := existingURLs(cmd.Context(), client, collection.ID)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("list links already in the collection: %w", err)
 	}

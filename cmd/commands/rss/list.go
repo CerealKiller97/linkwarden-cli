@@ -20,7 +20,9 @@ func List() *cobra.Command {
 func executeList(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching RSS subscriptions…")
 	subs, err := client.RSS.List(cmd.Context())
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("list RSS subscriptions: %w", err)
 	}

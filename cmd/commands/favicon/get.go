@@ -38,7 +38,9 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching favicon…")
 	favicon, err := client.Favicon.Get(cmd.Context(), targetURL)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("fetch favicon: %w", err)
 	}

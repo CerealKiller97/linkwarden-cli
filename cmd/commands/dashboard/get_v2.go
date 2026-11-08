@@ -20,7 +20,9 @@ func GetV2() *cobra.Command {
 func executeGetV2(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching dashboard…")
 	data, err := client.Dashboard.GetV2(cmd.Context())
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("get dashboard data: %w", err)
 	}

@@ -33,7 +33,9 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve tag ID: %w", err)
 	}
 
+	spinner := utils.StartSpinner("Fetching tag…")
 	tag, err := client.Tags.Get(cmd.Context(), id)
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("get tag: %w", err)
 	}

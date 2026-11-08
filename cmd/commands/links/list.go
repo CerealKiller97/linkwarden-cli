@@ -48,6 +48,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Fetching links…")
 	links, err := client.Links.List(cmd.Context(), linkwarden.ListLinksOptions{
 		Cursor:            cursor,
 		CollectionID:      collectionID,
@@ -55,6 +56,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		PinnedOnly:        pinnedOnly,
 		SearchQueryString: search,
 	})
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("list links: %w", err)
 	}

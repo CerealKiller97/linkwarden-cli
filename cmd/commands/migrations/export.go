@@ -40,7 +40,9 @@ func executeExport(cmd *cobra.Command, _ []string) error {
 
 	client := utils.NewLinkwardenClient()
 
+	spinner := utils.StartSpinner("Exporting data…")
 	data, err := client.Migrations.Export(cmd.Context())
+	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("export data: %w", err)
 	}
