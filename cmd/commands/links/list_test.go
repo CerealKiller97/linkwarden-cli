@@ -15,10 +15,10 @@ func TestListRendersLinks(t *testing.T) {
 	var gotQuery string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(http.MethodGet, r.Method)
-		assert.Equal("/api/v1/links", r.URL.Path)
+		assert.Equal("/api/v1/search", r.URL.Path)
 		gotQuery = r.URL.RawQuery
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Example","url":"https://example.com"}]}`))
+		_, _ = w.Write([]byte(`{"message":"Success","data":{"links":[{"id":1,"name":"Example","url":"https://example.com"}]}}`))
 	}))
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
