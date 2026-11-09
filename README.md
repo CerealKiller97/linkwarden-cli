@@ -40,6 +40,34 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 
 ### 1. Install
 
+**⚡ One-liner** (macOS and Linux, x86_64 and ARM64):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh | bash
+```
+
+![The installer detecting the system, downloading and checking the release, and installing linkwarden](.github/assets/install.gif)
+
+It picks the right build for your OS and CPU, checks it against the release's `checksums.txt`, and
+installs `linkwarden` into `/usr/local/bin`, asking for `sudo` when needed. It also installs tab
+completions for your shell (`--no-completions` skips them). Pick `~/.local/bin` in its menu, or pass
+`--dir`, to install just for you without `sudo`. If that folder isn't on your `PATH`, it offers to add
+it. Pass options after `bash -s --`:
+
+```bash
+# Pin a version, pick the folder, and don't ask anything (handy in CI and Dockerfiles)
+curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh | bash -s -- --version 1.0.0 --dir ~/bin --yes
+```
+
+Run it with `--help` for every option, or `--uninstall` to remove it again. Prefer to read a script
+before you run it? Download it first:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh -o install.sh
+less install.sh
+bash install.sh
+```
+
 **🍺 Homebrew** (macOS and Linux):
 
 ```bash
@@ -66,14 +94,16 @@ All three install shell completions for bash, zsh and fish where the platform su
 docker run --rm -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/linkwarden-cli links list
 ```
 
-Add `-it` for interactive prompts. Tags are `latest` and each release version, e.g. `1.1.0`.
+Add `-it` for interactive prompts. Tags are `latest` and each release version without the `v`, e.g. `1.0.0`.
 
 **📦 Prebuilt binary:** grab the archive for your OS and CPU (x86_64 or ARM64) from
 [Releases](https://github.com/CerealKiller97/linkwarden-cli/releases/latest):
 
 ```bash
 # macOS on Apple Silicon. Swap darwin_arm64 for linux_amd64, linux_arm64, darwin_amd64…
-VERSION=1.0.0
+# VERSION resolves to the latest release; set it yourself (e.g. VERSION=1.0.0) to pin one.
+VERSION=$(curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/CerealKiller97/linkwarden-cli/releases/latest)
+VERSION=${VERSION##*/v}
 curl -sSL "https://github.com/CerealKiller97/linkwarden-cli/releases/download/v${VERSION}/linkwarden_${VERSION}_darwin_arm64.tar.gz" | tar -xz
 sudo mv "linkwarden_${VERSION}_darwin_arm64/linkwarden" /usr/local/bin/
 linkwarden --version
@@ -143,6 +173,10 @@ export LINKWARDEN_URL="https://links.example.com"   # only for self-hosted insta
 
 ### 3. Go
 
+```bash
+linkwarden links create https://go.dev/doc/effective_go --tag go
+```
+
 ```console
 $ linkwarden links list --collection-id 3
 ╭─────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -175,10 +209,10 @@ Real-world workflows built from the commands below.
 
 ```bash
 # Pick the target collection interactively…
-linkwarden links create --file reading-list.json
+linkwarden links import --file reading-list.json
 
 # …or name it up front (handy in scripts)
-linkwarden links create --file reading-list.json --collection 3
+linkwarden links import --file reading-list.json --collection 3
 ```
 
 Links already in the target collection are skipped (URLs are compared ignoring case in the scheme and host and any
@@ -414,7 +448,8 @@ Run `linkwarden <command> <subcommand> --help` for the full flag list of anythin
 <summary><b><code>links</code></b>: create, list, update and archive bookmarks</summary>
 
 ```bash
-linkwarden links create         --file FILE [--collection ID]
+linkwarden links create         URL [--name NAME] [--description TEXT] [--collection ID] [--tag NAME ...]
+linkwarden links import         --file FILE [--collection ID] [--concurrency N]
 linkwarden links list           [--collection-id ID] [--tag-id ID] [--pinned-only] [--search QUERY] [--cursor N]
 linkwarden links get            [--id ID]
 linkwarden links update         [--id ID] [--name NAME] [--url URL] [--description TEXT] [--color HEX] [--icon NAME] [--icon-weight W]

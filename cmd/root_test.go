@@ -11,6 +11,7 @@ import (
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 )
 
@@ -120,4 +121,19 @@ func TestInterruptContextCancelsOnSignal(t *testing.T) {
 	case <-time.After(5 * time.Second):
 		t.Fatal("context not cancelled by SIGINT")
 	}
+}
+
+// Every command needs a Short, or --help lists it with a blank description.
+func TestEveryCommandHasShort(t *testing.T) {
+	var walk func(c *cobra.Command)
+	walk = func(c *cobra.Command) {
+		if !c.Hidden && c.Name() != "help" && c.Name() != "completion" {
+			require.NotEmpty(t, c.Short, "%q has no Short", c.CommandPath())
+		}
+		for _, sub := range c.Commands() {
+			walk(sub)
+		}
+	}
+
+	walk(Root())
 }

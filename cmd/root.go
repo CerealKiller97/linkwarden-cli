@@ -143,9 +143,13 @@ var version = "dev"
 
 func Root() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:     "linkwarden",
-		Short:   "Linkwarden is a CLI for the Linkwarden platform",
-		Long:    `Linkwarden is a CLI for the Linkwarden platform`,
+		Use:   "linkwarden",
+		Short: "Linkwarden is a CLI for the Linkwarden platform",
+		Long: `Manage your Linkwarden bookmarks from the terminal: links, collections, tags, archives,
+RSS feeds, highlights and backups, on Linkwarden Cloud or a self-hosted instance.
+
+Run "linkwarden init" to sign in. Leave out --id on most commands to pick from a list,
+add --json for machine-readable output, or -q for bare IDs.`,
 		Version: version,
 		// Execute prints the error itself, once.
 		SilenceErrors: true,

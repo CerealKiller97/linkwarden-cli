@@ -2,7 +2,7 @@
 #
 # Imports links from a JSON file into a collection and reports any that failed.
 #
-# Companion to `linkwarden links create --json`: prints a one-line summary of
+# Companion to `linkwarden links import --json`: prints a one-line summary of
 # the import, then each failed URL with the server's reason. The CLI's own
 # per-link log lines are held back, since the report lists the same failures;
 # they're shown only when the import stops before it reaches a summary (bad
@@ -47,7 +47,7 @@ main() {
 
   local report
   local status=0
-  report="$("${LW}" --non-interactive links create --json \
+  report="$("${LW}" --non-interactive links import --json \
     --file "${file}" --collection "${collection}" 2> "${errlog}")" \
     || status=$?
 

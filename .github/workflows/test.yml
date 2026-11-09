@@ -19,6 +19,14 @@ jobs:
       - run: go build ./...
       - run: go vet ./...
       - run: go test ./... -race -cover
+      - name: 📖 README's Go requirement matches go.mod
+        run: |
+          # "go 1.27" or "go 1.27.1" in go.mod → "1.27"
+          want=$(awk '$1 == "go" { split($2, v, "."); print v[1] "." v[2]; exit }' go.mod)
+          grep -q "Go ${want}+" README.md || {
+            echo "::error file=README.md::README should say 'Go ${want}+' to match go.mod"
+            exit 1
+          }
 
   docker:
     runs-on: ubuntu-latest

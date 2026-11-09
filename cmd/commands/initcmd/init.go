@@ -71,6 +71,9 @@ func signInMethods(cfg *linkwarden.LoginConfig) []signInMethod {
 	return methods
 }
 
+// openBrowser opens a URL in the user's browser; a variable so tests don't.
+var openBrowser = utils.OpenBrowser
+
 // newClient builds an SDK client; a variable so tests can point it elsewhere.
 var newClient = func(baseURL, token string) *linkwarden.Client {
 	return linkwarden.New(baseURL, token)
@@ -186,7 +189,7 @@ func tokenFlow(instanceURL, provider string) (string, error) {
 	}
 	fmt.Println()
 
-	if err := utils.OpenBrowser(pageURL); err != nil {
+	if err := openBrowser(pageURL); err != nil {
 		fmt.Println("Couldn't open a browser; open the URL above manually.")
 	}
 

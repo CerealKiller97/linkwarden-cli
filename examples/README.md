@@ -52,4 +52,4 @@ COL=$(linkwarden collections create --name "Reading List" -q)
   names are the API's own.
 - `links list` returns only the first page of links, so exports of large libraries are incomplete.
 - Errors and info messages go to stderr, so stdout is always clean JSON or IDs. Check the exit code: it's
-  non-zero on any failure, including a `links create` where some links failed.
+  non-zero on any failure, including a `links import` where some links failed.
