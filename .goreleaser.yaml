@@ -74,6 +74,9 @@ release:
   prerelease: auto
   skip_upload: false
   include_meta: true
+  # A copy of the installer pinned to this release, at releases/download/vX.Y.Z/install.sh.
+  extra_files:
+    - glob: ./install.sh
 
 # 🐳 docker run --rm -e LINKWARDEN_TOKEN ghcr.io/cerealkiller97/linkwarden-cli links list
 # One buildx build per release pushes a linux/amd64 + linux/arm64 manifest. --snapshot builds
