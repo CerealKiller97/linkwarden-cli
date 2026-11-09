@@ -1,248 +1,144 @@
 package links
 
 import (
-	"fmt"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
 	"sync/atomic"
 	"testing"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateUploadsLinksFromFile(t *testing.T) {
-	assert := require.New(t)
+type createdLink struct {
+	Name        string `json:"name"`
+	URL         string `json:"url"`
+	Description string `json:"description"`
+	Tags        []struct {
+		Name string `json:"name"`
+	} `json:"tags"`
+	Collection struct {
+		ID int `json:"id"`
+	} `json:"collection"`
+}
 
-	var createCount int
+// fakeCreateServer serves collections and records each link POSTed. A non-zero
+// status is returned for every create instead of a success.
+func fakeCreateServer(t *testing.T, collections string, status int) (*[]createdLink, *atomic.Int64) {
+	t.Helper()
+
+	var (
+		posts []createdLink
+		count atomic.Int64
+	)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/collections":
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Unorganized"}]}`))
+			_, _ = w.Write([]byte(`{"response":` + collections + `}`))
 		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/search":
-			// With no matches the search route sends "data": [] instead of {"links": [...]}.
-			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write([]byte(`{"message":"Success","data":[]}`))
 		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/links":
-			createCount++
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"response":{"id":1,"name":"x","url":"https://example.com"}}`))
+			count.Add(1)
+			body, _ := io.ReadAll(r.Body)
+			var link createdLink
+			require.NoError(t, json.Unmarshal(body, &link))
+			posts = append(posts, link)
+			if status != 0 {
+				w.WriteHeader(status)
+				_, _ = w.Write([]byte(`{"response":"nope"}`))
+				return
+			}
+			_, _ = w.Write([]byte(`{"response":{"id":42,"url":"https://go.dev"}}`))
 		default:
 			w.WriteHeader(http.StatusNotFound)
 		}
 	}))
-	defer server.Close()
+	t.Cleanup(server.Close)
 	utils.SetVars("test-token", server.URL)
 
-	file := filepath.Join(t.TempDir(), "links.json")
-	assert.NoError(os.WriteFile(file, []byte(`[{"url":"https://example.com","title":"Example"}]`), 0o644))
+	return &posts, &count
+}
+
+const twoCollections = `[{"id":1,"name":"Unorganized"},{"id":7,"name":"Go"}]`
+
+func TestCreateSavesSingleLink(t *testing.T) {
+	assert := require.New(t)
+
+	posts, _ := fakeCreateServer(t, twoCollections, 0)
 
 	cmd := Create()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
+	cmd.SetArgs([]string{"https://go.dev", "--name", "Go", "--description", "The Go site",
+		"--collection", "7", "--tag", "go", "--tag", "lang"})
 	assert.NoError(cmd.Execute())
-	assert.Equal(1, createCount)
+
+	assert.Len(*posts, 1)
+	got := (*posts)[0]
+	assert.Equal("https://go.dev", got.URL)
+	assert.Equal("Go", got.Name)
+	assert.Equal("The Go site", got.Description)
+	assert.Equal(7, got.Collection.ID)
+	assert.Len(got.Tags, 2)
+	assert.Equal("go", got.Tags[0].Name)
+	assert.Equal("lang", got.Tags[1].Name)
 }
 
-func TestCreateEmptyFileErrors(t *testing.T) {
+func TestCreateDefaultsToUnorganized(t *testing.T) {
 	assert := require.New(t)
 
-	file := filepath.Join(t.TempDir(), "links.json")
-	assert.NoError(os.WriteFile(file, []byte(`[]`), 0o644))
+	posts, _ := fakeCreateServer(t, `[{"id":7,"name":"Go"},{"id":3,"name":"Unorganized"}]`, 0)
 
 	cmd := Create()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
-	err := cmd.Execute()
-	assert.ErrorIs(err, errFileEmpty)
+	cmd.SetArgs([]string{"https://go.dev"})
+	assert.NoError(cmd.Execute())
+
+	assert.Len(*posts, 1)
+	assert.Equal(3, (*posts)[0].Collection.ID)
 }
 
-func TestCreateUnknownCollectionErrorsWithoutCreatingLinks(t *testing.T) {
+func TestCreateUnknownCollectionErrors(t *testing.T) {
 	assert := require.New(t)
 
-	var createCount atomic.Int64
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/collections":
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Unorganized"}]}`))
-		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/links":
-			createCount.Add(1)
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte(`{"response":{"id":1,"name":"x","url":"https://example.com"}}`))
-		default:
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}))
-	defer server.Close()
-	utils.SetVars("test-token", server.URL)
-
-	file := filepath.Join(t.TempDir(), "links.json")
-	assert.NoError(os.WriteFile(file, []byte(`[{"url":"https://example.com","title":"Example"}]`), 0o644))
+	_, count := fakeCreateServer(t, twoCollections, 0)
 
 	cmd := Create()
-	cmd.SetArgs([]string{"--file", file, "--collection", "9999"})
+	cmd.SetArgs([]string{"https://go.dev", "--collection", "9999"})
 	err := cmd.Execute()
 	assert.ErrorIs(err, errCollectionNotFound)
-	assert.ErrorContains(err, "9999")
-	assert.Zero(createCount.Load())
+	assert.Zero(count.Load())
 }
 
-// fakeLinkServer serves one collection whose links are pre-seeded with
-// existing URLs, paged pageSize at a time by cursor like the real API, and
-// counts creates. Creating a URL in conflict returns 409.
-func fakeLinkServer(t *testing.T, existing []string, pageSize int, conflict string) (*httptest.Server, *atomic.Int64, *atomic.Int64) {
-	t.Helper()
-
-	var creates, lists atomic.Int64
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/collections":
-			_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Go"}]}`))
-		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/search":
-			lists.Add(1)
-			assert.Equal(t, "1", r.URL.Query().Get("collectionId"))
-			// IDs count down from len(existing), newest first, like the API.
-			cursor, _ := strconv.Atoi(r.URL.Query().Get("cursor"))
-			var page []string
-			for i := len(existing); i >= 1 && len(page) < pageSize; i-- {
-				if cursor != 0 && i >= cursor {
-					continue
-				}
-				page = append(page, fmt.Sprintf(`{"id":%d,"url":%q}`, i, existing[i-1]))
-			}
-			if len(page) == 0 {
-				_, _ = w.Write([]byte(`{"message":"Success","data":[]}`))
-				return
-			}
-			_, _ = w.Write([]byte(`{"message":"Success","data":{"links":[` + strings.Join(page, ",") + `]}}`))
-		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/links":
-			body, _ := io.ReadAll(r.Body)
-			if conflict != "" && strings.Contains(string(body), conflict) {
-				w.WriteHeader(http.StatusConflict)
-				_, _ = w.Write([]byte(`{"response":"Link already exists"}`))
-				return
-			}
-			creates.Add(1)
-			_, _ = w.Write([]byte(`{"response":{"id":100,"url":"x"}}`))
-		default:
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}))
-	t.Cleanup(server.Close)
-	utils.SetVars("test-token", server.URL)
-
-	return server, &creates, &lists
-}
-
-func writeLinksFile(t *testing.T, urls ...string) string {
-	t.Helper()
-
-	items := make([]string, len(urls))
-	for i, u := range urls {
-		items[i] = fmt.Sprintf(`{"url":%q,"title":"t"}`, u)
-	}
-	file := filepath.Join(t.TempDir(), "links.json")
-	require.NoError(t, os.WriteFile(file, []byte("["+strings.Join(items, ",")+"]"), 0o644))
-
-	return file
-}
-
-func TestCreateSkipsLinksAlreadyInCollection(t *testing.T) {
+func TestCreateConflictReportsAlreadyExists(t *testing.T) {
 	assert := require.New(t)
 
-	// Five existing links served two per page, so the check has to paginate.
-	existing := []string{"https://a.example", "https://b.example", "https://c.example", "https://d.example", "https://e.example/"}
-	_, creates, lists := fakeLinkServer(t, existing, 2, "")
-
-	file := writeLinksFile(t,
-		"https://A.example/",  // exists (case and trailing slash differ)
-		"https://e.example",   // exists (stored with a trailing slash)
-		"https://new.example", // new
-		"https://new.example", // repeated in the file
-	)
+	fakeCreateServer(t, twoCollections, http.StatusConflict)
 
 	cmd := Create()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
-	assert.NoError(cmd.Execute())
-
-	assert.Equal(int64(1), creates.Load(), "only the one new URL is created")
-	assert.Equal(int64(4), lists.Load(), "3 pages of links plus the empty page that ends paging")
-}
-
-func TestCreateConflictCountsAsAlreadyExists(t *testing.T) {
-	assert := require.New(t)
-
-	_, creates, _ := fakeLinkServer(t, nil, 50, "dup.example")
-
-	file := writeLinksFile(t, "https://dup.example", "https://ok.example")
-	cmd := Create()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
-	assert.NoError(cmd.Execute())
-	assert.Equal(int64(1), creates.Load())
-}
-
-func TestCreateFailedLinksReturnError(t *testing.T) {
-	assert := require.New(t)
-
-	var creates atomic.Int64
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch {
-		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/collections":
-			_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Go"}]}`))
-		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/search":
-			// No links in the collection yet: the search route sends "data": [].
-			_, _ = w.Write([]byte(`{"message":"Success","data":[]}`))
-		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/links":
-			body, _ := io.ReadAll(r.Body)
-			if strings.Contains(string(body), "broken.example") {
-				w.WriteHeader(http.StatusInternalServerError)
-				_, _ = w.Write([]byte(`{"response":"boom"}`))
-				return
-			}
-			creates.Add(1)
-			_, _ = w.Write([]byte(`{"response":{"id":100,"url":"x"}}`))
-		default:
-			w.WriteHeader(http.StatusNotFound)
-		}
-	}))
-	t.Cleanup(server.Close)
-	utils.SetVars("test-token", server.URL)
-
-	file := writeLinksFile(t, "https://ok.example", "https://broken.example")
-	cmd := Create()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
-
+	cmd.SetArgs([]string{"https://go.dev"})
 	err := cmd.Execute()
-	assert.ErrorIs(err, errLinksFailed)
-	assert.ErrorContains(err, "1 of 2")
-	assert.Equal(int64(1), creates.Load(), "the working link is still created")
+	assert.ErrorIs(err, errLinkExists)
+	assert.ErrorContains(err, "https://go.dev")
 }
 
-func TestSplitExisting(t *testing.T) {
+func TestCreateRequiresURL(t *testing.T) {
 	assert := require.New(t)
 
-	existing := map[string]bool{"https://a.example": true}
-	toCreate, skipped := splitExisting([]item{
-		{URL: "https://a.example/"},
-		{URL: "https://b.example"},
-		{URL: " https://B.example/ "},
-	}, existing)
-
-	assert.Equal(2, skipped)
-	assert.Equal([]item{{URL: "https://b.example"}}, toCreate)
+	for _, args := range [][]string{{}, {"https://a.example", "https://b.example"}} {
+		cmd := Create()
+		cmd.SetArgs(args)
+		cmd.SetOut(io.Discard)
+		cmd.SetErr(io.Discard)
+		assert.ErrorContains(cmd.Execute(), "requires the URL to save")
+	}
 }
 
-func TestNormalizeURL(t *testing.T) {
+func TestCreateRejectsFileFlag(t *testing.T) {
 	assert := require.New(t)
 
-	assert.Equal("https://example.com", normalizeURL(" HTTPS://Example.COM/ "))
-	assert.Equal("https://example.com/Docs", normalizeURL("https://example.com/Docs/"), "path case is kept")
-	assert.Equal("https://example.com/a?x=1#y", normalizeURL("https://example.com/a?x=1#y"))
-	assert.Equal("not a url", normalizeURL("not a url/"))
+	cmd := Create()
+	cmd.SetArgs([]string{"--file", "links.json"})
+	cmd.SetOut(io.Discard)
+	cmd.SetErr(io.Discard)
+	assert.ErrorContains(cmd.Execute(), "unknown flag: --file")
 }

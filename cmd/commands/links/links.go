@@ -9,6 +9,7 @@ func Command() *cobra.Command {
 	}
 
 	cmd.AddCommand(Create())
+	cmd.AddCommand(Import())
 	cmd.AddCommand(List())
 	cmd.AddCommand(Get())
 	cmd.AddCommand(Update())
