@@ -383,6 +383,9 @@ COLLECTION=$(linkwarden collections create --name "Reading List" -q)
 Commands with nothing to list, such as `delete`, print nothing on stdout either way; check the exit code.
 `--json` and `--quiet` can't be combined. Errors and info messages always go to stderr, so stdout stays clean.
 
+Ready-to-run scripts built on these flags (CSV export, import with a failure report for cron, and more) are in
+[`examples/`](examples/README.md).
+
 ### 🛑 Confirming deletes
 
 Commands that delete or revoke something ask **No / Yes** first, with **No** selected, so a stray Enter
