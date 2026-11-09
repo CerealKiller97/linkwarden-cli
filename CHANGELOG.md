@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### ✨ Added
 
+- **cli:** Global `--json` flag prints results as JSON with the API's field names instead of a table: lists as arrays, a single `get` or `create` as an object, and the `links create` summary with each failed URL and why. Global `-q` / `--quiet` prints only the ID of each result, one per line, and hides info messages, e.g. `linkwarden tags list -q | xargs …`.
 - **cli:** `links delete`, `links bulk-delete`, `links delete-archive`, `collections delete`, `tags delete`, `tags bulk-delete`, `rss delete`, `highlights delete` and `tokens revoke` ask **No / Yes** before acting, with No as the default answer. `collections delete` names the collection and how many links go with it. `--yes` / `-y` skips the question.
 - **init:** Add `linkwarden init`, a guided setup that signs in with an access token (opening the Access Tokens page in your browser), email/password, or any SSO provider the instance offers (Google, Apple, …), verifies it and saves it to `$XDG_CONFIG_HOME/linkwarden/config.json`. Commands fall back to this file when `LINKWARDEN_TOKEN` isn't set.
 - **ui:** All prompts, tables and the progress bar use Linkwarden's own blue palette (`#8FD1F8` / `#4AA3E2`, defined once in `pkg/tui/theme.go`).

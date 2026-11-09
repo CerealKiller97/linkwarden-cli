@@ -44,7 +44,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("create tags: %w", err)
 	}
 
-	renderTagsTable(createdTags)
+	renderTagsTable(createdTags, createdTags)
 
 	return nil
 }

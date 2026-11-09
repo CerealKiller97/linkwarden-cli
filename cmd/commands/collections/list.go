@@ -26,7 +26,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("list collections: %w", err)
 	}
 
-	renderCollectionsTable(collections)
+	renderCollectionsTable(collections, collections)
 
 	// The list already holds the Unorganized collection, so refresh this
 	// instance's cached ID for "collections create" at no extra cost. A cache

@@ -13,7 +13,8 @@ import (
 const colLinkURL = 2
 
 // Links builds the table of links that links, search, dashboard and archives
-// print. Call Render on it, after adding a Caption if needed.
+// print. Call Render on it, after adding a Caption if needed. --json prints
+// links; call JSON to print something else, such as the one link of a get.
 func Links(title string, links []linkwarden.Link) *utils.Table {
 	t := utils.NewTable(title)
 	t.Header("ID", "Name", "URL", "Collection", "Tags")
@@ -22,6 +23,7 @@ func Links(title string, links []linkwarden.Link) *utils.Table {
 		t.Row(l.ID, l.Name, l.URL, l.Collection.Name, tagNames(l.Tags))
 	}
 	t.LinkColumn(colLinkURL)
+	t.JSON(links)
 
 	return t
 }
@@ -34,6 +36,7 @@ func Highlights(title string, highlights []linkwarden.Highlight) *utils.Table {
 	for _, h := range highlights {
 		t.Row(h.ID, h.LinkID, h.Text, h.Color, h.Comment)
 	}
+	t.JSON(highlights)
 
 	return t
 }

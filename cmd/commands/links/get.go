@@ -5,7 +5,6 @@ import (
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +40,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get link: %w", err)
 	}
 
-	renderLinksTable([]linkwarden.Link{*link})
+	renderLinkTable(link)
 
 	return nil
 }

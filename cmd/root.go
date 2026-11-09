@@ -20,6 +20,7 @@ import (
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tokens"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -41,6 +42,8 @@ func registerCommands(root *cobra.Command) {
 
 	root.PersistentFlags().Bool("non-interactive", false, "Never prompt (e.g. for a picker); fail fast instead. "+
 		"On by default when stdin isn't a terminal.")
+	root.PersistentFlags().Bool("json", false, "Print results as JSON instead of a table.")
+	root.PersistentFlags().BoolP("quiet", "q", false, "Print only the ID of each result, one per line, and hide info messages.")
 
 	root.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		// Flags and args have parsed by now, so any error from here on is a runtime
@@ -52,6 +55,10 @@ func registerCommands(root *cobra.Command) {
 			return err
 		}
 		utils.SetNonInteractive(nonInteractive)
+
+		if err := applyOutputFlags(cmd); err != nil {
+			return err
+		}
 
 		if cmd.Annotations[initcmd.SkipAuthAnnotation] != "" {
 			return nil
@@ -71,6 +78,35 @@ func registerCommands(root *cobra.Command) {
 
 		return nil
 	}
+}
+
+var errJSONAndQuiet = errors.New("--json and --quiet can't be used together")
+
+// applyOutputFlags sets the output mode from --json and --quiet. --quiet also
+// hides info messages on stderr, leaving warnings and errors.
+func applyOutputFlags(cmd *cobra.Command) error {
+	asJSON, err := cmd.Flags().GetBool("json")
+	if err != nil {
+		return err
+	}
+	quiet, err := cmd.Flags().GetBool("quiet")
+	if err != nil {
+		return err
+	}
+
+	switch {
+	case asJSON && quiet:
+		return errJSONAndQuiet
+	case asJSON:
+		utils.SetOutputMode(utils.OutputJSON)
+	case quiet:
+		utils.SetOutputMode(utils.OutputIDs)
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	default:
+		utils.SetOutputMode(utils.OutputTable)
+	}
+
+	return nil
 }
 
 // errNotLoggedIn is returned when neither LINKWARDEN_TOKEN nor the config file

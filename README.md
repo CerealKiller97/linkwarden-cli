@@ -27,7 +27,7 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 |                          |                                                                                                   |
 | ------------------------ | ------------------------------------------------------------------------------------------------- |
 | 🧭 **Interactive pickers** | Leave out `--id` and pick the link, collection, tag or feed from a list right in your terminal.     |
-| 🤖 **Script-safe**         | Without a TTY (cron, CI, pipes) it fails fast with a clear error instead of hanging on a prompt.   |
+| 🤖 **Script-safe**         | `--json` for machine-readable output, `-q` for bare IDs. Without a TTY (cron, CI, pipes) it fails fast instead of hanging on a prompt. |
 | 📦 **Bulk operations**     | Import hundreds of links with a progress bar; retag, move or delete many links in one call.       |
 | 🗄️ **Archives & backups**  | Download PDF, screenshot or HTML snapshots; export and import your whole library.                 |
 | 🔄 **Easy migration**      | Import from browser bookmarks, Pocket, Wallabag, Omnivore or another Linkwarden instance.         |
@@ -358,6 +358,34 @@ linkwarden collections get --id 42                 # never prompts
 linkwarden --non-interactive collections get       # fails fast, even in a terminal
 ```
 
+### 🧾 JSON and IDs for scripts
+
+Add the global `--json` flag to get results as JSON instead of a table. Field names are the API's own, and you
+get every field, not only the columns the table shows. Lists print as an array, a single `get`, `create` or
+`update` as an object:
+
+```bash
+linkwarden links list --collection-id 3 --json | jq -r '.[] | "\(.id)\t\(.url)"'
+linkwarden collections get --id 7 --json | jq .name
+```
+
+`-q` / `--quiet` prints only the ID of each result, one per line, and hides info messages, so it pipes
+straight into another command:
+
+```bash
+# Delete every link that matches a search
+linkwarden links list --search "old draft" -q | paste -sd, - | xargs -I{} linkwarden links bulk-delete --ids {} --yes
+
+# Capture the ID of a new collection
+COLLECTION=$(linkwarden collections create --name "Reading List" -q)
+```
+
+Commands with nothing to list, such as `delete`, print nothing on stdout either way; check the exit code.
+`--json` and `--quiet` can't be combined. Errors and info messages always go to stderr, so stdout stays clean.
+
+Ready-to-run scripts built on these flags (CSV export, import with a failure report for cron, and more) are in
+[`examples/`](examples/README.md).
+
 ### 🛑 Confirming deletes
 
 Commands that delete or revoke something ask **No / Yes** first, with **No** selected, so a stray Enter
@@ -647,7 +675,8 @@ golangci-lint run        # lint (config in .golangci.yml)
 go build -o bin/linkwarden .
 ```
 
-CI runs tests, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests.
+CI runs tests, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus
+[ShellCheck](https://www.shellcheck.net) on the scripts in `examples/` when they change.
 
 ### 🚀 Releasing
 

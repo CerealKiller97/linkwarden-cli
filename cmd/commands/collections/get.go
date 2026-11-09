@@ -40,7 +40,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get collection: %w", err)
 	}
 
-	renderCollectionsTable([]linkwarden.Collection{*collection})
+	renderCollectionsTable([]linkwarden.Collection{*collection}, collection)
 
 	return nil
 }

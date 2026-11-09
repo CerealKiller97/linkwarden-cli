@@ -8,7 +8,9 @@ import (
 // colRSSURL is the URL column of the RSS table.
 const colRSSURL = 2
 
-func renderRSSTable(subs []linkwarden.RSSSubscription) {
+// renderRSSTable prints subs; --json prints jsonValue, the whole list or the one
+// record a get or create returned.
+func renderRSSTable(subs []linkwarden.RSSSubscription, jsonValue any) {
 	t := utils.NewTable("RSS Subscriptions")
 	t.Header("ID", "Name", "URL", "Collection ID")
 
@@ -17,5 +19,6 @@ func renderRSSTable(subs []linkwarden.RSSSubscription) {
 	}
 	t.LinkColumn(colRSSURL)
 
+	t.JSON(jsonValue)
 	t.Render()
 }

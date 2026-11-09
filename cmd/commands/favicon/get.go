@@ -46,8 +46,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 	}
 
 	if output == "" {
-		fmt.Printf("Content-Type: %s, Size: %d bytes\n", favicon.ContentType, len(favicon.Data))
-		return nil
+		return utils.PrintFileInfo(favicon.ContentType, len(favicon.Data))
 	}
 
 	if err := os.WriteFile(output, favicon.Data, 0o600); err != nil {

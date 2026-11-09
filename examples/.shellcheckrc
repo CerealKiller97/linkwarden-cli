@@ -1,0 +1,11 @@
+# ShellCheck settings for the example scripts.
+#
+# The scripts source lib.sh from their own folder, so look for sourced files
+# next to the script, and follow them to check the helpers they call.
+source-path=SCRIPTDIR
+external-sources=true
+
+# Opt-in checks worth having in scripts people copy.
+enable=require-variable-braces
+enable=quote-safe-variables
+enable=check-unassigned-uppercase

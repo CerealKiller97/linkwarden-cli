@@ -27,7 +27,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("list RSS subscriptions: %w", err)
 	}
 
-	renderRSSTable(subs)
+	renderRSSTable(subs, subs)
 
 	return nil
 }

@@ -5,7 +5,9 @@ import (
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
-func renderCollectionsTable(collections []linkwarden.Collection) {
+// renderCollectionsTable prints collections; --json prints jsonValue, the whole list or the one
+// record a get or create returned.
+func renderCollectionsTable(collections []linkwarden.Collection, jsonValue any) {
 	t := utils.NewTable("Collections")
 	t.Header("ID", "Name", "Description", "Color")
 
@@ -13,5 +15,6 @@ func renderCollectionsTable(collections []linkwarden.Collection) {
 		t.Row(c.ID, c.Name, c.Description, utils.ColorSwatch(c.Color))
 	}
 
+	t.JSON(jsonValue)
 	t.Render()
 }

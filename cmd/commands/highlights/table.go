@@ -6,5 +6,5 @@ import (
 )
 
 func renderHighlightTable(highlight linkwarden.Highlight) {
-	tables.Highlights("Highlights", []linkwarden.Highlight{highlight}).Render()
+	tables.Highlights("Highlights", []linkwarden.Highlight{highlight}).JSON(highlight).Render()
 }

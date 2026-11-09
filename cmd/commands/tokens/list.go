@@ -32,6 +32,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		t.Row(token.ID, token.Name, token.IsSession, token.Expires, token.CreatedAt)
 	}
 
+	t.JSON(tokenList)
 	t.Render()
 
 	return nil
