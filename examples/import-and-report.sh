@@ -1,40 +1,70 @@
-#!/usr/bin/env bash
-# Import links from a JSON file and report any that failed. Exits 1 when a link
-# failed, so it fits in cron or CI.
+#!/bin/bash
 #
-# Usage:
-#   examples/import-and-report.sh <links.json> <collection-id>
+# Imports links from a JSON file into a collection and reports any that failed.
 #
-# The file is a JSON array of {"url": "...", "title": "..."}.
-set -uo pipefail
-. "$(dirname "$0")/lib.sh"
+# Companion to `linkwarden links create --json`: prints a one-line summary of
+# the import, then each failed URL with the server's reason. The CLI's own
+# per-link log lines are held back, since the report lists the same failures;
+# they're shown only when the import stops before it reaches a summary (bad
+# file, unknown collection, server down). Exits 1 when any link failed, so it
+# fits in cron or CI. The file is a JSON array of objects with "url" and
+# "title".
+#
+# Usage: examples/import-and-report.sh <links.json> <collection-id>
+#   examples/import-and-report.sh links.json 3 || notify-send "Import failed"
+#   LINKWARDEN_BIN=bin/linkwarden examples/import-and-report.sh links.json 3
 
-[ $# -eq 2 ] || usage "<links.json> <collection-id>"
-file="$1"
-collection="$2"
-[ -r "$file" ] || die "can't read $file"
-require_id "collection-id" "$collection"
+set -euo pipefail
 
-# The CLI logs each failed link on stderr as well. Keep that aside: the report
-# below lists the same failures more readably, and the log is only shown when
-# the import stops before it gets to a summary.
-errlog=$(mktemp)
-trap 'rm -f "$errlog"' EXIT
+source "$(dirname "$0")/lib.sh"
 
-report=$("$LW" --non-interactive links create --file "$file" --collection "$collection" --json 2>"$errlog")
-status=$?
+#######################################
+# Imports the file and prints the report.
+# Globals:
+#   LW
+# Arguments:
+#   Path to the JSON file of links.
+#   ID of the collection to import into.
+# Outputs:
+#   Writes the summary to STDOUT, and the failed links to STDERR.
+# Returns:
+#   0 when every link was created or already saved, non-zero otherwise.
+#######################################
+main() {
+  (( $# == 2 )) || usage "<links.json> <collection-id>"
+  local file="$1"
+  local collection="$2"
+  [[ -r "${file}" ]] || die "can't read ${file}"
+  require_id "collection-id" "${collection}"
+  check_deps
 
-if [ -z "$report" ]; then
-  # Bad file, unknown collection, server unreachable… The CLI said why.
-  cat "$errlog" >&2
-  exit "$status"
-fi
+  local errlog
+  errlog="$(mktemp)"
+  trap "rm -f '${errlog}'" EXIT
 
-echo "$report" | jq -r '"\(.total) links: \(.success) created, \(.alreadyExists) already saved, \(.failed) failed"'
+  local report
+  local status=0
+  report="$("${LW}" --non-interactive links create --json \
+    --file "${file}" --collection "${collection}" 2> "${errlog}")" \
+    || status=$?
 
-if [ "$(echo "$report" | jq '.failed')" -gt 0 ]; then
-  echo "Failed:" >&2
-  echo "$report" | jq -r '.failures[] | "  \(.url)  \(.error | sub("^linkwarden: "; ""))"' >&2
-fi
+  if [[ -z "${report}" ]]; then
+    cat "${errlog}" >&2
+    return "${status}"
+  fi
 
-exit "$status"
+  echo "${report}" | jq -r '
+    "\(.total) links: \(.success) created, "
+    + "\(.alreadyExists) already saved, \(.failed) failed"'
+
+  if (( $(echo "${report}" | jq '.failed') > 0 )); then
+    echo "Failed:" >&2
+    echo "${report}" \
+      | jq -r '.failures[]
+          | "  \(.url)  \(.error | sub("^linkwarden: "; ""))"' >&2
+  fi
+
+  return "${status}"
+}
+
+main "$@"

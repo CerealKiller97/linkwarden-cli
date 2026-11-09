@@ -29,6 +29,10 @@ All scripts check their arguments and that `linkwarden` and `jq` are installed b
 They exit 0 on success, 1 when something failed and 2 on a usage mistake. Shared helpers live in
 [`lib.sh`](lib.sh).
 
+The scripts follow the [Google Shell Style Guide](https://google.github.io/styleguide/shellguide.html):
+each starts with a header that says what it does and how to call it, and every function has a comment
+block.
+
 ## One-liners
 
 ```bash
