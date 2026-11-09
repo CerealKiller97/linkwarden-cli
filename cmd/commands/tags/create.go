@@ -17,9 +17,7 @@ func Create() *cobra.Command {
 
 	cmd.Flags().StringSlice("label", nil, "Tag label (repeatable).")
 
-	if err := cmd.MarkFlagRequired("label"); err != nil {
-		return nil
-	}
+	cobra.CheckErr(cmd.MarkFlagRequired("label"))
 
 	return cmd
 }

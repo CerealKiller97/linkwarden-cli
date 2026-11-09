@@ -49,9 +49,7 @@ Without --collection, a picker asks for the target collection.`,
 	cmd.Flags().String("collection", "", "Collection ID to import into.")
 	cmd.Flags().Int("concurrency", defaultConcurrency, "Number of links to create in parallel.")
 
-	if err := cmd.MarkFlagRequired("file"); err != nil {
-		return nil
-	}
+	cobra.CheckErr(cmd.MarkFlagRequired("file"))
 
 	return cmd
 }

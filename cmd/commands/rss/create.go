@@ -20,12 +20,8 @@ func Create() *cobra.Command {
 	cmd.Flags().Int("collection-id", 0, "Destination collection ID.")
 	cmd.Flags().String("collection-name", "", "Destination collection name (used if collection-id is not set).")
 
-	if err := cmd.MarkFlagRequired("name"); err != nil {
-		return nil
-	}
-	if err := cmd.MarkFlagRequired("url"); err != nil {
-		return nil
-	}
+	cobra.CheckErr(cmd.MarkFlagRequired("name"))
+	cobra.CheckErr(cmd.MarkFlagRequired("url"))
 
 	return cmd
 }

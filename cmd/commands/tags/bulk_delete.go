@@ -18,9 +18,7 @@ func BulkDelete() *cobra.Command {
 	cmd.Flags().String("ids", "", "Comma-separated list of tag IDs.")
 	utils.AddYesFlag(cmd)
 
-	if err := cmd.MarkFlagRequired("ids"); err != nil {
-		return nil
-	}
+	cobra.CheckErr(cmd.MarkFlagRequired("ids"))
 
 	return cmd
 }

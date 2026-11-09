@@ -20,9 +20,7 @@ func UpdateV2() *cobra.Command {
 	cmd.Flags().String("file", "", "Path to a JSON file containing the layout, "+
 		`e.g. [{"type":"STATS","enabled":true,"order":0}].`)
 
-	if err := cmd.MarkFlagRequired("file"); err != nil {
-		return nil
-	}
+	cobra.CheckErr(cmd.MarkFlagRequired("file"))
 
 	return cmd
 }

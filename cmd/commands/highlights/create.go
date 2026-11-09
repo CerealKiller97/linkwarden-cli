@@ -24,9 +24,7 @@ func Create() *cobra.Command {
 	cmd.Flags().Int("end-offset", 0, "End offset of the highlighted text.")
 
 	for _, name := range []string{"text", "color", "start-offset", "end-offset"} {
-		if err := cmd.MarkFlagRequired(name); err != nil {
-			return nil
-		}
+		cobra.CheckErr(cmd.MarkFlagRequired(name))
 	}
 
 	return cmd

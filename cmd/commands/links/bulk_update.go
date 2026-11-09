@@ -21,9 +21,7 @@ func BulkUpdate() *cobra.Command {
 	cmd.Flags().StringSlice("tag", nil, "Tag name to apply (repeatable).")
 	cmd.Flags().Bool("remove-previous-tags", false, "Remove tags not in --tag before applying.")
 
-	if err := cmd.MarkFlagRequired("ids"); err != nil {
-		return nil
-	}
+	cobra.CheckErr(cmd.MarkFlagRequired("ids"))
 
 	return cmd
 }

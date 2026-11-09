@@ -18,9 +18,7 @@ func Update() *cobra.Command {
 	cmd.Flags().String("id", "", "Tag ID.")
 	cmd.Flags().String("name", "", "New tag name.")
 
-	if err := cmd.MarkFlagRequired("name"); err != nil {
-		return nil
-	}
+	cobra.CheckErr(cmd.MarkFlagRequired("name"))
 
 	return cmd
 }

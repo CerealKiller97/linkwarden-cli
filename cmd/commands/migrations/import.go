@@ -24,9 +24,7 @@ func Import() *cobra.Command {
 	cmd.Flags().Int("format", 0, importFormatHelp)
 
 	for _, name := range []string{"file", "format"} {
-		if err := cmd.MarkFlagRequired(name); err != nil {
-			return nil
-		}
+		cobra.CheckErr(cmd.MarkFlagRequired(name))
 	}
 
 	return cmd

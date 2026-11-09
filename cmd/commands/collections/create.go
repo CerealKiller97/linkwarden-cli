@@ -37,9 +37,7 @@ func Create() *cobra.Command {
 	cmd.Flags().String("icon-weight", "", "Collection icon weight.")
 	cmd.Flags().Int("parent-id", 0, "Parent collection ID. Defaults to the Unorganized collection.")
 
-	if err := cmd.MarkFlagRequired("name"); err != nil {
-		return nil
-	}
+	cobra.CheckErr(cmd.MarkFlagRequired("name"))
 
 	return cmd
 }

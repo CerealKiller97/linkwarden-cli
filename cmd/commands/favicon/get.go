@@ -19,9 +19,7 @@ func Get() *cobra.Command {
 	cmd.Flags().String("url", "", "URL to fetch a favicon for.")
 	cmd.Flags().String("output", "", "Path to save the favicon to. Without it, only content-type/size are printed.")
 
-	if err := cmd.MarkFlagRequired("url"); err != nil {
-		return nil
-	}
+	cobra.CheckErr(cmd.MarkFlagRequired("url"))
 
 	return cmd
 }

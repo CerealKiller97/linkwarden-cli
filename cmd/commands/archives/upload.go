@@ -24,9 +24,7 @@ func Upload() *cobra.Command {
 	cmd.Flags().Bool("preview", false, "Store the uploaded file as the generated preview instead of the main archive.")
 
 	for _, name := range []string{"file", "format"} {
-		if err := cmd.MarkFlagRequired(name); err != nil {
-			return nil
-		}
+		cobra.CheckErr(cmd.MarkFlagRequired(name))
 	}
 
 	return cmd
