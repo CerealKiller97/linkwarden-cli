@@ -173,6 +173,10 @@ export LINKWARDEN_URL="https://links.example.com"   # only for self-hosted insta
 
 ### 3. Go
 
+```bash
+linkwarden links create https://go.dev/doc/effective_go --tag go
+```
+
 ```console
 $ linkwarden links list --collection-id 3
 ╭─────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -205,10 +209,10 @@ Real-world workflows built from the commands below.
 
 ```bash
 # Pick the target collection interactively…
-linkwarden links create --file reading-list.json
+linkwarden links import --file reading-list.json
 
 # …or name it up front (handy in scripts)
-linkwarden links create --file reading-list.json --collection 3
+linkwarden links import --file reading-list.json --collection 3
 ```
 
 Links already in the target collection are skipped (URLs are compared ignoring case in the scheme and host and any
@@ -444,7 +448,8 @@ Run `linkwarden <command> <subcommand> --help` for the full flag list of anythin
 <summary><b><code>links</code></b>: create, list, update and archive bookmarks</summary>
 
 ```bash
-linkwarden links create         --file FILE [--collection ID]
+linkwarden links create         URL [--name NAME] [--description TEXT] [--collection ID] [--tag NAME ...]
+linkwarden links import         --file FILE [--collection ID] [--concurrency N]
 linkwarden links list           [--collection-id ID] [--tag-id ID] [--pinned-only] [--search QUERY] [--cursor N]
 linkwarden links get            [--id ID]
 linkwarden links update         [--id ID] [--name NAME] [--url URL] [--description TEXT] [--color HEX] [--icon NAME] [--icon-weight W]
