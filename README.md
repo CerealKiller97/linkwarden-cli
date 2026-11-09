@@ -40,6 +40,30 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 
 ### 1. Install
 
+**⚡ One-liner** (macOS and Linux, x86_64 and ARM64):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh | bash
+```
+
+It picks the right build for your OS and CPU, checks it against the release's `checksums.txt`, and
+installs `linkwarden` into `$XDG_BIN_HOME` (default `~/.local/bin`). It asks before it installs tab
+completions or adds that folder to your `PATH`. Pass options after `bash -s --`:
+
+```bash
+# Pin a version, pick the folder, and don't ask anything (handy in CI and Dockerfiles)
+curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh | bash -s -- --version 1.0.0 --dir ~/bin --yes
+```
+
+Run it with `--help` for every option, or `--uninstall` to remove it again. Prefer to read a script
+before you run it? Download it first:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh -o install.sh
+less install.sh
+bash install.sh
+```
+
 **🍺 Homebrew** (macOS and Linux):
 
 ```bash
