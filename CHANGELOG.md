@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🐛 Fixed
 
+- **cli:** Ctrl+C (or SIGTERM) now cancels in-flight API requests and exits with status 130 and a short "Interrupted" warning, instead of being cut off mid-request. `links create` starts no new requests once interrupted, still prints its summary of what was saved, and doesn't count the cancelled links as failures. A second Ctrl+C kills the process outright.
 - **cli:** Trim trailing slashes from `LINKWARDEN_URL`.
 - **tokens:** `tokens revoke` revokes the selected token even when several tokens share a name.
 

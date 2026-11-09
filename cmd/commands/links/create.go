@@ -1,6 +1,7 @@
 package links
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -136,18 +137,31 @@ func execute(cmd *cobra.Command, _ []string) error {
 		bar = utils.StartProgress("Creating links", len(toCreate))
 	}
 
+	ctx := cmd.Context()
+
 	for _, item := range toCreate {
 		sem <- struct{}{}
+		// Ctrl+C: start no more requests; the ones in flight are cancelled too.
+		if ctx.Err() != nil {
+			<-sem
+			break
+		}
 		wg.Go(func() {
 			defer func() { <-sem }()
 
-			_, err := client.Links.Create(cmd.Context(), linkwarden.CreateLinkRequest{
+			_, err := client.Links.Create(ctx, linkwarden.CreateLinkRequest{
 				Name:       item.Title,
 				URL:        item.URL,
 				Type:       "url",
 				Collection: linkwarden.Collection{ID: collection.ID, Name: collection.Name},
 				Tags:       []linkwarden.Tag{},
 			})
+
+			// Cut short by Ctrl+C: not a failure of this link, and logging one
+			// line per cancelled request would bury the summary.
+			if ctx.Err() != nil && errors.Is(err, context.Canceled) {
+				return
+			}
 
 			bar.Increment()
 
@@ -187,6 +201,11 @@ func execute(cmd *cobra.Command, _ []string) error {
 		failed:        len(failures),
 		failures:      failures,
 	})
+
+	// Interrupted: the summary above shows what got saved before Ctrl+C.
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 
 	// Fail the command so scripts and cron jobs notice links that weren't saved.
 	if len(failures) > 0 {

@@ -1,9 +1,13 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"os"
+	"syscall"
 	"testing"
+	"time"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -92,11 +96,28 @@ func TestExitCode(t *testing.T) {
 		"failure":         {err: errors.New("boom"), want: 1},
 		"aborted":         {err: tui.ErrAborted, want: exitAborted},
 		"wrapped aborted": {err: fmt.Errorf("resolve collection ID: %w", tui.ErrAborted), want: exitAborted},
+		"interrupted":     {err: fmt.Errorf("list links: %w", context.Canceled), want: exitAborted},
 	}
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			require.Equal(t, tc.want, exitCode(tc.err))
 		})
+	}
+}
+
+func TestInterruptContextCancelsOnSignal(t *testing.T) {
+	assert := require.New(t)
+
+	ctx, stop := interruptContext()
+	defer stop()
+
+	assert.NoError(syscall.Kill(os.Getpid(), syscall.SIGINT))
+
+	select {
+	case <-ctx.Done():
+		assert.ErrorIs(ctx.Err(), context.Canceled)
+	case <-time.After(5 * time.Second):
+		t.Fatal("context not cancelled by SIGINT")
 	}
 }
