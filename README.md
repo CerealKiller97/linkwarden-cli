@@ -94,14 +94,16 @@ All three install shell completions for bash, zsh and fish where the platform su
 docker run --rm -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/linkwarden-cli links list
 ```
 
-Add `-it` for interactive prompts. Tags are `latest` and each release version, e.g. `1.1.0`.
+Add `-it` for interactive prompts. Tags are `latest` and each release version without the `v`, e.g. `1.0.0`.
 
 **📦 Prebuilt binary:** grab the archive for your OS and CPU (x86_64 or ARM64) from
 [Releases](https://github.com/CerealKiller97/linkwarden-cli/releases/latest):
 
 ```bash
 # macOS on Apple Silicon. Swap darwin_arm64 for linux_amd64, linux_arm64, darwin_amd64…
-VERSION=1.0.0
+# VERSION resolves to the latest release; set it yourself (e.g. VERSION=1.0.0) to pin one.
+VERSION=$(curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/CerealKiller97/linkwarden-cli/releases/latest)
+VERSION=${VERSION##*/v}
 curl -sSL "https://github.com/CerealKiller97/linkwarden-cli/releases/download/v${VERSION}/linkwarden_${VERSION}_darwin_arm64.tar.gz" | tar -xz
 sudo mv "linkwarden_${VERSION}_darwin_arm64/linkwarden" /usr/local/bin/
 linkwarden --version
