@@ -123,7 +123,7 @@ func Select(label string, options []string) (int, string, error) {
 		return 0, "", errNoTerminal(label)
 	}
 
-	idx, err := tui.Select(label, options)
+	idx, err := prompter.Select(label, options)
 	if err != nil {
 		return 0, "", err
 	}
@@ -138,7 +138,7 @@ func Input(label string, validate func(string) error) (string, error) {
 		return "", errNoTerminal(label)
 	}
 
-	return tui.Input(label, validate)
+	return prompter.Input(label, validate)
 }
 
 func errNoTerminal(label string) error {
@@ -159,7 +159,7 @@ func ResolveID(flagValue, flagHint, label string, fetch func() ([]PickerItem, er
 }
 
 func isInteractive() bool {
-	return isInteractiveFor(GetNonInteractive(), isatty.IsTerminal(os.Stdin.Fd()))
+	return isInteractiveFor(GetNonInteractive(), scriptedPrompter || isatty.IsTerminal(os.Stdin.Fd()))
 }
 
 // isInteractiveFor is the pure decision behind isInteractive: the
@@ -180,7 +180,7 @@ func InputDefault(label, def string, validate func(string) error) (string, error
 		return "", errNoTerminal(label)
 	}
 
-	return tui.InputDefault(label, def, validate)
+	return prompter.InputDefault(label, def, validate)
 }
 
 // Password is Input with the typed characters masked. Without an interactive
@@ -190,5 +190,5 @@ func Password(label string, validate func(string) error) (string, error) {
 		return "", errNoTerminal(label)
 	}
 
-	return tui.Password(label, validate)
+	return prompter.Password(label, validate)
 }
