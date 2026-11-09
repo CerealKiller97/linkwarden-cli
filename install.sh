@@ -5,8 +5,9 @@
 #
 # Finds the release for this OS and CPU on GitHub, checks it against the
 # release's checksums.txt and installs the linkwarden binary into
-# $XDG_BIN_HOME (default ~/.local/bin). Optionally installs shell completions
-# and adds the folder to your PATH, asking first.
+# /usr/local/bin (asking sudo when needed), or ~/.local/bin if you pick it,
+# plus tab completions for your shell. If the folder isn't on your PATH, it
+# offers to add it.
 #
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh | bash
@@ -22,6 +23,8 @@ set -euo pipefail
 readonly REPO="CerealKiller97/linkwarden-cli"
 readonly BIN="linkwarden"
 readonly STEPS=6
+readonly SYSTEM_BIN_DIR="/usr/local/bin"
+readonly SYSTEM_SHARE_DIR="/usr/local/share"
 
 # Options, set by parse_args.
 OPT_VERSION="${LINKWARDEN_VERSION:-}"
@@ -87,11 +90,13 @@ Usage:
 
 Options:
   -v, --version <x.y.z>  Install this version instead of the latest.
-  -d, --dir <path>       Install into <path>. Default: \$XDG_BIN_HOME or ~/.local/bin.
+  -d, --dir <path>       Install into <path>. Default: /usr/local/bin. Without a terminal,
+                         falls back to \$XDG_BIN_HOME or ~/.local/bin when sudo would
+                         need a password.
   -y, --yes              Don't ask anything; take the defaults. Also on when there's no
                          terminal or CI is set. Never edits your shell rc file.
   -f, --force            Reinstall even when that version is already installed.
-      --no-completions   Don't install shell completions.
+      --no-completions   Don't install tab completions (installed by default).
       --no-modify-path   Don't offer to add the install folder to your PATH.
       --plain            No colours or animations. Also on with NO_COLOR or TERM=dumb.
   -q, --quiet            Only print errors and the final result.
@@ -656,15 +661,21 @@ expand_path() {
 # writable by the current user.
 # Arguments:
 #   A folder.
+#   Optional "soft": set SUDO to "missing" instead of exiting when sudo
+#   isn't installed.
 #######################################
 pick_sudo() {
-  local dir="$1"
+  local dir="$1" mode="${2:-}"
   SUDO=""
   while [[ ! -d "${dir}" && "${dir}" != "/" && -n "${dir}" ]]; do
     dir="$(dirname "${dir}")"
   done
   if [[ ! -w "${dir}" ]]; then
     if ! command -v sudo >/dev/null 2>&1; then
+      if [[ "${mode}" == "soft" ]]; then
+        SUDO="missing"
+        return
+      fi
       die "can't write to ${dir} and sudo isn't available. Pick another folder with --dir."
     fi
     SUDO="sudo"
@@ -672,25 +683,36 @@ pick_sudo() {
 }
 
 #######################################
-# Sets INSTALL_DIR: --dir, or a choice from a small menu, or the default.
+# Prints the per-user install folder: $XDG_BIN_HOME or ~/.local/bin.
+# Outputs:
+#   Writes the folder to STDOUT.
+#######################################
+user_bin_dir() {
+  echo "${XDG_BIN_HOME:-${HOME}/.local/bin}"
+}
+
+#######################################
+# Sets INSTALL_DIR: --dir, or a choice from a small menu, or the default,
+# /usr/local/bin. Without a terminal, when /usr/local/bin needs sudo and sudo
+# would ask for a password, falls back to the per-user folder.
 #######################################
 choose_dir() {
-  local default choice
-  default="${XDG_BIN_HOME:-${HOME}/.local/bin}"
+  local user_dir choice
+  user_dir="$(user_bin_dir)"
   if [[ -n "${OPT_DIR}" ]]; then
     INSTALL_DIR="$(expand_path "${OPT_DIR}")"
   elif (( INTERACTIVE )); then
     printf '  %sWhere should linkwarden live?%s\n' "${C_BOLD}" "${C_RESET}"
-    printf '    %s1)%s %-22s %s← just for you, no sudo (default)%s\n' "${C_CYAN}" "${C_RESET}" \
-      "$(tildify "${default}")" "${C_DIM}" "${C_RESET}"
-    printf '    %s2)%s %-22s %s← everyone on this machine, may ask for sudo%s\n' "${C_CYAN}" \
-      "${C_RESET}" "/usr/local/bin" "${C_DIM}" "${C_RESET}"
+    printf '    %s1)%s %-22s %s← everyone on this machine, may ask for sudo (default)%s\n' \
+      "${C_CYAN}" "${C_RESET}" "${SYSTEM_BIN_DIR}" "${C_DIM}" "${C_RESET}"
+    printf '    %s2)%s %-22s %s← just for you, no sudo%s\n' "${C_CYAN}" "${C_RESET}" \
+      "$(tildify "${user_dir}")" "${C_DIM}" "${C_RESET}"
     printf '    %s3)%s %-22s\n' "${C_CYAN}" "${C_RESET}" "somewhere else…"
     ask "Pick one [1-3]:"
     choice="${REPLY_TEXT:-1}"
     case "${choice}" in
-      1) INSTALL_DIR="${default}" ;;
-      2) INSTALL_DIR="/usr/local/bin" ;;
+      1) INSTALL_DIR="${SYSTEM_BIN_DIR}" ;;
+      2) INSTALL_DIR="${user_dir}" ;;
       3)
         ask "Folder:"
         [[ -n "${REPLY_TEXT}" ]] || die "no folder given"
@@ -699,7 +721,13 @@ choose_dir() {
       *) die "'${choice}' isn't one of 1, 2 or 3" ;;
     esac
   else
-    INSTALL_DIR="${default}"
+    INSTALL_DIR="${SYSTEM_BIN_DIR}"
+    pick_sudo "${INSTALL_DIR}" soft
+    if [[ "${SUDO}" == "missing" ]] \
+      || { [[ "${SUDO}" == "sudo" ]] && ! sudo -n true 2>/dev/null; }; then
+      warn "Can't write to ${SYSTEM_BIN_DIR} without sudo and a terminal; using $(tildify "${user_dir}") instead"
+      INSTALL_DIR="${user_dir}"
+    fi
   fi
   INSTALL_DIR="${INSTALL_DIR%/}"
   pick_sudo "${INSTALL_DIR}"
@@ -873,15 +901,27 @@ install_binary() {
 }
 
 #######################################
-# Prints where this script puts the completion file for a shell.
+# Prints where this script puts the completion file for a shell. System-wide
+# paths are under /usr/local/share, which bash-completion, zsh and fish all
+# search by default; per-user paths follow the XDG base directories.
 # Arguments:
 #   bash, zsh or fish.
+#   system or user.
 # Outputs:
 #   Writes the path to STDOUT, or nothing for other shells.
 #######################################
 completion_path() {
   local data="${XDG_DATA_HOME:-${HOME}/.local/share}"
   local config="${XDG_CONFIG_HOME:-${HOME}/.config}"
+  if [[ "$2" == "system" ]]; then
+    case "$1" in
+      bash) echo "${SYSTEM_SHARE_DIR}/bash-completion/completions/${BIN}" ;;
+      zsh) echo "${SYSTEM_SHARE_DIR}/zsh/site-functions/_${BIN}" ;;
+      fish) echo "${SYSTEM_SHARE_DIR}/fish/vendor_completions.d/${BIN}.fish" ;;
+      *) ;;
+    esac
+    return
+  fi
   case "$1" in
     bash) echo "${data}/bash-completion/completions/${BIN}" ;;
     zsh) echo "${data}/zsh/site-functions/_${BIN}" ;;
@@ -891,14 +931,30 @@ completion_path() {
 }
 
 #######################################
-# Offers to install completions for the user's shell.
+# Prints whether completions for INSTALL_DIR go system-wide or per-user:
+# per-user when it's inside $HOME, system otherwise.
+# Outputs:
+#   Writes "system" or "user" to STDOUT.
+#######################################
+completion_scope() {
+  case "${INSTALL_DIR}/" in
+    "${HOME}"/*) echo "user" ;;
+    *) echo "system" ;;
+  esac
+}
+
+#######################################
+# Installs completions for the user's shell, next to the binary: under
+# /usr/local/share for a system-wide install, or the XDG folders for a
+# per-user one. Skipped with --no-completions.
 #######################################
 install_completions() {
-  local dest src
+  local dest src scope comp_sudo
   if (( NO_COMPLETIONS )); then
     return
   fi
-  dest="$(completion_path "${SHELL_NAME}")"
+  scope="$(completion_scope)"
+  dest="$(completion_path "${SHELL_NAME}" "${scope}")"
   if [[ -z "${dest}" ]]; then
     return
   fi
@@ -912,13 +968,20 @@ install_completions() {
       return
     fi
   fi
-  if ! confirm "Install ${SHELL_NAME} tab completions?" y; then
+  pick_sudo "$(dirname "${dest}")" soft
+  comp_sudo="${SUDO}"
+  pick_sudo "${INSTALL_DIR}"
+  if [[ "${comp_sudo}" == "missing" ]]; then
+    warn "Skipped tab completions: can't write to $(dirname "${dest}")"
     return
   fi
-  mkdir -p "$(dirname "${dest}")"
-  cp "${src}" "${dest}"
+  if ! ${comp_sudo} mkdir -p "$(dirname "${dest}")" \
+    || ! ${comp_sudo} install -m 0644 "${src}" "${dest}"; then
+    warn "Skipped tab completions: couldn't write ${dest}"
+    return
+  fi
   ok "Tab completions for ${SHELL_NAME} → $(tildify "${dest}")"
-  if [[ "${SHELL_NAME}" == "zsh" ]]; then
+  if [[ "${SHELL_NAME}" == "zsh" && "${scope}" == "user" ]]; then
     info "   ${C_DIM}zsh loads them once this is in ~/.zshrc, before compinit:${C_RESET}"
     info "   ${C_CYAN}fpath=($(tildify "$(dirname "${dest}")") \$fpath)${C_RESET}"
   fi
@@ -1044,34 +1107,43 @@ finale() {
 }
 
 #######################################
-# Removes the binary from the install folder and any completions this
-# script would have installed.
+# Removes the binary from --dir, or from /usr/local/bin and the per-user
+# folder, and any completions this script installs, system-wide or per-user.
 #######################################
 uninstall() {
-  local target removed=0 shell file
-  INSTALL_DIR="$(expand_path "${OPT_DIR:-${XDG_BIN_HOME:-${HOME}/.local/bin}}")"
-  INSTALL_DIR="${INSTALL_DIR%/}"
-  target="${INSTALL_DIR}/${BIN}"
+  local dir target removed=0 shell scope file
+  local -a dirs=()
+  if [[ -n "${OPT_DIR}" ]]; then
+    dirs=("$(expand_path "${OPT_DIR}")")
+  else
+    dirs=("${SYSTEM_BIN_DIR}" "$(user_bin_dir)")
+  fi
   printf '\n'
-  if [[ -e "${target}" ]]; then
+  for dir in "${dirs[@]}"; do
+    target="${dir%/}/${BIN}"
+    if [[ ! -e "${target}" ]]; then
+      info "No ${BIN} at $(tildify "${target}")"
+      continue
+    fi
     if ! confirm "Remove $(tildify "${target}")?" y; then
       info "Left it alone."
-      return
+      continue
     fi
-    pick_sudo "${INSTALL_DIR}"
+    pick_sudo "${dir}"
     ${SUDO} rm -f "${target}"
     ok "Removed $(tildify "${target}")"
     removed=1
-  else
-    info "No ${BIN} at $(tildify "${target}")"
-  fi
-  for shell in bash zsh fish; do
-    file="$(completion_path "${shell}")"
-    if [[ -f "${file}" ]]; then
-      rm -f "${file}"
-      ok "Removed $(tildify "${file}")"
-      removed=1
-    fi
+  done
+  for scope in system user; do
+    for shell in bash zsh fish; do
+      file="$(completion_path "${shell}" "${scope}")"
+      if [[ -f "${file}" ]]; then
+        pick_sudo "$(dirname "${file}")"
+        ${SUDO} rm -f "${file}"
+        ok "Removed $(tildify "${file}")"
+        removed=1
+      fi
+    done
   done
   if [[ -n "$(command -v "${BIN}" 2>/dev/null || true)" ]]; then
     warn "${BIN} is still on your PATH at $(tildify "$(command -v "${BIN}")")"

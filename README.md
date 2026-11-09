@@ -49,8 +49,10 @@ curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/
 ![The installer detecting the system, downloading and checking the release, and installing linkwarden](.github/assets/install.gif)
 
 It picks the right build for your OS and CPU, checks it against the release's `checksums.txt`, and
-installs `linkwarden` into `$XDG_BIN_HOME` (default `~/.local/bin`). It asks before it installs tab
-completions or adds that folder to your `PATH`. Pass options after `bash -s --`:
+installs `linkwarden` into `/usr/local/bin`, asking for `sudo` when needed. It also installs tab
+completions for your shell (`--no-completions` skips them). Pick `~/.local/bin` in its menu, or pass
+`--dir`, to install just for you without `sudo`. If that folder isn't on your `PATH`, it offers to add
+it. Pass options after `bash -s --`:
 
 ```bash
 # Pin a version, pick the folder, and don't ask anything (handy in CI and Dockerfiles)

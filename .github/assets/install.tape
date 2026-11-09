@@ -44,17 +44,5 @@ Type "1"
 Sleep 500ms
 Enter
 
-Wait@30s /tab completions/
-Sleep 1s
-Type "y"
-Sleep 300ms
-Enter
-
-Wait@15s /Add it to/
-Sleep 1s
-Type "y"
-Sleep 300ms
-Enter
-
 Wait+Screen@30s /Happy bookmarking/
 Sleep 4s
