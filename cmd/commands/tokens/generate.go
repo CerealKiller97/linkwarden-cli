@@ -27,7 +27,13 @@ const (
 
 func Generate() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "generate",
+		Use:   "generate",
+		Short: "Create an API token",
+		Long: `Create an API token for another machine or script.
+
+Prompts for a token name and an expiry (7, 30, 60 or 90 days, or never), then
+prints the new token. On Linux and macOS it offers to add the token to your
+shell config. Needs an interactive terminal.`,
 		RunE: execute,
 	}
 
