@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ui:** Replace go-pretty tables with Lip Gloss tables: rounded border, bold header, title badge and dimmed alternate rows. The `links import` summary colors its counts (blue / amber / red). In a terminal, tables taller than the screen open as an inline, scrollable bubbles/table that stays on screen when you quit.
 - **ui:** Replace the schollz/progressbar bar in `links import` with a bubbles/progress bar on stderr (hidden when stderr isn't a terminal). Per-link failures are logged after the bar finishes instead of interleaving with it.
 - **tokens:** `tokens generate` and `tokens revoke` now fail fast without an interactive terminal, like the other pickers.
-- **links:** The JSON-file import moved from `links create --file` to `links import --file`. `links create --file` still works but prints a deprecation notice.
+- **links:** ⚠️ **Breaking:** the JSON-file import moved from `links create --file` to `links import --file`. `links create` no longer takes `--file`.
 - **cli:** ⚠️ **Breaking:** commands that delete or revoke now refuse to run without an interactive terminal (or with `--non-interactive`) unless you pass `--yes`. Add `--yes` to scripts and cron jobs that delete things.
 
 ### ✨ Added

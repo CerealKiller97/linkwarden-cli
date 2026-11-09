@@ -133,15 +133,12 @@ func TestCreateRequiresURL(t *testing.T) {
 	}
 }
 
-func TestCreateFileFlagStillImports(t *testing.T) {
+func TestCreateRejectsFileFlag(t *testing.T) {
 	assert := require.New(t)
 
-	_, count := fakeCreateServer(t, twoCollections, 0)
-	file := writeLinksFile(t, "https://a.example", "https://b.example")
-
 	cmd := Create()
-	cmd.SetArgs([]string{"--file", file, "--collection", "7"})
+	cmd.SetArgs([]string{"--file", "links.json"})
+	cmd.SetOut(io.Discard)
 	cmd.SetErr(io.Discard)
-	assert.NoError(cmd.Execute())
-	assert.Equal(int64(2), count.Load())
+	assert.ErrorContains(cmd.Execute(), "unknown flag: --file")
 }

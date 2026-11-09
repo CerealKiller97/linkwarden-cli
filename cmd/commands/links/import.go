@@ -45,21 +45,15 @@ Without --collection, a picker asks for the target collection.`,
 		RunE: executeImport,
 	}
 
-	addImportFlags(cmd)
+	cmd.Flags().String("file", "", "JSON file of links to import.")
+	cmd.Flags().String("collection", "", "Collection ID to import into.")
+	cmd.Flags().Int("concurrency", defaultConcurrency, "Number of links to create in parallel.")
 
 	if err := cmd.MarkFlagRequired("file"); err != nil {
 		return nil
 	}
 
 	return cmd
-}
-
-// addImportFlags adds the import flags to cmd. links create keeps them too,
-// hidden, so the old "links create --file" still imports.
-func addImportFlags(cmd *cobra.Command) {
-	cmd.Flags().String("file", "", "JSON file of links to import.")
-	cmd.Flags().String("collection", "", "Collection ID to import into.")
-	cmd.Flags().Int("concurrency", defaultConcurrency, "Number of links to create in parallel.")
 }
 
 type item struct {

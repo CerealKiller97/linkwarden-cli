@@ -38,38 +38,19 @@ To save many links at once from a JSON file, use "links import".`,
 	cmd.Flags().String("collection", "", "Collection ID to save to. Defaults to Unorganized.")
 	cmd.Flags().StringSlice("tag", nil, "Tag name to add (repeatable).")
 
-	// "links create --file" was the import command before "links import"
-	// existed. Keep it working for scripts written against 1.0.
-	cmd.Flags().String("file", "", "JSON file of links to import.")
-	cmd.Flags().Int("concurrency", defaultConcurrency, "Number of links to create in parallel.")
-	if err := cmd.Flags().MarkDeprecated("file", `use "links import --file" instead`); err != nil {
-		return nil
-	}
-	if err := cmd.Flags().MarkHidden("concurrency"); err != nil {
-		return nil
-	}
-
 	return cmd
 }
 
-// createArgs wants exactly one URL, or none when the deprecated --file is set.
-func createArgs(cmd *cobra.Command, args []string) error {
-	if cmd.Flags().Changed("file") {
-		return cobra.NoArgs(cmd, args)
-	}
-
+// createArgs wants exactly one URL, and points file imports at links import.
+func createArgs(_ *cobra.Command, args []string) error {
 	if len(args) != 1 {
-		return fmt.Errorf("requires the URL to save, e.g. linkwarden links create https://example.com (got %d arguments)", len(args))
+		return fmt.Errorf(`requires the URL to save, e.g. linkwarden links create https://example.com (got %d arguments); to import a JSON file use "links import --file"`, len(args))
 	}
 
 	return nil
 }
 
 func executeCreate(cmd *cobra.Command, args []string) error {
-	if cmd.Flags().Changed("file") {
-		return executeImport(cmd, args)
-	}
-
 	tagNames, err := cmd.Flags().GetStringSlice("tag")
 	if err != nil {
 		return err
