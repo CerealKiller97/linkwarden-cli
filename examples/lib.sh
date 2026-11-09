@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 #
 # Shared helpers for the example scripts in this folder.
 #

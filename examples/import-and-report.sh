@@ -40,6 +40,9 @@ main() {
 
   local errlog
   errlog="$(mktemp)"
+  # Expand the path now, while the local is in scope; the trap runs after
+  # main returns.
+  # shellcheck disable=SC2064
   trap "rm -f '${errlog}'" EXIT
 
   local report

@@ -675,7 +675,8 @@ golangci-lint run        # lint (config in .golangci.yml)
 go build -o bin/linkwarden .
 ```
 
-CI runs tests, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests.
+CI runs tests, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus
+[ShellCheck](https://www.shellcheck.net) on the scripts in `examples/` when they change.
 
 ### 🚀 Releasing
 
