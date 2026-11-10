@@ -13,10 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ui:** Replace go-pretty tables with Lip Gloss tables: rounded border, bold header, title badge and dimmed alternate rows. The `links import` summary colors its counts (blue / amber / red). In a terminal, tables taller than the screen open as an inline, scrollable bubbles/table that stays on screen when you quit.
 - **ui:** Replace the schollz/progressbar bar in `links import` with a bubbles/progress bar on stderr (hidden when stderr isn't a terminal). Per-link failures are logged after the bar finishes instead of interleaving with it.
 - **tokens:** `tokens generate` and `tokens revoke` now fail fast without an interactive terminal, like the other pickers.
-- **links:** ⚠️ **Breaking:** the JSON-file import moved from `links create --file` to `links import --file`. `links create` no longer takes `--file`.
-- **cli:** ⚠️ **Breaking:** `--format` and `--sort` take names instead of the API's numbers: `archives get|upload|upload-standalone --format png|jpeg|pdf|html|readable`, `migrations import --format linkwarden|html|wallabag|omnivore|pocket` and `search --sort newest|oldest|name-asc|name-desc|description-asc|description-desc`. Numbers are rejected, so update scripts (e.g. `--format 2` → `--format pdf`). `--help` lists the names and shell completion suggests them. `archives upload` no longer offers `readable`, which is retrieve-only.
-- **cli:** ⚠️ **Breaking:** commands that delete or revoke now refuse to run without an interactive terminal (or with `--non-interactive`) unless you pass `--yes`. Add `--yes` to scripts and cron jobs that delete things.
-- **cli:** ⚠️ **Breaking:** ID flags are integers everywhere. `--id` and `--link-id` were strings and are now checked when the command line is parsed, like `--collection-id`, `--tag-id` and `--parent-id` already were, so a bad value gets the same error on every command; zero and negative IDs are rejected. `--ids` also takes repeated flags (`--ids 1,2 --ids 3`), and no longer accepts spaces inside the list (`--ids "1, 2"` → `--ids 1,2`) or an empty list.
+- **links:** the JSON-file import moved from `links create --file` to `links import --file`. `links create` no longer takes `--file`.
+- **cli:** `--format` and `--sort` take names instead of the API's numbers: `archives get|upload|upload-standalone --format png|jpeg|pdf|html|readable`, `migrations import --format linkwarden|html|wallabag|omnivore|pocket` and `search --sort newest|oldest|name-asc|name-desc|description-asc|description-desc`. Numbers are rejected, so update scripts (e.g. `--format 2` → `--format pdf`). `--help` lists the names and shell completion suggests them. `archives upload` no longer offers `readable`, which is retrieve-only.
+- **cli:** commands that delete or revoke now refuse to run without an interactive terminal (or with `--non-interactive`) unless you pass `--yes`. Add `--yes` to scripts and cron jobs that delete things.
+- **cli:** ID flags are integers everywhere. `--id` and `--link-id` were strings and are now checked when the command line is parsed, like `--collection-id`, `--tag-id` and `--parent-id` already were, so a bad value gets the same error on every command; zero and negative IDs are rejected. `--ids` also takes repeated flags (`--ids 1,2 --ids 3`), and no longer accepts spaces inside the list (`--ids "1, 2"` → `--ids 1,2`) or an empty list.
 
 ### ✨ Added
 
@@ -36,26 +36,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **cli:** Trim trailing slashes from `LINKWARDEN_URL`.
 - **tokens:** `tokens revoke` revokes the selected token even when several tokens share a name.
 
-## [1.0.0] - 2026-10-06
-
-### ✨ Added
-
-- **links:** Collection option added, if nothing passed show interactive prompt for collections.
-- **sdk:** Add Linkwarden API client and full CRUD commands for links, collections, tags, tokens.
-- **sdk:** Add Search/RSS/Highlights/Dashboard SDK services and CLI commands.
-- **sdk:** Add Archives/Config/Favicon SDK services, implement migrations import.
-- **ui:** Replace forced-color table style with adaptive rounded + cyan header.
-- **cli:** Add global --non-interactive flag to force fail-fast prompting.
-- **tokens:** Show colored manual setup steps when user skips auto env config.
-
-### ♻️ Changed
-
-- Binary/command name from linkwarden-cli to linkwarden.
-
-### 🐛 Fixed
-
-- **utils:** Correct shell config paths for token persistence, drop broken reload.
-- **utils:** Fail fast instead of prompting when stdin isn't interactive.
-
-[Unreleased]: https://github.com/CerealKiller97/linkwarden-cli/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/CerealKiller97/linkwarden-cli/releases/tag/v1.0.0
+[Unreleased]: https://github.com/CerealKiller97/linkwarden-cli/commits/main
