@@ -19,7 +19,7 @@ COPY . .
 ARG VERSION=dev
 RUN go build -trimpath \
     -ldflags "-s -w -X github.com/CerealKiller97/linkwarden-cli/cmd.version=${VERSION}" \
-    -o /out/linkwarden .
+    -o /out/linkwarden ./cmd/linkwarden
 
 # distroless/static ships CA certificates for HTTPS to Linkwarden, and runs as a non-root user.
 FROM gcr.io/distroless/static-debian13:nonroot AS prepare-production

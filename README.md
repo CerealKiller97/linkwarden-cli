@@ -114,14 +114,14 @@ linkwarden --version
 ```bash
 git clone https://github.com/CerealKiller97/linkwarden-cli.git
 cd linkwarden-cli
-go build -o linkwarden .
+go build -o linkwarden ./cmd/linkwarden
 sudo mv linkwarden /usr/local/bin/
 ```
 
-Or install straight from the module path. The binary is named `linkwarden-cli` this way:
+Or install straight from the module path:
 
 ```bash
-go install github.com/CerealKiller97/linkwarden-cli@latest
+go install github.com/CerealKiller97/linkwarden-cli/cmd/linkwarden@latest
 ```
 
 ### 2. Authenticate
@@ -710,7 +710,7 @@ Options: `WithHTTPClient(*http.Client)` for timeouts, proxies or custom transpor
 ```bash
 go test ./...            # unit tests
 golangci-lint run        # lint (config in .golangci.yml)
-go build -o bin/linkwarden .
+go build -o bin/linkwarden ./cmd/linkwarden
 ```
 
 CI runs tests, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus
