@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"testing"
@@ -93,6 +94,7 @@ func TestExitCode(t *testing.T) {
 		"failure":         {err: errors.New("boom"), want: 1},
 		"aborted":         {err: tui.ErrAborted, want: exitAborted},
 		"wrapped aborted": {err: fmt.Errorf("resolve collection ID: %w", tui.ErrAborted), want: exitAborted},
+		"interrupted":     {err: fmt.Errorf("list links: %w", context.Canceled), want: exitAborted},
 	}
 
 	for name, tc := range cases {

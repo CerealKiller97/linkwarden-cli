@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/archives"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/collections"
@@ -162,8 +165,16 @@ func Execute() {
 	// errors, which fail before any PreRun hook, are logged the same way.
 	utils.ConfigureDefaultLogger("info")
 
-	err := Root().Execute()
-	if err != nil && !errors.Is(err, tui.ErrAborted) {
+	ctx, stop := interruptContext()
+	err := Root().ExecuteContext(ctx)
+	stop()
+
+	switch {
+	case err == nil, errors.Is(err, tui.ErrAborted):
+	case errors.Is(err, context.Canceled):
+		// The wrapped error ends in "context canceled", which reads like a bug.
+		log.Warn().Msg("Interrupted")
+	default:
 		log.Error().Msg(err.Error())
 	}
 
@@ -172,18 +183,39 @@ func Execute() {
 	}
 }
 
+// interruptContext returns a context that is cancelled on Ctrl+C (SIGINT) or
+// SIGTERM, so in-flight API requests stop and the command can return cleanly.
+// After the first signal the default handling comes back, so a second Ctrl+C
+// kills the process even if something isn't watching the context.
+func interruptContext() (context.Context, context.CancelFunc) {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-ctx.Done()
+		stop()
+	}()
+
+	return ctx, stop
+}
+
 // exitAborted is the exit status when the user cancels a prompt with Esc or
-// Ctrl+C: 128+SIGINT, as shells report an interrupted command.
+// Ctrl+C, or interrupts a running command: 128+SIGINT, as shells report an
+// interrupted command.
 const exitAborted = 130
 
-// exitCode maps the error Execute got back to the process exit status. A
-// cancelled prompt is the user stopping the command, not a failure, so it exits
-// quietly with exitAborted rather than logging an error.
+// isInterrupted reports whether err means the user stopped the command: a
+// cancelled prompt, or Ctrl+C cancelling the command's context.
+func isInterrupted(err error) bool {
+	return errors.Is(err, tui.ErrAborted) || errors.Is(err, context.Canceled)
+}
+
+// exitCode maps the error Execute got back to the process exit status. Stopping
+// the command is the user's choice, not a failure, so it exits quietly with
+// exitAborted rather than logging an error.
 func exitCode(err error) int {
 	switch {
 	case err == nil:
 		return 0
-	case errors.Is(err, tui.ErrAborted):
+	case isInterrupted(err):
 		return exitAborted
 	default:
 		return 1

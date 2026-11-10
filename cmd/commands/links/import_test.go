@@ -1,6 +1,7 @@
 package links
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -245,4 +246,52 @@ func TestNormalizeURL(t *testing.T) {
 	assert.Equal("https://example.com/Docs", normalizeURL("https://example.com/Docs/"), "path case is kept")
 	assert.Equal("https://example.com/a?x=1#y", normalizeURL("https://example.com/a?x=1#y"))
 	assert.Equal("not a url", normalizeURL("not a url/"))
+}
+
+func TestImportStopsWhenInterrupted(t *testing.T) {
+	assert := require.New(t)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Unblocks hanging handlers if the test fails before the client hangs up.
+	stopServer := make(chan struct{})
+
+	var creates atomic.Int64
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/collections":
+			_, _ = w.Write([]byte(`{"response":[{"id":1,"name":"Unorganized"}]}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/search":
+			_, _ = w.Write([]byte(`{"message":"Success","data":[]}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/links":
+			// The first request "presses Ctrl+C" and then hangs until cancelled.
+			creates.Add(1)
+			cancel()
+			select {
+			case <-r.Context().Done():
+			case <-stopServer:
+			}
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+	defer close(stopServer)
+	utils.SetVars("test-token", server.URL)
+
+	var items []string
+	for i := range 50 {
+		items = append(items, fmt.Sprintf(`{"url":"https://example.com/%d","title":"%d"}`, i, i))
+	}
+	file := filepath.Join(t.TempDir(), "links.json")
+	assert.NoError(os.WriteFile(file, []byte("["+strings.Join(items, ",")+"]"), 0o644))
+
+	cmd := Import()
+	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
+	err := cmd.ExecuteContext(ctx)
+
+	assert.ErrorIs(err, context.Canceled)
+	assert.NotErrorIs(err, errLinksFailed, "cancelled links aren't failures")
+	assert.LessOrEqual(creates.Load(), int64(defaultConcurrency), "no new requests after Ctrl+C")
 }
