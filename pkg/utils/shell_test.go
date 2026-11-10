@@ -12,7 +12,7 @@ func TestAppendTokenToShellFileAppendsToExistingFile(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("SHELL", "/bin/zsh")
-	t.Setenv("HOME", t.TempDir())
+	setHome(t, t.TempDir())
 
 	rcPath := filepath.Join(os.Getenv("HOME"), ".zshenv")
 	assert.NoError(os.WriteFile(rcPath, []byte("#!/bin/zsh\n"), 0o644))
@@ -29,7 +29,7 @@ func TestAppendTokenToShellFileCreatesMissingFile(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("SHELL", "/bin/bash")
-	t.Setenv("HOME", t.TempDir())
+	setHome(t, t.TempDir())
 
 	assert.NoError(AppendTokenToShellFile("TOKEN2"))
 
@@ -42,7 +42,7 @@ func TestAppendTokenToShellFileCreatesFishConfigDir(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("SHELL", "/usr/local/bin/fish")
-	t.Setenv("HOME", t.TempDir())
+	setHome(t, t.TempDir())
 	t.Setenv("XDG_CONFIG_HOME", "")
 
 	assert.NoError(AppendTokenToShellFile("TOKEN3"))
@@ -57,7 +57,7 @@ func TestAppendTokenToShellFileFishHonorsXDGConfigHome(t *testing.T) {
 
 	configHome := t.TempDir()
 	t.Setenv("SHELL", "/usr/local/bin/fish")
-	t.Setenv("HOME", t.TempDir())
+	setHome(t, t.TempDir())
 	t.Setenv("XDG_CONFIG_HOME", configHome)
 
 	assert.NoError(AppendTokenToShellFile("TOKEN5"))
@@ -71,7 +71,7 @@ func TestAppendTokenToShellFileUnrecognizedShellErrors(t *testing.T) {
 	assert := require.New(t)
 
 	t.Setenv("SHELL", "/bin/tcsh")
-	t.Setenv("HOME", t.TempDir())
+	setHome(t, t.TempDir())
 
 	assert.Error(AppendTokenToShellFile("TOKEN4"))
 }
@@ -79,8 +79,9 @@ func TestAppendTokenToShellFileUnrecognizedShellErrors(t *testing.T) {
 func TestShellConfigPathResolvesNonStandardShellPaths(t *testing.T) {
 	assert := require.New(t)
 
+	home := t.TempDir()
 	t.Setenv("SHELL", "/opt/homebrew/bin/zsh")
-	t.Setenv("HOME", "/home/example")
+	setHome(t, home)
 
-	assert.Equal("/home/example/.zshenv", ShellConfigPath())
+	assert.Equal(filepath.Join(home, ".zshenv"), ShellConfigPath())
 }
