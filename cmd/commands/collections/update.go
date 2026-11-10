@@ -16,7 +16,7 @@ func Update() *cobra.Command {
 		RunE:  executeUpdate,
 	}
 
-	cmd.Flags().String("id", "", "Collection ID.")
+	cmd.Flags().Int("id", 0, "Collection ID.")
 	cmd.Flags().String("name", "", "New collection name.")
 	cmd.Flags().String("description", "", "New collection description.")
 	cmd.Flags().String("color", "", "New collection color.")
@@ -32,8 +32,8 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveID(
-		cmd.Flag("id").Value.String(),
-		"--id",
+		cmd,
+		"id",
 		"Select Collection to update:",
 		collectionsPickerFetch(cmd.Context(), client),
 	)

@@ -15,7 +15,7 @@ func DeleteArchive() *cobra.Command {
 		RunE:  executeDeleteArchive,
 	}
 
-	cmd.Flags().String("ids", "", "Comma-separated list of link IDs.")
+	utils.AddIDsFlag(cmd, "Link IDs.")
 	utils.AddYesFlag(cmd)
 
 	if err := cmd.MarkFlagRequired("ids"); err != nil {
@@ -26,9 +26,9 @@ func DeleteArchive() *cobra.Command {
 }
 
 func executeDeleteArchive(cmd *cobra.Command, _ []string) error {
-	ids, err := parseIDs(cmd.Flag("ids").Value.String())
+	ids, err := utils.GetIDs(cmd)
 	if err != nil {
-		return fmt.Errorf("parse --ids: %w", err)
+		return err
 	}
 
 	ok, err := utils.Confirm(cmd, fmt.Sprintf("Delete the archived files of %s (%s)? This can't be undone.",

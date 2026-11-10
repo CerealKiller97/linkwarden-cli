@@ -70,7 +70,7 @@ func TestCreateSavesSingleLink(t *testing.T) {
 
 	cmd := Create()
 	cmd.SetArgs([]string{"https://go.dev", "--name", "Go", "--description", "The Go site",
-		"--collection", "7", "--tag", "go", "--tag", "lang"})
+		"--collection-id", "7", "--tag", "go", "--tag", "lang"})
 	assert.NoError(cmd.Execute())
 
 	assert.Len(*posts, 1)
@@ -103,7 +103,7 @@ func TestCreateUnknownCollectionErrors(t *testing.T) {
 	_, count := fakeCreateServer(t, twoCollections, 0)
 
 	cmd := Create()
-	cmd.SetArgs([]string{"https://go.dev", "--collection", "9999"})
+	cmd.SetArgs([]string{"https://go.dev", "--collection-id", "9999"})
 	err := cmd.Execute()
 	assert.ErrorIs(err, errCollectionNotFound)
 	assert.Zero(count.Load())

@@ -15,7 +15,7 @@ func Delete() *cobra.Command {
 		RunE:  executeDelete,
 	}
 
-	cmd.Flags().String("id", "", "Subscription ID.")
+	cmd.Flags().Int("id", 0, "Subscription ID.")
 	utils.AddYesFlag(cmd)
 
 	return cmd
@@ -25,8 +25,8 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveID(
-		cmd.Flag("id").Value.String(),
-		"--id",
+		cmd,
+		"id",
 		"Select RSS subscription to delete:",
 		rssPickerFetch(cmd.Context(), client),
 	)

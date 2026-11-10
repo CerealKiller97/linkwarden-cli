@@ -16,7 +16,7 @@ func Create() *cobra.Command {
 		RunE:  executeCreate,
 	}
 
-	cmd.Flags().String("link-id", "", "Link ID.")
+	cmd.Flags().Int("link-id", 0, "Link ID.")
 	cmd.Flags().String("text", "", "Highlighted text.")
 	cmd.Flags().String("color", "", "Highlight color.")
 	cmd.Flags().String("comment", "", "Optional comment.")
@@ -36,8 +36,8 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	linkID, err := utils.ResolveIDPaged(
-		cmd.Flag("link-id").Value.String(),
-		"--link-id",
+		cmd,
+		"link-id",
 		"Select Link to highlight:",
 		pickers.Links(cmd.Context(), client),
 	)

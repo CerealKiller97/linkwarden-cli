@@ -3,11 +3,11 @@ package utils
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"sync"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/mattn/go-isatty"
+	"github.com/spf13/cobra"
 )
 
 // PickerItem is a single choice in an interactive ID picker. Detail, if set, is
@@ -45,9 +45,20 @@ func selectOptions(items []PickerItem) []tui.SelectOption {
 // ResolveIDPaged is ResolveID for long lists the API returns a page at a
 // time: the picker shows the first page and fetches the next ones as the user
 // pages or filters past what's loaded.
-func ResolveIDPaged(flagValue, flagHint, label string, fetch PageFetch) (int, error) {
-	if flagValue != "" {
-		return strconv.Atoi(flagValue)
+func ResolveIDPaged(cmd *cobra.Command, flag, label string, fetch PageFetch) (int, error) {
+	flagHint := "--" + flag
+
+	if cmd.Flags().Changed(flag) {
+		id, err := cmd.Flags().GetInt(flag)
+		if err != nil {
+			return 0, err
+		}
+
+		if id <= 0 {
+			return 0, fmt.Errorf("%w: %s %d", ErrInvalidID, flagHint, id)
+		}
+
+		return id, nil
 	}
 
 	if !isInteractive() {
@@ -145,14 +156,13 @@ func errNoTerminal(label string) error {
 	return fmt.Errorf("%q needs an interactive terminal, but none is available", label)
 }
 
-// ResolveID returns flagValue parsed as an int when non-empty. Otherwise, if stdin
-// is an interactive terminal, it calls fetch to list the available items and shows
-// a picker for label. If stdin isn't a terminal (a script, CI, piped input, ...),
-// it fails fast with an actionable error instead of hanging on a prompt nobody can
-// answer. flagHint (e.g. "--id") names the flag to use for non-interactive callers,
-// and is only used in that error message.
-func ResolveID(flagValue, flagHint, label string, fetch func() ([]PickerItem, error)) (int, error) {
-	return ResolveIDPaged(flagValue, flagHint, label, func(int) ([]PickerItem, int, error) {
+// ResolveID returns the value of cmd's int flag when it was set, rejecting zero
+// and negative IDs. Otherwise, if stdin is an interactive terminal, it calls fetch
+// to list the available items and shows a picker for label. If stdin isn't a
+// terminal (a script, CI, piped input, ...), it fails fast with an actionable error
+// naming --flag instead of hanging on a prompt nobody can answer.
+func ResolveID(cmd *cobra.Command, flag, label string, fetch func() ([]PickerItem, error)) (int, error) {
+	return ResolveIDPaged(cmd, flag, label, func(int) ([]PickerItem, int, error) {
 		items, err := fetch()
 		return items, 0, err
 	})

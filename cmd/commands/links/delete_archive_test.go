@@ -27,7 +27,7 @@ func TestDeleteArchiveParsesIDs(t *testing.T) {
 	utils.SetVars("test-token", server.URL)
 
 	cmd := DeleteArchive()
-	cmd.SetArgs([]string{"--ids", "1, 2,3", "--yes"})
+	cmd.SetArgs([]string{"--ids", "1,2", "--ids", "3", "--yes"})
 	assert.NoError(cmd.Execute())
 	assert.Equal([]int{1, 2, 3}, gotBody.LinkIDs)
 }

@@ -2,7 +2,6 @@ package highlights
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -18,8 +17,8 @@ func Delete() *cobra.Command {
 		RunE:  executeDelete,
 	}
 
-	cmd.Flags().String("id", "", "Highlight ID.")
-	cmd.Flags().String("link-id", "", "Link ID (used to pick a highlight when --id is not set).")
+	cmd.Flags().Int("id", 0, "Highlight ID.")
+	cmd.Flags().Int("link-id", 0, "Link ID (used to pick a highlight when --id is not set).")
 	utils.AddYesFlag(cmd)
 
 	return cmd
@@ -28,7 +27,7 @@ func Delete() *cobra.Command {
 func executeDelete(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
-	id, err := resolveHighlightID(cmd, client, cmd.Flag("id").Value.String())
+	id, err := resolveHighlightID(cmd, client)
 	if err != nil {
 		return fmt.Errorf("resolve highlight ID: %w", err)
 	}
@@ -54,17 +53,16 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 	return nil
 }
 
-// resolveHighlightID returns idFlag parsed as an int when non-empty; otherwise it
-// walks the user through a two-step picker (link, then one of its highlights), since
+// resolveHighlightID returns --id when set; otherwise it walks the user through a two-step picker (link, then one of its highlights), since
 // there is no list-all-highlights endpoint to pick from directly.
-func resolveHighlightID(cmd *cobra.Command, client *linkwarden.Client, idFlag string) (int, error) {
-	if idFlag != "" {
-		return strconv.Atoi(idFlag)
+func resolveHighlightID(cmd *cobra.Command, client *linkwarden.Client) (int, error) {
+	if cmd.Flags().Changed("id") {
+		return utils.ResolveID(cmd, "id", "", nil)
 	}
 
 	linkID, err := utils.ResolveIDPaged(
-		cmd.Flag("link-id").Value.String(),
-		"--link-id",
+		cmd,
+		"link-id",
 		"Select Link:",
 		pickers.Links(cmd.Context(), client),
 	)
@@ -72,5 +70,6 @@ func resolveHighlightID(cmd *cobra.Command, client *linkwarden.Client, idFlag st
 		return 0, err
 	}
 
-	return utils.ResolveID("", "--id", "Select Highlight to delete:", highlightsPickerFetch(cmd.Context(), client, linkID))
+	// --id is unset here, so this opens the highlight picker.
+	return utils.ResolveID(cmd, "id", "Select Highlight to delete:", highlightsPickerFetch(cmd.Context(), client, linkID))
 }
