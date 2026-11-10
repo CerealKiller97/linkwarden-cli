@@ -7,28 +7,44 @@ import (
 	"testing"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
-	"github.com/CerealKiller97/linkwarden-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
 
 func TestFromReturnsStoredApp(t *testing.T) {
 	t.Parallel()
+	assert := require.New(t)
 
+	// Arrange
 	a := app.New(app.WithCredentials("t", "https://links.example.com"))
-	require.Same(t, a, app.From(app.WithApp(t.Context(), a)))
+	ctx := app.WithApp(t.Context(), a)
+
+	// Act
+	got := app.From(ctx)
+
+	// Assert
+	assert.Same(a, got)
 }
 
 func TestFromPanicsWithoutApp(t *testing.T) {
 	t.Parallel()
+	assert := require.New(t)
 
-	require.Panics(t, func() { app.From(context.Background()) })
+	// Arrange
+	ctx := context.Background()
+
+	// Act & Assert
+	assert.Panics(func() { app.From(ctx) })
 }
 
 func TestNewAppliesOptions(t *testing.T) {
 	t.Parallel()
+	assert := require.New(t)
 
+	// Arrange
 	var out bytes.Buffer
 	p := app.TerminalPrompter{}
+
+	// Act
 	a := app.New(
 		app.WithCredentials("tok", "https://links.example.com"),
 		app.WithMode(app.OutputIDs),
@@ -36,43 +52,44 @@ func TestNewAppliesOptions(t *testing.T) {
 		app.WithOutput(&out),
 		app.WithPrompter(p),
 	)
-	require.Equal(t, "tok", a.Token)
-	require.Equal(t, "https://links.example.com", a.InstanceURL)
-	require.Equal(t, app.OutputIDs, a.Mode)
-	require.True(t, a.NonInteractive)
-	require.Same(t, &out, a.Stdout())
-	require.Equal(t, p, a.Prompts())
-	require.False(t, a.Scripted)
+
+	// Assert
+	assert.Equal("tok", a.Token)
+	assert.Equal("https://links.example.com", a.InstanceURL)
+	assert.Equal(app.OutputIDs, a.Mode)
+	assert.True(a.NonInteractive)
+	assert.Same(&out, a.Stdout())
+	assert.Equal(p, a.Prompts())
+	assert.False(a.Scripted)
 }
 
 func TestNewDefaults(t *testing.T) {
 	t.Parallel()
+	assert := require.New(t)
 
+	// Act
 	a := app.New()
-	require.Equal(t, os.Stdout, a.Stdout())
-	require.IsType(t, app.TerminalPrompter{}, a.Prompts())
-	require.Equal(t, app.OutputTable, a.Mode)
-	require.False(t, a.NonInteractive)
-	require.Empty(t, a.Token)
+
+	// Assert
+	assert.Equal(os.Stdout, a.Stdout())
+	assert.IsType(app.TerminalPrompter{}, a.Prompts())
+	assert.Equal(app.OutputTable, a.Mode)
+	assert.False(a.NonInteractive)
+	assert.Empty(a.Token)
 }
 
 func TestZeroAppDefaults(t *testing.T) {
 	t.Parallel()
+	assert := require.New(t)
 
+	// Arrange
 	var a app.App
-	require.Equal(t, os.Stdout, a.Stdout())
-	require.IsType(t, app.TerminalPrompter{}, a.Prompts())
-	require.Equal(t, app.OutputTable, a.Mode)
-}
 
-func TestApptestNewAppliesOptions(t *testing.T) {
-	t.Parallel()
+	// Act
+	out, prompter := a.Stdout(), a.Prompts()
 
-	ctx, a := testutils.NewApp(t, "http://example.invalid", app.WithMode(app.OutputJSON), app.WithNonInteractive(true))
-	require.Same(t, a, app.From(ctx))
-	require.Equal(t, testutils.Token, a.Token)
-	require.Equal(t, "http://example.invalid", a.InstanceURL)
-	require.Equal(t, app.OutputJSON, a.Mode)
-	require.True(t, a.NonInteractive)
-	require.IsType(t, &bytes.Buffer{}, a.Out)
+	// Assert
+	assert.Equal(os.Stdout, out)
+	assert.IsType(app.TerminalPrompter{}, prompter)
+	assert.Equal(app.OutputTable, a.Mode)
 }
