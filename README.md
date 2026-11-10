@@ -66,7 +66,7 @@ winget install CerealKiller97.LinkwardenCLI
 docker run --rm -it -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/linkwarden-cli links list
 ```
 
-**Go**
+**From source** (Go 1.27+)
 
 ```bash
 go install github.com/CerealKiller97/linkwarden-cli/cmd/linkwarden@latest
