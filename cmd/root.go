@@ -90,10 +90,10 @@ func newApp(cmd *cobra.Command) (*app.App, error) {
 		return nil, err
 	}
 
-	a := &app.App{Mode: mode, NonInteractive: nonInteractive}
+	opts := []app.Option{app.WithMode(mode), app.WithNonInteractive(nonInteractive)}
 
 	if cmd.Annotations[initcmd.SkipAuthAnnotation] != "" {
-		return a, nil
+		return app.New(opts...), nil
 	}
 
 	cfg, err := utils.LoadConfig()
@@ -101,12 +101,12 @@ func newApp(cmd *cobra.Command) (*app.App, error) {
 		return nil, fmt.Errorf("reading config file: %w", err)
 	}
 
-	a.Token, a.InstanceURL, err = resolveCredentials(os.Getenv("LINKWARDEN_TOKEN"), os.Getenv("LINKWARDEN_URL"), cfg)
+	token, instanceURL, err := resolveCredentials(os.Getenv("LINKWARDEN_TOKEN"), os.Getenv("LINKWARDEN_URL"), cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	return a, nil
+	return app.New(append(opts, app.WithCredentials(token, instanceURL))...), nil
 }
 
 var errJSONAndQuiet = errors.New("--json and --quiet can't be used together")

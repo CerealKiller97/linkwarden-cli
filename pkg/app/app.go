@@ -32,8 +32,8 @@ const (
 	OutputIDs
 )
 
-// App is the state of one run of the CLI. The zero value is usable: table
-// output on stdout, terminal prompts, no credentials.
+// App is the state of one run of the CLI. Build one with New. The zero value
+// is usable too: table output on stdout, terminal prompts, no credentials.
 type App struct {
 	// Out is where results are printed. Nil means os.Stdout.
 	Out io.Writer
@@ -53,6 +53,48 @@ type App struct {
 	// Scripted reports that Prompter answers from a script (tests), so prompts
 	// run even though stdin isn't a terminal. --non-interactive still wins.
 	Scripted bool
+}
+
+// Option configures the App New builds.
+type Option func(*App)
+
+// WithCredentials sets the token and instance URL API requests use.
+func WithCredentials(token, instanceURL string) Option {
+	return func(a *App) {
+		a.Token = token
+		a.InstanceURL = instanceURL
+	}
+}
+
+// WithMode sets how results are printed; see OutputMode.
+func WithMode(mode OutputMode) Option {
+	return func(a *App) { a.Mode = mode }
+}
+
+// WithNonInteractive forces non-interactive mode when on (--non-interactive).
+func WithNonInteractive(on bool) Option {
+	return func(a *App) { a.NonInteractive = on }
+}
+
+// WithOutput prints results to w instead of os.Stdout.
+func WithOutput(w io.Writer) Option {
+	return func(a *App) { a.Out = w }
+}
+
+// WithPrompter answers prompts with p instead of the terminal.
+func WithPrompter(p Prompter) Option {
+	return func(a *App) { a.Prompter = p }
+}
+
+// New returns an App that prints tables to os.Stdout and prompts in the
+// terminal, with no credentials, changed by opts.
+func New(opts ...Option) *App {
+	a := &App{}
+	for _, opt := range opts {
+		opt(a)
+	}
+
+	return a
 }
 
 // Client returns a Linkwarden API client for the App's instance and token.

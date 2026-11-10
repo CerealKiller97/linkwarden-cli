@@ -10,5 +10,5 @@ import (
 //
 // Legacy, removed once every command reads the App: use app.From(cmd.Context()).Client().
 func NewLinkwardenClient() *linkwarden.Client {
-	return (&app.App{InstanceURL: GetInstanceURL(), Token: GetLinkwardenToken()}).Client()
+	return app.New(app.WithCredentials(GetLinkwardenToken(), GetInstanceURL())).Client()
 }

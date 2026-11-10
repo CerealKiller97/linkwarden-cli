@@ -14,22 +14,9 @@ import (
 // Token is the API token every test App carries.
 const Token = "test-token"
 
-// Option changes the App New builds.
-type Option func(*app.App)
-
-// WithMode prints results in mode instead of tables.
-func WithMode(mode app.OutputMode) Option {
-	return func(a *app.App) { a.Mode = mode }
-}
-
-// NonInteractive behaves as if --non-interactive was passed.
-func NonInteractive() Option {
-	return func(a *app.App) { a.NonInteractive = true }
-}
-
 // WithPrompter answers prompts with p (such as a prompttest.Script), and
 // treats stdin as an interactive terminal (--non-interactive still wins).
-func WithPrompter(p app.Prompter) Option {
+func WithPrompter(p app.Prompter) app.Option {
 	return func(a *app.App) {
 		a.Prompter = p
 		a.Scripted = true
@@ -37,9 +24,10 @@ func WithPrompter(p app.Prompter) Option {
 }
 
 // New returns a context carrying an App that talks to instanceURL with Token
-// and prints results to the returned buffer. Run the command with
+// and prints results to the returned buffer. opts (app.WithMode,
+// app.WithNonInteractive, WithPrompter, ...) apply on top. Run the command with
 // cmd.ExecuteContext(ctx).
-func New(t testing.TB, instanceURL string, opts ...Option) (context.Context, *bytes.Buffer) {
+func New(t testing.TB, instanceURL string, opts ...app.Option) (context.Context, *bytes.Buffer) {
 	t.Helper()
 
 	ctx, a := NewApp(t, instanceURL, opts...)
@@ -49,13 +37,11 @@ func New(t testing.TB, instanceURL string, opts ...Option) (context.Context, *by
 
 // NewApp is New for tests that need the App itself, for example to read its
 // InstanceURL.
-func NewApp(t testing.TB, instanceURL string, opts ...Option) (context.Context, *app.App) {
+func NewApp(t testing.TB, instanceURL string, opts ...app.Option) (context.Context, *app.App) {
 	t.Helper()
 
-	a := &app.App{Token: Token, InstanceURL: instanceURL, Out: &bytes.Buffer{}}
-	for _, opt := range opts {
-		opt(a)
-	}
+	base := []app.Option{app.WithCredentials(Token, instanceURL), app.WithOutput(&bytes.Buffer{})}
+	a := app.New(append(base, opts...)...)
 
 	return app.WithApp(t.Context(), a), a
 }
