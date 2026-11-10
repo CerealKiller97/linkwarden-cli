@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ui:** Replace the schollz/progressbar bar in `links import` with a bubbles/progress bar on stderr (hidden when stderr isn't a terminal). Per-link failures are logged after the bar finishes instead of interleaving with it.
 - **tokens:** `tokens generate` and `tokens revoke` now fail fast without an interactive terminal, like the other pickers.
 - **links:** ⚠️ **Breaking:** the JSON-file import moved from `links create --file` to `links import --file`. `links create` no longer takes `--file`.
+- **cli:** ⚠️ **Breaking:** `--format` and `--sort` take names instead of the API's numbers: `archives get|upload|upload-standalone --format png|jpeg|pdf|html|readable`, `migrations import --format linkwarden|html|wallabag|omnivore|pocket` and `search --sort newest|oldest|name-asc|name-desc|description-asc|description-desc`. Numbers are rejected, so update scripts (e.g. `--format 2` → `--format pdf`). `--help` lists the names and shell completion suggests them. `archives upload` no longer offers `readable`, which is retrieve-only.
 - **cli:** ⚠️ **Breaking:** commands that delete or revoke now refuse to run without an interactive terminal (or with `--non-interactive`) unless you pass `--yes`. Add `--yes` to scripts and cron jobs that delete things.
 
 ### ✨ Added

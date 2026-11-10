@@ -28,7 +28,7 @@ func TestGetSavesToOutputFile(t *testing.T) {
 	outputPath := filepath.Join(t.TempDir(), "archive.pdf")
 
 	cmd := Get()
-	cmd.SetArgs([]string{"--link-id", "5", "--format", "2", "--output", outputPath})
+	cmd.SetArgs([]string{"--link-id", "5", "--format", "pdf", "--output", outputPath})
 	assert.NoError(cmd.Execute())
 
 	data, err := os.ReadFile(outputPath)

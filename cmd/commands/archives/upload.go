@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/choice"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
@@ -20,7 +21,7 @@ func Upload() *cobra.Command {
 
 	cmd.Flags().String("link-id", "", "Link ID.")
 	cmd.Flags().String("file", "", "Local file to upload.")
-	cmd.Flags().Int("format", 0, formatHelp)
+	choice.Flag(cmd, "format", "", "Archive format.", uploadFormats)
 	cmd.Flags().Bool("preview", false, "Store the uploaded file as the generated preview instead of the main archive.")
 
 	for _, name := range []string{"file", "format"} {
@@ -49,7 +50,7 @@ func executeUpload(cmd *cobra.Command, _ []string) error {
 	if err != nil {
 		return err
 	}
-	format, err := cmd.Flags().GetInt("format")
+	format, _, err := choice.Get[linkwarden.ArchiveFormat](cmd, "format")
 	if err != nil {
 		return err
 	}
@@ -65,7 +66,7 @@ func executeUpload(cmd *cobra.Command, _ []string) error {
 	defer f.Close()
 
 	spinner := utils.StartSpinner("Uploading archive…")
-	link, err := client.Archives.Upload(cmd.Context(), linkID, linkwarden.ArchiveFormat(format), preview, filepath.Base(filePath), f)
+	link, err := client.Archives.Upload(cmd.Context(), linkID, format, preview, filepath.Base(filePath), f)
 	spinner.Stop()
 	if err != nil {
 		return fmt.Errorf("upload archive: %w", err)
