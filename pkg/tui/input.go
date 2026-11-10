@@ -87,12 +87,12 @@ func (m inputModel) value() string {
 }
 
 type inputModel struct {
-	label    string
-	validate func(string) error
-	def      string // accepted when Enter is pressed on an empty field
-	masked   bool   // password input: never echo the value
-	input    textinput.Model
 	err      error
+	validate func(string) error
+	label    string
+	def      string // accepted when Enter is pressed on an empty field
+	input    textinput.Model
+	masked   bool // password input: never echo the value
 	done     bool
 	aborted  bool
 }

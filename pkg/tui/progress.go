@@ -15,11 +15,11 @@ import (
 // The bar doesn't read the keyboard and doesn't install a signal handler, so
 // Ctrl+C still interrupts the command the way it always has.
 type Progress struct {
+	// final is the model the program ended with; set before done is closed.
+	final   tea.Model
 	program *tea.Program
 	done    chan struct{}
 	once    sync.Once
-	// final is the model the program ended with; set before done is closed.
-	final tea.Model
 }
 
 // StartProgress draws a bar for total units of work under label on out
@@ -62,10 +62,10 @@ type (
 )
 
 type progressModel struct {
+	bar     progress.Model
 	label   string
 	total   int
 	current int
-	bar     progress.Model
 	stopped bool
 }
 

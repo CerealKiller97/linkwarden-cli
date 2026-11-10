@@ -32,7 +32,7 @@
 #   and non-conventional commits
 #
 # A "!" after the type/scope (feat!: ..., fix(api)!: ...) or a "BREAKING CHANGE:" footer
-# marks the entry with 💥 **BREAKING**.
+# marks the entry with 💥 **BREAKING**, except in the first release (no vX.Y.Z tag yet).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -121,7 +121,8 @@ collect_changes() {
 		[[ "$desc" =~ [.!?]$ ]] || desc="${desc}."
 
 		entry="- "
-		if [[ -n "$bang" ]] || grep -qE '^BREAKING[ -]CHANGE:' <<<"$body"; then
+		# Nothing can break before the first release, so only mark entries once a tag exists.
+		if [[ -n "$prev" ]] && { [[ -n "$bang" ]] || grep -qE '^BREAKING[ -]CHANGE:' <<<"$body"; }; then
 			entry+="💥 **BREAKING** "
 		fi
 		[[ -n "$scope" && "$scope" != "security" ]] && entry+="**${scope}:** "

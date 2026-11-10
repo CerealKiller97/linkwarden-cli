@@ -74,11 +74,9 @@ bash install.sh
 brew install CerealKiller97/tap/linkwarden-cli
 ```
 
-**🐧 Arch Linux** ([AUR](https://aur.archlinux.org/packages/linkwarden-cli-bin)):
-
-```bash
-yay -S linkwarden-cli-bin
-```
+**🐧 Arch Linux** (AUR, coming soon): the AUR has temporarily closed new account registrations
+because of malicious packages, so `linkwarden-cli-bin` isn't published yet. It will be once
+registrations reopen. Until then, use the install script, Docker or a prebuilt binary.
 
 **🪟 Windows** (winget):
 
@@ -86,7 +84,7 @@ yay -S linkwarden-cli-bin
 winget install CerealKiller97.LinkwardenCLI
 ```
 
-All three install shell completions for bash, zsh and fish where the platform supports them.
+Homebrew and winget install shell completions for bash, zsh and fish where the platform supports them.
 
 **🐳 Docker** (linux/amd64 and linux/arm64):
 
@@ -644,20 +642,20 @@ The script shows the next version and a changelog preview, then triggers the
 5. Pushes the commit and tag, then publishes a GitHub Release with the changelog section as its notes.
 6. Publishes packages: opens PRs against
    [CerealKiller97/homebrew-tap](https://github.com/CerealKiller97/homebrew-tap) and
-   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs), and pushes the
-   [`linkwarden-cli-bin`](https://aur.archlinux.org/packages/linkwarden-cli-bin) PKGBUILD to the AUR.
+   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs). The
+   `linkwarden-cli-bin` AUR package is built but not pushed until AUR registrations reopen.
 7. Pushes a multi-arch image to `ghcr.io/cerealkiller97/linkwarden-cli`.
 
 Preview the changelog with `scripts/release.sh changelog 1.5.0`, and the binaries, Homebrew cask,
 AUR PKGBUILD, winget manifests and Docker images with `goreleaser release --snapshot --clean`
 (output in `dist/`, images tagged with an `-amd64`/`-arm64` suffix).
 
-The workflow needs two repository secrets:
+The workflow uses these repository secrets:
 
 | Secret | What it is |
 |---|---|
 | `PACKAGES_GITHUB_TOKEN` | Classic PAT with the `public_repo` scope. It pushes to `homebrew-tap` and the `winget-pkgs` fork, and opens the PRs. |
-| `AUR_KEY` | Private SSH key (no passphrase) whose public half is on your [AUR account](https://aur.archlinux.org/account). |
+| `AUR_KEY` | Private SSH key (no passphrase) whose public half is on your [AUR account](https://aur.archlinux.org/account). Not needed until AUR publishing is turned back on. |
 
 ---
 

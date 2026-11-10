@@ -35,20 +35,21 @@ const (
 // App is the state of one run of the CLI. The zero value is usable: table
 // output on stdout, terminal prompts, no credentials.
 type App struct {
+	// Out is where results are printed. Nil means os.Stdout.
+	Out io.Writer
+	// Prompter answers prompts. Nil means TerminalPrompter.
+	Prompter Prompter
+
 	// Token and InstanceURL are the credentials API requests use.
 	Token       string
 	InstanceURL string
 
 	// Mode is how results are printed; see OutputMode.
 	Mode OutputMode
-	// Out is where results are printed. Nil means os.Stdout.
-	Out io.Writer
 
 	// NonInteractive forces non-interactive mode (--non-interactive), so
 	// commands fail fast instead of prompting.
 	NonInteractive bool
-	// Prompter answers prompts. Nil means TerminalPrompter.
-	Prompter Prompter
 	// Scripted reports that Prompter answers from a script (tests), so prompts
 	// run even though stdin isn't a terminal. --non-interactive still wins.
 	Scripted bool

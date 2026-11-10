@@ -77,6 +77,16 @@ release:
   # A copy of the installer pinned to this release, at releases/download/vX.Y.Z/install.sh.
   extra_files:
     - glob: ./install.sh
+  # Appended after the CHANGELOG.md notes passed with --release-notes.
+  footer: |
+
+    ### 🐳 Docker
+
+    ```bash
+    docker run --rm -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/linkwarden-cli:{{ .Version }} --version
+    ```
+
+    Multi-arch image for `linux/amd64` and `linux/arm64`. Add `-it` for interactive prompts.
 
 # 🐳 docker run --rm -e LINKWARDEN_TOKEN ghcr.io/cerealkiller97/linkwarden-cli links list
 # One buildx build per release pushes a linux/amd64 + linux/arm64 manifest. --snapshot builds
@@ -138,6 +148,9 @@ homebrew_casks:
 
 # 🐧 yay -S linkwarden-cli-bin
 # AUR has no pull requests: the PKGBUILD is pushed straight to the package's AUR git repo over SSH.
+# ⏸️ Not published yet: AUR has temporarily closed new account registrations because of malicious
+# packages, so there's no account to push to. The PKGBUILD is still rendered into dist/aur/.
+# Once registrations reopen, add the AUR_KEY secret and set skip_upload back to auto.
 aurs:
   - name: linkwarden-cli-bin
     ids: [linkwarden]
@@ -145,7 +158,7 @@ aurs:
     homepage: https://github.com/CerealKiller97/linkwarden-cli
     license: AGPL-3.0-only
     maintainers:
-      - Stefan Bogdanović <bogdanovicstefan1997@gmail.com>
+      - Stefan Bogdanović <stefan@stefanbogdanovic.dev>
     provides: [linkwarden-cli]
     conflicts: [linkwarden-cli]
     private_key: "{{ .Env.AUR_KEY }}"
@@ -153,8 +166,8 @@ aurs:
     commit_msg_template: "Update to {{ .Tag }}"
     commit_author:
       name: Stefan Bogdanović
-      email: bogdanovicstefan1997@gmail.com
-    skip_upload: auto
+      email: stefan@stefanbogdanovic.dev
+    skip_upload: true
     package: |-
       cd "${srcdir}"/linkwarden_*/
       install -Dm755 "./linkwarden" "${pkgdir}/usr/bin/linkwarden"
@@ -182,7 +195,7 @@ winget:
     commit_msg_template: "New version: {{ .PackageIdentifier }} {{ .Version }}"
     commit_author:
       name: Stefan Bogdanović
-      email: bogdanovicstefan1997@gmail.com
+      email: stefan@stefanbogdanovic.dev
     skip_upload: auto
     repository:
       owner: CerealKiller97
