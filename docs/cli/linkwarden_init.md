@@ -6,7 +6,7 @@ Set up the CLI with your Linkwarden account
 
 Walks you through signing in to your Linkwarden instance, with an access token (recommended), your email and password, or a provider such as Google or Apple, and saves the result to the CLI's config file.
 
-```
+```bash
 linkwarden init [flags]
 ```
 
@@ -27,4 +27,3 @@ linkwarden init [flags]
 ### SEE ALSO
 
 * [linkwarden](linkwarden.md)	 - Linkwarden is a CLI for the Linkwarden platform
-

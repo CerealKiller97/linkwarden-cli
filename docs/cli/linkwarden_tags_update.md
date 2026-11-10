@@ -2,7 +2,7 @@
 
 Rename a tag
 
-```
+```bash
 linkwarden tags update [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden tags update [flags]
 ### SEE ALSO
 
 * [linkwarden tags](linkwarden_tags.md)	 - Manage tags
-

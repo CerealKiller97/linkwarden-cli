@@ -2,7 +2,7 @@
 
 List tags
 
-```
+```bash
 linkwarden tags list [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden tags list [flags]
 ### SEE ALSO
 
 * [linkwarden tags](linkwarden_tags.md)	 - Manage tags
-

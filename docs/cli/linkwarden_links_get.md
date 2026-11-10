@@ -2,7 +2,7 @@
 
 Get a link by ID
 
-```
+```bash
 linkwarden links get [flags]
 ```
 
@@ -24,4 +24,3 @@ linkwarden links get [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

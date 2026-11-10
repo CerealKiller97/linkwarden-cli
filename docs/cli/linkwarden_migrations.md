@@ -21,4 +21,3 @@ Manage migration (Import / Export)
 * [linkwarden](linkwarden.md)	 - Linkwarden is a CLI for the Linkwarden platform
 * [linkwarden migrations export](linkwarden_migrations_export.md)	 - Export Linkwarden data to a JSON file
 * [linkwarden migrations import](linkwarden_migrations_import.md)	 - Import Linkwarden data from a data source
-

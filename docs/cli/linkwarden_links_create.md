@@ -11,16 +11,16 @@ web app. Without --name, Linkwarden uses the page's title.
 
 To save many links at once from a JSON file, use "links import".
 
-```
+```bash
 linkwarden links create <url> [flags]
 ```
 
 ### Examples
 
-```
-  linkwarden links create https://go.dev/doc/effective_go
-  linkwarden links create https://12factor.net --name "The Twelve-Factor App" --collection-id 3
-  linkwarden links create https://k8spatterns.io --tag kubernetes --tag books
+```bash
+linkwarden links create https://go.dev/doc/effective_go
+linkwarden links create https://12factor.net --name "The Twelve-Factor App" --collection-id 3
+linkwarden links create https://k8spatterns.io --tag kubernetes --tag books
 ```
 
 ### Options
@@ -44,4 +44,3 @@ linkwarden links create <url> [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

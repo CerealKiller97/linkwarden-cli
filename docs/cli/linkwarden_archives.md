@@ -22,4 +22,3 @@ Manage link archive files
 * [linkwarden archives get](linkwarden_archives_get.md)	 - Retrieve a link's archive file
 * [linkwarden archives upload](linkwarden_archives_upload.md)	 - Upload a local file as a link's archive
 * [linkwarden archives upload-standalone](linkwarden_archives_upload-standalone.md)	 - Upload a local file as a new link's archive
-

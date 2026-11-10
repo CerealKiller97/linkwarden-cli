@@ -2,7 +2,7 @@
 
 Get dashboard data (v2)
 
-```
+```bash
 linkwarden dashboard get-v2 [flags]
 ```
 
@@ -23,4 +23,3 @@ linkwarden dashboard get-v2 [flags]
 ### SEE ALSO
 
 * [linkwarden dashboard](linkwarden_dashboard.md)	 - View and configure the dashboard
-

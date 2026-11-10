@@ -22,4 +22,3 @@ View and configure the dashboard
 * [linkwarden dashboard get](linkwarden_dashboard_get.md)	 - Get dashboard data (v1)
 * [linkwarden dashboard get-v2](linkwarden_dashboard_get-v2.md)	 - Get dashboard data (v2)
 * [linkwarden dashboard update-v2](linkwarden_dashboard_update-v2.md)	 - Update dashboard layout (v2)
-

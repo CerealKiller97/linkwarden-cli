@@ -21,4 +21,3 @@ Manage link highlights
 * [linkwarden](linkwarden.md)	 - Linkwarden is a CLI for the Linkwarden platform
 * [linkwarden highlights create](linkwarden_highlights_create.md)	 - Create or update a highlight on a link
 * [linkwarden highlights delete](linkwarden_highlights_delete.md)	 - Delete a highlight
-

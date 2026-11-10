@@ -2,7 +2,7 @@
 
 Update a collection
 
-```
+```bash
 linkwarden collections update [flags]
 ```
 
@@ -31,4 +31,3 @@ linkwarden collections update [flags]
 ### SEE ALSO
 
 * [linkwarden collections](linkwarden_collections.md)	 - Manage collections
-

@@ -2,7 +2,7 @@
 
 List all available tokens
 
-```
+```bash
 linkwarden tokens list [flags]
 ```
 
@@ -23,4 +23,3 @@ linkwarden tokens list [flags]
 ### SEE ALSO
 
 * [linkwarden tokens](linkwarden_tokens.md)	 - Manage tokens
-

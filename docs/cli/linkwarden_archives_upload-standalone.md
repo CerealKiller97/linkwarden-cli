@@ -2,7 +2,7 @@
 
 Upload a local file as a new link's archive
 
-```
+```bash
 linkwarden archives upload-standalone [flags]
 ```
 
@@ -27,4 +27,3 @@ linkwarden archives upload-standalone [flags]
 ### SEE ALSO
 
 * [linkwarden archives](linkwarden_archives.md)	 - Manage link archive files
-

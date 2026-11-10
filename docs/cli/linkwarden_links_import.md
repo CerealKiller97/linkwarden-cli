@@ -19,15 +19,15 @@ end, and the command fails if any link could not be created.
 
 Without --collection-id, a picker asks for the target collection.
 
-```
+```bash
 linkwarden links import [flags]
 ```
 
 ### Examples
 
-```
-  linkwarden links import --file reading-list.json
-  linkwarden links import --file reading-list.json --collection-id 3
+```bash
+linkwarden links import --file reading-list.json
+linkwarden links import --file reading-list.json --collection-id 3
 ```
 
 ### Options
@@ -50,4 +50,3 @@ linkwarden links import [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

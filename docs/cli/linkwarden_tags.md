@@ -25,4 +25,3 @@ Manage tags
 * [linkwarden tags get](linkwarden_tags_get.md)	 - Get a tag by ID
 * [linkwarden tags list](linkwarden_tags_list.md)	 - List tags
 * [linkwarden tags update](linkwarden_tags_update.md)	 - Rename a tag
-

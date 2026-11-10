@@ -35,4 +35,3 @@ add --json for machine-readable output, or -q for bare IDs.
 * [linkwarden search](linkwarden_search.md)	 - Search links
 * [linkwarden tags](linkwarden_tags.md)	 - Manage tags
 * [linkwarden tokens](linkwarden_tokens.md)	 - Manage tokens
-

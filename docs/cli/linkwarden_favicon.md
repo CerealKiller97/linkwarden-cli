@@ -20,4 +20,3 @@ Fetch favicons
 
 * [linkwarden](linkwarden.md)	 - Linkwarden is a CLI for the Linkwarden platform
 * [linkwarden favicon get](linkwarden_favicon_get.md)	 - Fetch a favicon for a URL
-

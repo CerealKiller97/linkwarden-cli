@@ -2,7 +2,7 @@
 
 Search links
 
-```
+```bash
 linkwarden search [flags]
 ```
 
@@ -26,4 +26,3 @@ linkwarden search [flags]
 ### SEE ALSO
 
 * [linkwarden](linkwarden.md)	 - Linkwarden is a CLI for the Linkwarden platform
-

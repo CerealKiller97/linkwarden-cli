@@ -2,7 +2,7 @@
 
 List links
 
-```
+```bash
 linkwarden links list [flags]
 ```
 
@@ -28,4 +28,3 @@ linkwarden links list [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

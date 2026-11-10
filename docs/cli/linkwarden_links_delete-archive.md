@@ -2,7 +2,7 @@
 
 Delete archived files for multiple links
 
-```
+```bash
 linkwarden links delete-archive [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden links delete-archive [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

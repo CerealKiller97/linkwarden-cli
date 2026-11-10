@@ -2,7 +2,7 @@
 
 List RSS subscriptions
 
-```
+```bash
 linkwarden rss list [flags]
 ```
 
@@ -23,4 +23,3 @@ linkwarden rss list [flags]
 ### SEE ALSO
 
 * [linkwarden rss](linkwarden_rss.md)	 - Manage RSS subscriptions
-

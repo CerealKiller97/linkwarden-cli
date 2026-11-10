@@ -2,7 +2,7 @@
 
 Delete a tag
 
-```
+```bash
 linkwarden tags delete [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden tags delete [flags]
 ### SEE ALSO
 
 * [linkwarden tags](linkwarden_tags.md)	 - Manage tags
-

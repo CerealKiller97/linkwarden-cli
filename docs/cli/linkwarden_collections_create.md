@@ -6,7 +6,7 @@ Create a collection
 
 Create a collection
 
-```
+```bash
 linkwarden collections create [flags]
 ```
 
@@ -33,4 +33,3 @@ linkwarden collections create [flags]
 ### SEE ALSO
 
 * [linkwarden collections](linkwarden_collections.md)	 - Manage collections
-

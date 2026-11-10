@@ -24,4 +24,3 @@ Manage collections
 * [linkwarden collections get](linkwarden_collections_get.md)	 - Get a collection by ID
 * [linkwarden collections list](linkwarden_collections_list.md)	 - List collections
 * [linkwarden collections update](linkwarden_collections_update.md)	 - Update a collection
-

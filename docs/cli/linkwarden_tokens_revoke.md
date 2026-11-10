@@ -2,7 +2,7 @@
 
 Revoke a token
 
-```
+```bash
 linkwarden tokens revoke [flags]
 ```
 
@@ -24,4 +24,3 @@ linkwarden tokens revoke [flags]
 ### SEE ALSO
 
 * [linkwarden tokens](linkwarden_tokens.md)	 - Manage tokens
-

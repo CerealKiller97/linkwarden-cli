@@ -2,7 +2,7 @@
 
 Get a tag by ID
 
-```
+```bash
 linkwarden tags get [flags]
 ```
 
@@ -24,4 +24,3 @@ linkwarden tags get [flags]
 ### SEE ALSO
 
 * [linkwarden tags](linkwarden_tags.md)	 - Manage tags
-

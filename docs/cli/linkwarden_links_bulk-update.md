@@ -2,7 +2,7 @@
 
 Apply a collection/tag change to multiple links
 
-```
+```bash
 linkwarden links bulk-update [flags]
 ```
 
@@ -27,4 +27,3 @@ linkwarden links bulk-update [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

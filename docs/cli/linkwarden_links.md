@@ -30,4 +30,3 @@ Manage links
 * [linkwarden links import](linkwarden_links_import.md)	 - Import links from a JSON file
 * [linkwarden links list](linkwarden_links_list.md)	 - List links
 * [linkwarden links update](linkwarden_links_update.md)	 - Update a link
-

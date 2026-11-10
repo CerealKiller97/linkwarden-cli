@@ -10,7 +10,7 @@ Prompts for a token name and an expiry (7, 30, 60 or 90 days, or never), then
 prints the new token. On Linux and macOS it offers to add the token to your
 shell config. Needs an interactive terminal.
 
-```
+```bash
 linkwarden tokens generate [flags]
 ```
 
@@ -31,4 +31,3 @@ linkwarden tokens generate [flags]
 ### SEE ALSO
 
 * [linkwarden tokens](linkwarden_tokens.md)	 - Manage tokens
-

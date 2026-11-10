@@ -2,7 +2,7 @@
 
 Get highlights for a link
 
-```
+```bash
 linkwarden links get-highlights [flags]
 ```
 
@@ -24,4 +24,3 @@ linkwarden links get-highlights [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

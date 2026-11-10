@@ -2,7 +2,7 @@
 
 Get a collection by ID
 
-```
+```bash
 linkwarden collections get [flags]
 ```
 
@@ -24,4 +24,3 @@ linkwarden collections get [flags]
 ### SEE ALSO
 
 * [linkwarden collections](linkwarden_collections.md)	 - Manage collections
-

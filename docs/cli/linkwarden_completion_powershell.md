@@ -14,7 +14,7 @@ To load completions for every new session, add the output of the above command
 to your powershell profile.
 
 
-```
+```bash
 linkwarden completion powershell [flags]
 ```
 
@@ -36,4 +36,3 @@ linkwarden completion powershell [flags]
 ### SEE ALSO
 
 * [linkwarden completion](linkwarden_completion.md)	 - Generate the autocompletion script for the specified shell
-

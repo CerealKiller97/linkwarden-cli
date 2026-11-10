@@ -2,7 +2,7 @@
 
 Create an RSS subscription
 
-```
+```bash
 linkwarden rss create [flags]
 ```
 
@@ -27,4 +27,3 @@ linkwarden rss create [flags]
 ### SEE ALSO
 
 * [linkwarden rss](linkwarden_rss.md)	 - Manage RSS subscriptions
-

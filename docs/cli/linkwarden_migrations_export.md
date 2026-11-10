@@ -2,7 +2,7 @@
 
 Export Linkwarden data to a JSON file
 
-```
+```bash
 linkwarden migrations export [flags]
 ```
 
@@ -24,4 +24,3 @@ linkwarden migrations export [flags]
 ### SEE ALSO
 
 * [linkwarden migrations](linkwarden_migrations.md)	 - Manage migration (Import / Export)
-

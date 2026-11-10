@@ -2,7 +2,7 @@
 
 Delete multiple links
 
-```
+```bash
 linkwarden links bulk-delete [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden links bulk-delete [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

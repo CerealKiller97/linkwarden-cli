@@ -22,4 +22,3 @@ Manage RSS subscriptions
 * [linkwarden rss create](linkwarden_rss_create.md)	 - Create an RSS subscription
 * [linkwarden rss delete](linkwarden_rss_delete.md)	 - Delete an RSS subscription
 * [linkwarden rss list](linkwarden_rss_list.md)	 - List RSS subscriptions
-

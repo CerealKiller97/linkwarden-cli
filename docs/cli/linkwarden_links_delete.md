@@ -2,7 +2,7 @@
 
 Delete a link
 
-```
+```bash
 linkwarden links delete [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden links delete [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

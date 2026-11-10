@@ -2,7 +2,7 @@
 
 Get public runtime configuration
 
-```
+```bash
 linkwarden config get [flags]
 ```
 
@@ -23,4 +23,3 @@ linkwarden config get [flags]
 ### SEE ALSO
 
 * [linkwarden config](linkwarden_config.md)	 - View instance configuration
-

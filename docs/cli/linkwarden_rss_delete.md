@@ -2,7 +2,7 @@
 
 Delete an RSS subscription
 
-```
+```bash
 linkwarden rss delete [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden rss delete [flags]
 ### SEE ALSO
 
 * [linkwarden rss](linkwarden_rss.md)	 - Manage RSS subscriptions
-

@@ -2,7 +2,7 @@
 
 List collections
 
-```
+```bash
 linkwarden collections list [flags]
 ```
 
@@ -23,4 +23,3 @@ linkwarden collections list [flags]
 ### SEE ALSO
 
 * [linkwarden collections](linkwarden_collections.md)	 - Manage collections
-

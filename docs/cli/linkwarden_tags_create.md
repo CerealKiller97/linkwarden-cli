@@ -2,7 +2,7 @@
 
 Create or update tags in bulk
 
-```
+```bash
 linkwarden tags create [flags]
 ```
 
@@ -24,4 +24,3 @@ linkwarden tags create [flags]
 ### SEE ALSO
 
 * [linkwarden tags](linkwarden_tags.md)	 - Manage tags
-

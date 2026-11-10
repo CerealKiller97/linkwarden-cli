@@ -2,7 +2,7 @@
 
 Delete a collection
 
-```
+```bash
 linkwarden collections delete [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden collections delete [flags]
 ### SEE ALSO
 
 * [linkwarden collections](linkwarden_collections.md)	 - Manage collections
-

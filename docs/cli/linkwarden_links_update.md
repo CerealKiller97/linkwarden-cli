@@ -2,7 +2,7 @@
 
 Update a link
 
-```
+```bash
 linkwarden links update [flags]
 ```
 
@@ -30,4 +30,3 @@ linkwarden links update [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

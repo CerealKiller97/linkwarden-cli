@@ -22,4 +22,3 @@ Manage tokens
 * [linkwarden tokens generate](linkwarden_tokens_generate.md)	 - Create an API token
 * [linkwarden tokens list](linkwarden_tokens_list.md)	 - List all available tokens
 * [linkwarden tokens revoke](linkwarden_tokens_revoke.md)	 - Revoke a token
-

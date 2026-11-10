@@ -2,7 +2,7 @@
 
 Delete a highlight
 
-```
+```bash
 linkwarden highlights delete [flags]
 ```
 
@@ -26,4 +26,3 @@ linkwarden highlights delete [flags]
 ### SEE ALSO
 
 * [linkwarden highlights](linkwarden_highlights.md)	 - Manage link highlights
-

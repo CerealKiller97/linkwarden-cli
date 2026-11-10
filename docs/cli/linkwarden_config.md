@@ -20,4 +20,3 @@ View instance configuration
 
 * [linkwarden](linkwarden.md)	 - Linkwarden is a CLI for the Linkwarden platform
 * [linkwarden config get](linkwarden_config_get.md)	 - Get public runtime configuration
-

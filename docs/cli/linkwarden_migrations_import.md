@@ -2,7 +2,7 @@
 
 Import Linkwarden data from a data source
 
-```
+```bash
 linkwarden migrations import [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden migrations import [flags]
 ### SEE ALSO
 
 * [linkwarden migrations](linkwarden_migrations.md)	 - Manage migration (Import / Export)
-

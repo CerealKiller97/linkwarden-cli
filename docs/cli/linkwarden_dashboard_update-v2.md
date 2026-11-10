@@ -2,7 +2,7 @@
 
 Update dashboard layout (v2)
 
-```
+```bash
 linkwarden dashboard update-v2 [flags]
 ```
 
@@ -24,4 +24,3 @@ linkwarden dashboard update-v2 [flags]
 ### SEE ALSO
 
 * [linkwarden dashboard](linkwarden_dashboard.md)	 - View and configure the dashboard
-

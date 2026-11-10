@@ -2,7 +2,7 @@
 
 Fetch a favicon for a URL
 
-```
+```bash
 linkwarden favicon get [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden favicon get [flags]
 ### SEE ALSO
 
 * [linkwarden favicon](linkwarden_favicon.md)	 - Fetch favicons
-

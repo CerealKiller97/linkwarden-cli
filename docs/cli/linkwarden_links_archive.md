@@ -2,7 +2,7 @@
 
 Trigger archiving of a link
 
-```
+```bash
 linkwarden links archive [flags]
 ```
 
@@ -24,4 +24,3 @@ linkwarden links archive [flags]
 ### SEE ALSO
 
 * [linkwarden links](linkwarden_links.md)	 - Manage links
-

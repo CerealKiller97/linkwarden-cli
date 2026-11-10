@@ -2,7 +2,7 @@
 
 Retrieve a link's archive file
 
-```
+```bash
 linkwarden archives get [flags]
 ```
 
@@ -27,4 +27,3 @@ linkwarden archives get [flags]
 ### SEE ALSO
 
 * [linkwarden archives](linkwarden_archives.md)	 - Manage link archive files
-

@@ -2,7 +2,7 @@
 
 Delete multiple tags
 
-```
+```bash
 linkwarden tags bulk-delete [flags]
 ```
 
@@ -25,4 +25,3 @@ linkwarden tags bulk-delete [flags]
 ### SEE ALSO
 
 * [linkwarden tags](linkwarden_tags.md)	 - Manage tags
-

@@ -2,7 +2,7 @@
 
 Create or update a highlight on a link
 
-```
+```bash
 linkwarden highlights create [flags]
 ```
 
@@ -29,4 +29,3 @@ linkwarden highlights create [flags]
 ### SEE ALSO
 
 * [linkwarden highlights](linkwarden_highlights.md)	 - Manage link highlights
-

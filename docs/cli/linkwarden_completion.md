@@ -29,4 +29,3 @@ See each sub-command's help for details on how to use the generated script.
 * [linkwarden completion fish](linkwarden_completion_fish.md)	 - Generate the autocompletion script for fish
 * [linkwarden completion powershell](linkwarden_completion_powershell.md)	 - Generate the autocompletion script for powershell
 * [linkwarden completion zsh](linkwarden_completion_zsh.md)	 - Generate the autocompletion script for zsh
-

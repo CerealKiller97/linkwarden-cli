@@ -28,7 +28,7 @@ To load completions for every new session, execute once:
 You will need to start a new shell for this setup to take effect.
 
 
-```
+```bash
 linkwarden completion zsh [flags]
 ```
 
@@ -50,4 +50,3 @@ linkwarden completion zsh [flags]
 ### SEE ALSO
 
 * [linkwarden completion](linkwarden_completion.md)	 - Generate the autocompletion script for the specified shell
-
