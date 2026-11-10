@@ -21,8 +21,8 @@ type Option[T ~int] struct {
 
 // Value is a pflag.Value that accepts only the names of its options.
 type Value[T ~int] struct {
-	options []Option[T]
 	current *Option[T]
+	options []Option[T]
 }
 
 func (v *Value[T]) String() string {

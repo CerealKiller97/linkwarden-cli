@@ -15,22 +15,6 @@ import (
 
 // Table is plain tabular data: a title, column headers and string cells.
 type Table struct {
-	Title   string
-	Headers []string
-	Rows    [][]string
-
-	// ShowCount appends the number of rows to the title, as in "Links (12)".
-	// List tables set it; summaries and key/value tables don't.
-	ShowCount bool
-
-	// Caption, when set, is a dim line between the title and the table, for
-	// totals or other context that isn't a row.
-	Caption string
-
-	// Width, when positive, is the terminal width static output must fit in;
-	// long cells are cut short with an ellipsis. Zero means no limit.
-	Width int
-
 	// Tone, when set, picks a color for a data cell (row and col are 0-based
 	// into Rows). Only static output uses it.
 	Tone func(row, col int) Tone
@@ -39,7 +23,23 @@ type Table struct {
 	// color output the cell becomes a terminal hyperlink (OSC 8) to that URL,
 	// so clicking it opens the whole URL even when the cell shows it cut short
 	// with an ellipsis. Plain output has no links.
-	Link func(row, col int) string
+	Link  func(row, col int) string
+	Title string
+
+	// Caption, when set, is a dim line between the title and the table, for
+	// totals or other context that isn't a row.
+	Caption string
+
+	Headers []string
+	Rows    [][]string
+
+	// Width, when positive, is the terminal width static output must fit in;
+	// long cells are cut short with an ellipsis. Zero means no limit.
+	Width int
+
+	// ShowCount appends the number of rows to the title, as in "Links (12)".
+	// List tables set it; summaries and key/value tables don't.
+	ShowCount bool
 }
 
 // Tone is a semantic color for a table cell.
@@ -162,9 +162,9 @@ func BrowseTable(t Table, width, height int, o Options) error {
 
 type browseModel struct {
 	header string
+	table  table.Model
 	// extra is how many rows the header takes beyond the title line.
 	extra int
-	table table.Model
 	done  bool
 }
 

@@ -69,8 +69,8 @@ type item struct {
 }
 
 type failure struct {
-	item item
 	err  error
+	item item
 }
 
 func executeImport(cmd *cobra.Command, _ []string) error {
@@ -259,18 +259,18 @@ func splitExisting(data []item, existing map[string]bool) ([]item, int) {
 }
 
 type results struct {
-	total, success, alreadyExists, failed int
 	failures                              []failure
+	total, success, alreadyExists, failed int
 }
 
 // importReport is what --json prints for an import: the totals, and each link
 // that failed with the reason.
 type importReport struct {
+	Failures      []importFailure `json:"failures"`
 	Total         int             `json:"total"`
 	Success       int             `json:"success"`
 	AlreadyExists int             `json:"alreadyExists"`
 	Failed        int             `json:"failed"`
-	Failures      []importFailure `json:"failures"`
 }
 
 type importFailure struct {

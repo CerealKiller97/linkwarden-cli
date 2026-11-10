@@ -25,11 +25,11 @@ const spinnerMinVisible = time.Second
 // Like Progress, it doesn't read the keyboard and doesn't install a signal
 // handler, so Ctrl+C still interrupts the command the way it always has.
 type Spinner struct {
+	// final is the model the program ended with; set before done is closed.
+	final   tea.Model
 	program *tea.Program
 	done    chan struct{}
 	once    sync.Once
-	// final is the model the program ended with; set before done is closed.
-	final tea.Model
 }
 
 // StartSpinner draws a spinner next to label on out (normally stderr, so
@@ -71,12 +71,12 @@ type (
 )
 
 type spinnerModel struct {
+	shownAt    time.Time
 	label      string
+	spinner    spinner.Model
 	delay      time.Duration
 	minVisible time.Duration
-	spinner    spinner.Model
 	shown      bool
-	shownAt    time.Time
 	stopped    bool
 }
 

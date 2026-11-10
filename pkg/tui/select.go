@@ -67,31 +67,32 @@ func SelectPaged(label string, first []SelectOption, load LoadMore, o Options) (
 }
 
 type selectModel struct {
-	label   string
-	options []SelectOption
-	pages   paginator.Model
-	width   int
+	loadErr error
 
 	// load fetches the next batch; more is false once it has said there are
 	// no more, or failed. loading is true while a fetch is in flight.
-	load    LoadMore
-	more    bool
-	loading bool
-	loadErr error
+	load  LoadMore
+	label string
 
 	filter  string
+	pages   paginator.Model
+	options []SelectOption
 	matches []int // indexes into options matching filter
-	cursor  int   // position within matches
+	width   int
+
+	cursor  int // position within matches
 	choice  int
+	more    bool
+	loading bool
 	done    bool
 	aborted bool
 }
 
 // loadedMsg carries the result of a LoadMore call back to Update.
 type loadedMsg struct {
+	err     error
 	options []SelectOption
 	more    bool
-	err     error
 }
 
 func newSelectModel(label string, options []string) selectModel {
