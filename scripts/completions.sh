@@ -9,5 +9,5 @@ mkdir -p completions
 
 # The root command insists on LINKWARDEN_TOKEN even for `completion`; any value will do here.
 for shell in bash zsh fish; do
-	LINKWARDEN_TOKEN=completions go run . completion "$shell" >"completions/linkwarden.${shell}"
+	LINKWARDEN_TOKEN=completions go run ./cmd/linkwarden completion "$shell" >"completions/linkwarden.${shell}"
 done
