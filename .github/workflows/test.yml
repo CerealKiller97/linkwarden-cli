@@ -35,6 +35,16 @@ jobs:
             exit 1
           }
 
+      - name: 📚 docs/cli/ matches the commands
+        if: runner.os == 'Linux'
+        run: |
+          go run ./scripts/gendocs
+          git add --intent-to-add docs/cli
+          git diff --exit-code -- docs/cli || {
+            echo "::error::docs/cli/ is out of date: run 'go run ./scripts/gendocs' and commit the result"
+            exit 1
+          }
+
   docker:
     runs-on: ubuntu-latest
     steps:
