@@ -1,19 +1,21 @@
 name: shellcheck
 
-# Lints the example scripts and install.sh. Runs only when one of them (or this
-# workflow) changes; settings live in examples/.shellcheckrc and at the top of
-# install.sh.
+# Lints the example scripts, install.sh and the git hooks in .githooks/. Runs only
+# when one of them (or this workflow) changes; settings live in examples/.shellcheckrc
+# and at the top of install.sh.
 on:
   push:
     branches: [main]
     paths:
       - "examples/**"
       - "install.sh"
+      - ".githooks/**"
       - ".github/workflows/shellcheck.yml"
   pull_request:
     paths:
       - "examples/**"
       - "install.sh"
+      - ".githooks/**"
       - ".github/workflows/shellcheck.yml"
 
 permissions:
@@ -29,4 +31,4 @@ jobs:
         # runner's preinstalled ShellCheck. Every finding fails the job.
         run: |
           docker run --rm -v "${PWD}:/mnt" -w /mnt koalaman/shellcheck:v0.11.0 \
-            --severity=style --format=gcc examples/*.sh install.sh
+            --severity=style --format=gcc examples/*.sh install.sh .githooks/*

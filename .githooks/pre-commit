@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# 📚 Stops a commit whose docs/cli/ no longer matches the commands.
+#
+# Enable once per clone:
+#   git config core.hooksPath .githooks
+#
+# Skip once with `git commit --no-verify`. CI runs the same check (.github/workflows/docs.yml).
+set -euo pipefail
+
+cd "$(git rev-parse --show-toplevel)"
+
+# Only Go code, the module files or the pages themselves can change docs/cli/, so
+# don't spend a `go run` on commits that touch none of them.
+if ! git diff --cached --name-only --diff-filter=ACMRD | grep -qE '\.go$|^go\.(mod|sum)$|^docs/cli/'; then
+	exit 0
+fi
+
+go run ./scripts/gendocs
+
+# Compare the regenerated pages with what's staged, and catch brand-new pages too.
+untracked="$(git ls-files --others --exclude-standard -- docs/cli)"
+if ! git diff --quiet -- docs/cli || [ -n "${untracked}" ]; then
+	echo "📚 docs/cli/ was out of date, so it has been regenerated. Review it, stage it and commit again:" >&2
+	echo "   git add docs/cli" >&2
+	exit 1
+fi

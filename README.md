@@ -611,13 +611,14 @@ Options: `WithHTTPClient(*http.Client)` for timeouts, proxies or custom transpor
 ## 🛠️ Development
 
 ```bash
-go run ./scripts/gendocs # regenerate docs/cli/ after changing a command or flag
-go test ./...            # unit tests
-golangci-lint run        # lint (config in .golangci.yml)
+git config core.hooksPath .githooks  # once per clone: the pre-commit hook keeps docs/cli/ in sync
+go run ./scripts/gendocs             # regenerate docs/cli/ after changing a command or flag
+go test ./...                        # unit tests
+golangci-lint run                    # lint (config in .golangci.yml)
 go build -o bin/linkwarden ./cmd/linkwarden
 ```
 
-CI runs tests, checks that `docs/cli/` is up to date, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus
+CI runs tests, checks that `docs/cli/` is up to date (the same check as the hook), `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus
 [ShellCheck](https://www.shellcheck.net) on the scripts in `examples/` when they change.
 
 ### 🚀 Releasing
