@@ -15,7 +15,7 @@ func Get() *cobra.Command {
 		RunE:  executeGet,
 	}
 
-	cmd.Flags().String("id", "", "Tag ID.")
+	cmd.Flags().Int("id", 0, "Tag ID.")
 
 	return cmd
 }
@@ -24,8 +24,8 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveID(
-		cmd.Flag("id").Value.String(),
-		"--id",
+		cmd,
+		"id",
 		"Select Tag:",
 		tagsPickerFetch(cmd.Context(), client),
 	)

@@ -34,7 +34,7 @@ func Get() *cobra.Command {
 		RunE:  executeGet,
 	}
 
-	cmd.Flags().String("link-id", "", "Link ID.")
+	cmd.Flags().Int("link-id", 0, "Link ID.")
 	choice.Flag(cmd, "format", "png", "Archive format.", getFormats)
 	cmd.Flags().Bool("preview", false, "Retrieve the preview instead of the main archive file.")
 	cmd.Flags().String("output", "", "Path to save the archive file to. Without it, only content-type/size are printed.")
@@ -46,8 +46,8 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	linkID, err := utils.ResolveIDPaged(
-		cmd.Flag("link-id").Value.String(),
-		"--link-id",
+		cmd,
+		"link-id",
 		"Select Link:",
 		pickers.Links(cmd.Context(), client),
 	)

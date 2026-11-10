@@ -17,7 +17,7 @@ func Update() *cobra.Command {
 		RunE:  executeUpdate,
 	}
 
-	cmd.Flags().String("id", "", "Link ID.")
+	cmd.Flags().Int("id", 0, "Link ID.")
 	cmd.Flags().String("name", "", "New link name.")
 	cmd.Flags().String("url", "", "New link URL.")
 	cmd.Flags().String("description", "", "New link description.")
@@ -32,8 +32,8 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveIDPaged(
-		cmd.Flag("id").Value.String(),
-		"--id",
+		cmd,
+		"id",
 		"Select Link to update:",
 		pickers.Links(cmd.Context(), client),
 	)

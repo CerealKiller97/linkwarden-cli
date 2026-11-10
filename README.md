@@ -212,7 +212,7 @@ Real-world workflows built from the commands below.
 linkwarden links import --file reading-list.json
 
 # …or name it up front (handy in scripts)
-linkwarden links import --file reading-list.json --collection 3
+linkwarden links import --file reading-list.json --collection-id 3
 ```
 
 Links already in the target collection are skipped (URLs are compared ignoring case in the scheme and host and any
@@ -273,9 +273,10 @@ linkwarden tags create --label golang --label k8s --label architecture
 # Rename a tag (no --id given, so it opens a picker)
 linkwarden tags update --name kubernetes
 
-# Clean up (asks before deleting; --yes skips the question)
+# Clean up (asks before deleting; --yes skips the question).
+# --ids takes a comma-separated list, repeated flags, or both.
 linkwarden tags bulk-delete --ids 14,15,22
-linkwarden links bulk-delete --ids 301,302 --yes
+linkwarden links bulk-delete --ids 301 --ids 302 --yes
 ```
 
 ### 📄 Find an article and save it as a PDF
@@ -450,8 +451,8 @@ Run `linkwarden <command> <subcommand> --help` for the full flag list of anythin
 <summary><b><code>links</code></b>: create, list, update and archive bookmarks</summary>
 
 ```bash
-linkwarden links create         URL [--name NAME] [--description TEXT] [--collection ID] [--tag NAME ...]
-linkwarden links import         --file FILE [--collection ID] [--concurrency N]
+linkwarden links create         URL [--name NAME] [--description TEXT] [--collection-id ID] [--tag NAME ...]
+linkwarden links import         --file FILE [--collection-id ID] [--concurrency N]
 linkwarden links list           [--collection-id ID] [--tag-id ID] [--pinned-only] [--search QUERY] [--cursor N]
 linkwarden links get            [--id ID]
 linkwarden links update         [--id ID] [--name NAME] [--url URL] [--description TEXT] [--color HEX] [--icon NAME] [--icon-weight W]
