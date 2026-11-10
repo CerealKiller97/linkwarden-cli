@@ -18,7 +18,7 @@ var (
 // as an interactive terminal meanwhile (--non-interactive still wins). It only
 // affects commands run without an *app.App in their context.
 //
-// Legacy, removed once every command reads the App: run the command with apptest.WithPrompter instead.
+// Legacy, removed once every command reads the App: run the command with testutils.WithPrompter instead.
 func SetPrompter(p Prompter) (restore func()) {
 	prev, prevScripted := prompter, scriptedPrompter
 	prompter, scriptedPrompter = p, true

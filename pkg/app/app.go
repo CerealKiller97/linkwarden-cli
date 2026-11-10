@@ -5,7 +5,7 @@
 // helpers in pkg/utils read it back with From.
 //
 // Keeping this out of package variables lets tests build their own App per
-// test (see pkg/app/apptest) and run in parallel.
+// test (see pkg/testutils) and run in parallel.
 package app
 
 import (
@@ -145,7 +145,7 @@ func FromContext(ctx context.Context) (*App, bool) {
 func From(ctx context.Context) *App {
 	a, ok := FromContext(ctx)
 	if !ok {
-		panic("app: no *app.App in the command's context; run it under the root command or use apptest")
+		panic("app: no *app.App in the command's context; run it under the root command or use testutils.NewApp")
 	}
 
 	return a

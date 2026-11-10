@@ -1,7 +1,8 @@
-// Package apptest builds the *app.App a test runs a command with, so each test
-// has its own credentials, output mode, output buffer and prompter instead of
-// sharing package variables, and can run in parallel.
-package apptest
+// Package testutils holds helpers for tests. NewAppContext and NewApp build the *app.App
+// a test runs a command with, so each test has its own credentials, output
+// mode, output buffer and prompter instead of sharing package variables, and
+// can run in parallel.
+package testutils
 
 import (
 	"bytes"
@@ -23,11 +24,11 @@ func WithPrompter(p app.Prompter) app.Option {
 	}
 }
 
-// New returns a context carrying an App that talks to instanceURL with Token
+// NewAppContext returns a context carrying an App that talks to instanceURL with Token
 // and prints results to the returned buffer. opts (app.WithMode,
 // app.WithNonInteractive, WithPrompter, ...) apply on top. Run the command with
 // cmd.ExecuteContext(ctx).
-func New(t testing.TB, instanceURL string, opts ...app.Option) (context.Context, *bytes.Buffer) {
+func NewAppContext(t testing.TB, instanceURL string, opts ...app.Option) (context.Context, *bytes.Buffer) {
 	t.Helper()
 
 	ctx, a := NewApp(t, instanceURL, opts...)
@@ -35,7 +36,7 @@ func New(t testing.TB, instanceURL string, opts ...app.Option) (context.Context,
 	return ctx, a.Out.(*bytes.Buffer)
 }
 
-// NewApp is New for tests that need the App itself, for example to read its
+// NewApp is NewAppContext for tests that need the App itself, for example to read its
 // InstanceURL.
 func NewApp(t testing.TB, instanceURL string, opts ...app.Option) (context.Context, *app.App) {
 	t.Helper()

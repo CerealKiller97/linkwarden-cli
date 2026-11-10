@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
-	"github.com/CerealKiller97/linkwarden-cli/pkg/app/apptest"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -68,9 +68,9 @@ func TestZeroAppDefaults(t *testing.T) {
 func TestApptestNewAppliesOptions(t *testing.T) {
 	t.Parallel()
 
-	ctx, a := apptest.NewApp(t, "http://example.invalid", app.WithMode(app.OutputJSON), app.WithNonInteractive(true))
+	ctx, a := testutils.NewApp(t, "http://example.invalid", app.WithMode(app.OutputJSON), app.WithNonInteractive(true))
 	require.Same(t, a, app.From(ctx))
-	require.Equal(t, apptest.Token, a.Token)
+	require.Equal(t, testutils.Token, a.Token)
 	require.Equal(t, "http://example.invalid", a.InstanceURL)
 	require.Equal(t, app.OutputJSON, a.Mode)
 	require.True(t, a.NonInteractive)

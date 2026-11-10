@@ -25,7 +25,7 @@ var outputMode = OutputTable
 
 // SetOutputMode sets the legacy output mode.
 //
-// Legacy, removed once every command reads the App: run the command with an *app.App (apptest.WithMode in tests).
+// Legacy, removed once every command reads the App: run the command with an *app.App (app.WithMode in tests).
 func SetOutputMode(m OutputMode) {
 	outputMode = m
 }

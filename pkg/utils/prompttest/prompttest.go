@@ -36,7 +36,7 @@ type Script struct {
 }
 
 // New returns a Script that replies to the prompts the code under test shows,
-// in order. Pass it to apptest.WithPrompter. A prompt with no answer left, or
+// in order. Pass it to testutils.WithPrompter. A prompt with no answer left, or
 // a label that doesn't match, fails the test and aborts the prompt. Answers
 // left unused at the end fail the test too.
 func New(t testing.TB, answers ...Answer) *Script {
@@ -48,10 +48,10 @@ func New(t testing.TB, answers ...Answer) *Script {
 	return s
 }
 
-// Use is New for tests that don't run with an apptest App yet: it makes the
+// Use is New for tests that don't run with a testutils App yet: it makes the
 // script answer every prompt until the test ends.
 //
-// Legacy, removed once every command reads the App: pass New's Script to apptest.WithPrompter instead.
+// Legacy, removed once every command reads the App: pass New's Script to testutils.WithPrompter instead.
 func Use(t testing.TB, answers ...Answer) *Script {
 	t.Helper()
 
