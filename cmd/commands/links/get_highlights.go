@@ -12,7 +12,12 @@ func GetHighlights() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-highlights",
 		Short: "Get highlights for a link",
-		RunE:  executeGetHighlights,
+		Example: `  # Show the highlights on link 412
+  linkwarden links get-highlights --id 412
+
+  # Pick the link from a list, and print JSON
+  linkwarden links get-highlights --json`,
+		RunE: executeGetHighlights,
 	}
 
 	cmd.Flags().Int("id", 0, "Link ID.")

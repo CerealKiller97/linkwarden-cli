@@ -12,7 +12,12 @@ func List() *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
 		Short: "List collections",
-		RunE:  executeList,
+		Example: `  # List your collections
+  linkwarden collections list
+
+  # ID and name of each, tab-separated
+  linkwarden collections list --json | jq -r '.[] | "\(.id)\t\(.name)"'`,
+		RunE: executeList,
 	}
 }
 

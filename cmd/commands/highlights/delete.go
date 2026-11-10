@@ -14,7 +14,15 @@ func Delete() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a highlight",
-		RunE:  executeDelete,
+		Example: `  # Pick a link, then one of its highlights
+  linkwarden highlights delete
+
+  # Pick from the highlights on link 412
+  linkwarden highlights delete --link-id 412
+
+  # Delete highlight 31 without asking
+  linkwarden highlights delete --id 31 --yes`,
+		RunE: executeDelete,
 	}
 
 	cmd.Flags().Int("id", 0, "Highlight ID.")

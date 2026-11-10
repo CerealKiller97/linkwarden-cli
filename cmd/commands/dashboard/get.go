@@ -11,7 +11,12 @@ func Get() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get dashboard data (v1)",
-		RunE:  executeGet,
+		Example: `  # Show the dashboard data
+  linkwarden dashboard get
+
+  # Same, as JSON
+  linkwarden dashboard get --json`,
+		RunE: executeGet,
 	}
 
 	return cmd

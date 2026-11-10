@@ -12,7 +12,12 @@ func Delete() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete an RSS subscription",
-		RunE:  executeDelete,
+		Example: `  # Pick the subscription from a list, then confirm
+  linkwarden rss delete
+
+  # Delete subscription 5 without asking
+  linkwarden rss delete --id 5 --yes`,
+		RunE: executeDelete,
 	}
 
 	cmd.Flags().Int("id", 0, "Subscription ID.")

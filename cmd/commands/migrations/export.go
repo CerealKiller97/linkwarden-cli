@@ -15,7 +15,12 @@ func Export() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "export",
 		Short: "Export Linkwarden data to a JSON file",
-		RunE:  executeExport,
+		Example: `  # Export everything to ./linkwarden-export-<timestamp>.json
+  linkwarden migrations export
+
+  # Dated backup, e.g. from cron
+  linkwarden --non-interactive migrations export --output ~/backups/linkwarden-$(date +%F).json`,
+		RunE: executeExport,
 	}
 
 	cmd.Flags().String("output", "", "Path to write the export to. Defaults to ./linkwarden-export-<timestamp>.json.")

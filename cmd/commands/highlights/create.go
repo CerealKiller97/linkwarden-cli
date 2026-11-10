@@ -13,7 +13,14 @@ func Create() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create or update a highlight on a link",
-		RunE:  executeCreate,
+		Example: `  # Highlight a passage on link 412
+  linkwarden highlights create --link-id 412 --text "Don't communicate by sharing memory." \
+    --color yellow --start-offset 1840 --end-offset 1876
+
+  # Pick the link from a list and add a comment
+  linkwarden highlights create --text "Clear is better than clever." --color yellow \
+    --start-offset 120 --end-offset 148 --comment "quote this"`,
+		RunE: executeCreate,
 	}
 
 	cmd.Flags().Int("link-id", 0, "Link ID.")

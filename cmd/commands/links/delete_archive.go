@@ -12,7 +12,12 @@ func DeleteArchive() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete-archive",
 		Short: "Delete archived files for multiple links",
-		RunE:  executeDeleteArchive,
+		Example: `  # Delete the archived files of two links (asks first)
+  linkwarden links delete-archive --ids 412,418
+
+  # Same, without asking
+  linkwarden links delete-archive --ids 412 --ids 418 --yes`,
+		RunE: executeDeleteArchive,
 	}
 
 	utils.AddIDsFlag(cmd, "Link IDs.")

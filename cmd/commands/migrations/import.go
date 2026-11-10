@@ -23,7 +23,15 @@ func Import() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import Linkwarden data from a data source",
-		RunE:  executeImport,
+		Example: `  # Restore a Linkwarden export
+  linkwarden migrations import --file linkwarden-2026-10-06.json --format linkwarden
+
+  # Browser bookmarks exported as HTML (Chrome, Firefox, Safari…)
+  linkwarden migrations import --file bookmarks.html --format html
+
+  # Pocket export
+  linkwarden migrations import --file pocket.json --format pocket`,
+		RunE: executeImport,
 	}
 
 	cmd.Flags().String("file", "", "Path to the file containing the data to import.")

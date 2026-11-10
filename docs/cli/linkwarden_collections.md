@@ -1,0 +1,26 @@
+## linkwarden collections
+
+Manage collections
+
+### Options
+
+```
+  -h, --help[=true|false]   help for collections
+```
+
+### Options inherited from parent commands
+
+```
+      --json[=true|false]              Print results as JSON instead of a table.
+      --non-interactive[=true|false]   Never prompt (e.g. for a picker); fail fast instead. On by default when stdin isn't a terminal.
+  -q, --quiet[=true|false]             Print only the ID of each result, one per line, and hide info messages.
+```
+
+### SEE ALSO
+
+* [linkwarden](linkwarden.md)	 - Linkwarden is a CLI for the Linkwarden platform
+* [linkwarden collections create](linkwarden_collections_create.md)	 - Create a collection
+* [linkwarden collections delete](linkwarden_collections_delete.md)	 - Delete a collection
+* [linkwarden collections get](linkwarden_collections_get.md)	 - Get a collection by ID
+* [linkwarden collections list](linkwarden_collections_list.md)	 - List collections
+* [linkwarden collections update](linkwarden_collections_update.md)	 - Update a collection

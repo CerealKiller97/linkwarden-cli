@@ -13,7 +13,12 @@ func Get() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Fetch a favicon for a URL",
-		RunE:  executeGet,
+		Example: `  # Print the favicon's type and size
+  linkwarden favicon get --url https://go.dev
+
+  # Save it to a file
+  linkwarden favicon get --url https://go.dev --output go.ico`,
+		RunE: executeGet,
 	}
 
 	cmd.Flags().String("url", "", "URL to fetch a favicon for.")

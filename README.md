@@ -444,123 +444,26 @@ This applies to `links delete`, `links bulk-delete`, `links delete-archive`, `co
 
 ## 📚 Command reference
 
-Run `linkwarden <command> <subcommand> --help` for the full flag list of anything below.
-`[--id ID]` means the flag is optional and a picker appears when it's left out.
+The full reference, with every flag, is generated from the commands themselves and lives in
+[`docs/cli/`](docs/cli/linkwarden.md). `linkwarden <command> <subcommand> --help` prints the same thing.
+Leave out `--id` on most commands to pick from a list instead.
 
-<details open>
-<summary><b><code>links</code></b>: create, list, update and archive bookmarks</summary>
-
-```bash
-linkwarden links create         URL [--name NAME] [--description TEXT] [--collection-id ID] [--tag NAME ...]
-linkwarden links import         --file FILE [--collection-id ID] [--concurrency N]
-linkwarden links list           [--collection-id ID] [--tag-id ID] [--pinned-only] [--search QUERY] [--cursor N]
-linkwarden links get            [--id ID]
-linkwarden links update         [--id ID] [--name NAME] [--url URL] [--description TEXT] [--color HEX] [--icon NAME] [--icon-weight W]
-linkwarden links delete         [--id ID] [--yes]
-linkwarden links archive        [--id ID]
-linkwarden links get-highlights [--id ID]
-linkwarden links bulk-update    --ids 1,2,3 [--collection-id ID] [--tag NAME ...] [--remove-previous-tags]
-linkwarden links bulk-delete    --ids 1,2,3 [--yes]
-linkwarden links delete-archive --ids 1,2,3 [--yes]
-```
-</details>
-
-<details>
-<summary><b><code>collections</code></b>: group links, optionally nested</summary>
-
-```bash
-linkwarden collections create [--name NAME] [--description TEXT] [--color HEX] [--icon NAME] [--icon-weight W] [--parent-id ID]
-linkwarden collections list
-linkwarden collections get    [--id ID]
-linkwarden collections update [--id ID] [--name NAME] [--description TEXT] [--color HEX] [--icon NAME] [--parent-id ID] [--public]
-linkwarden collections delete [--id ID] [--yes]
-```
-
-`create` defaults to color `#00bba7` and description `Managed by: Linkwarden CLI`.
-</details>
-
-<details>
-<summary><b><code>tags</code></b>: label links</summary>
-
-```bash
-linkwarden tags list        [--search QUERY] [--cursor N]
-linkwarden tags get         [--id ID]
-linkwarden tags create      --label LABEL [--label LABEL ...]
-linkwarden tags update      [--id ID] --name NAME
-linkwarden tags delete      [--id ID] [--yes]
-linkwarden tags bulk-delete --ids 1,2,3 [--yes]
-```
-</details>
-
-<details>
-<summary><b><code>tokens</code></b>: manage API tokens</summary>
-
-```bash
-linkwarden tokens generate   # prompts for a name and expiry (7/30/60/90 days or never)
-linkwarden tokens list
-linkwarden tokens revoke     [--yes]   # picker
-```
-</details>
-
-<details>
-<summary><b><code>rss</code></b>: feed subscriptions into a collection</summary>
-
-```bash
-linkwarden rss list
-linkwarden rss create --name NAME --url FEED_URL [--collection-id ID | --collection-name NAME]
-linkwarden rss delete [--id ID] [--yes]
-```
-</details>
-
-<details>
-<summary><b><code>highlights</code></b>: annotate passages on a link</summary>
-
-```bash
-linkwarden highlights create --link-id ID --text TEXT --color COLOR --start-offset N --end-offset N [--comment TEXT]
-linkwarden highlights delete [--id ID] [--link-id ID] [--yes]
-```
-
-The API has no list-all endpoint, so `delete` without `--id` asks for a link first, then a highlight on it.
-</details>
-
-<details>
-<summary><b><code>archives</code></b>: download or upload snapshots</summary>
-
-```bash
-linkwarden archives get               --link-id ID [--format png|jpeg|pdf|html|readable] [--output PATH] [--preview]
-linkwarden archives upload            --link-id ID --file PATH --format png|jpeg|pdf|html [--preview]
-linkwarden archives upload-standalone --url URL --file PATH --format png|jpeg|pdf|html [--preview]
-```
-
-`upload-standalone` creates a new link from a local file, for example a page you saved yourself.
-</details>
-
-<details>
-<summary><b><code>migrations</code></b>: import and export your library</summary>
-
-```bash
-linkwarden migrations export [--output PATH]   # default: ./linkwarden-export-<timestamp>.json
-linkwarden migrations import --file PATH --format linkwarden|html|wallabag|omnivore|pocket
-```
-</details>
-
-<details>
-<summary><b><code>search</code> · <code>dashboard</code> · <code>config</code> · <code>favicon</code> · <code>completion</code></b></summary>
-
-```bash
-linkwarden search --query TEXT [--sort newest|oldest|name-asc|name-desc|description-asc|description-desc] [--cursor N]
-
-linkwarden dashboard get                    # v1 dashboard data
-linkwarden dashboard get-v2                 # v2 dashboard data
-linkwarden dashboard update-v2 --file layout.json
-
-linkwarden config get                       # instance's public runtime config
-
-linkwarden favicon get --url https://go.dev [--output go.ico]
-
-linkwarden completion zsh > "${fpath[1]}/_linkwarden"   # also: bash, fish, powershell
-```
-</details>
+| Command | What it does |
+|---|---|
+| [`links`](docs/cli/linkwarden_links.md) | Create, import, list, update, archive and delete bookmarks |
+| [`collections`](docs/cli/linkwarden_collections.md) | Group links, optionally nested |
+| [`tags`](docs/cli/linkwarden_tags.md) | Label links |
+| [`search`](docs/cli/linkwarden_search.md) | Search across all your links |
+| [`archives`](docs/cli/linkwarden_archives.md) | Download or upload snapshots (PNG, JPEG, PDF, HTML, readable) |
+| [`highlights`](docs/cli/linkwarden_highlights.md) | Annotate passages on a link |
+| [`rss`](docs/cli/linkwarden_rss.md) | Feed subscriptions into a collection |
+| [`migrations`](docs/cli/linkwarden_migrations.md) | Import and export your library |
+| [`tokens`](docs/cli/linkwarden_tokens.md) | Manage API tokens |
+| [`dashboard`](docs/cli/linkwarden_dashboard.md) | View and configure the dashboard |
+| [`config`](docs/cli/linkwarden_config.md) | The instance's public runtime config |
+| [`favicon`](docs/cli/linkwarden_favicon.md) | Fetch the favicon for any URL |
+| [`init`](docs/cli/linkwarden_init.md) | Guided sign-in |
+| [`completion`](docs/cli/linkwarden_completion.md) | Shell completion for bash, zsh, fish and PowerShell |
 
 ---
 
@@ -708,12 +611,14 @@ Options: `WithHTTPClient(*http.Client)` for timeouts, proxies or custom transpor
 ## 🛠️ Development
 
 ```bash
-go test ./...            # unit tests
-golangci-lint run        # lint (config in .golangci.yml)
+git config core.hooksPath .githooks  # once per clone: the pre-commit hook keeps docs/cli/ in sync
+go run ./scripts/gendocs             # regenerate docs/cli/ after changing a command or flag
+go test ./...                        # unit tests
+golangci-lint run                    # lint (config in .golangci.yml)
 go build -o bin/linkwarden ./cmd/linkwarden
 ```
 
-CI runs tests, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus
+CI runs tests, checks that `docs/cli/` is up to date (the same check as the hook), `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus
 [ShellCheck](https://www.shellcheck.net) on the scripts in `examples/` when they change.
 
 ### 🚀 Releasing

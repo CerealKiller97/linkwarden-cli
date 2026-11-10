@@ -27,7 +27,15 @@ func Create() *cobra.Command {
 		Use:   "create",
 		Short: "Create a collection",
 		Long:  `Create a collection`,
-		RunE:  executeCreate,
+		Example: `  # Create a collection
+  linkwarden collections create --name "Reading List" --color "#f59e0b"
+
+  # Nest a collection inside collection 9
+  linkwarden collections create --name Kubernetes --parent-id 9 --icon cube
+
+  # Create one and keep its ID for a script
+  COLLECTION=$(linkwarden collections create --name Inbox -q)`,
+		RunE: executeCreate,
 	}
 
 	cmd.Flags().String("name", "", "Collection name.")

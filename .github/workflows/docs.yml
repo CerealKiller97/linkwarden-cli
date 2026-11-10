@@ -1,0 +1,42 @@
+name: docs
+
+# Fails when docs/cli/ no longer matches the commands, for contributors who haven't
+# enabled the pre-commit hook in .githooks/. Runs only when something that can change
+# the generated pages (or this workflow) changes.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "docs/cli/**"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "docs/cli/**"
+      - ".github/workflows/docs.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: 📚 docs/cli/ matches the commands
+        run: |
+          go run ./scripts/gendocs
+          # Without this, git diff can't see pages for brand-new commands.
+          git add --intent-to-add docs/cli
+          git diff --exit-code -- docs/cli || {
+            echo "::error::docs/cli/ is out of date: run 'go run ./scripts/gendocs' and commit the result"
+            exit 1
+          }

@@ -26,8 +26,13 @@ Without --collection-id the link goes to your Unorganized collection, like in th
 web app. Without --name, Linkwarden uses the page's title.
 
 To save many links at once from a JSON file, use "links import".`,
-		Example: `  linkwarden links create https://go.dev/doc/effective_go
+		Example: `  # Save a link to Unorganized; its name comes from the page's title
+  linkwarden links create https://go.dev/doc/effective_go
+
+  # Name it and save it to collection 3
   linkwarden links create https://12factor.net --name "The Twelve-Factor App" --collection-id 3
+
+  # Add tags
   linkwarden links create https://k8spatterns.io --tag kubernetes --tag books`,
 		Args: createArgs,
 		RunE: executeCreate,

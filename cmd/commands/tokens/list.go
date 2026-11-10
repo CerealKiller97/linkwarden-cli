@@ -11,7 +11,12 @@ func List() *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
 		Short: "List all available tokens",
-		RunE:  executeList,
+		Example: `  # List your API tokens
+  linkwarden tokens list
+
+  # Same, as JSON
+  linkwarden tokens list --json`,
+		RunE: executeList,
 	}
 }
 

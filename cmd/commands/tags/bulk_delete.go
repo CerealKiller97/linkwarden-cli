@@ -12,7 +12,12 @@ func BulkDelete() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bulk-delete",
 		Short: "Delete multiple tags",
-		RunE:  executeBulkDelete,
+		Example: `  # Delete three tags (asks first)
+  linkwarden tags bulk-delete --ids 14,15,22
+
+  # Same, without asking
+  linkwarden tags bulk-delete --ids 14 --ids 15 --ids 22 --yes`,
+		RunE: executeBulkDelete,
 	}
 
 	utils.AddIDsFlag(cmd, "Tag IDs.")

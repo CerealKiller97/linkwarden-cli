@@ -1,0 +1,35 @@
+## linkwarden dashboard get-v2
+
+Get dashboard data (v2)
+
+```bash
+linkwarden dashboard get-v2 [flags]
+```
+
+### Examples
+
+```bash
+# Show the v2 dashboard data
+linkwarden dashboard get-v2
+
+# Same, as JSON
+linkwarden dashboard get-v2 --json
+```
+
+### Options
+
+```
+  -h, --help[=true|false]   help for get-v2
+```
+
+### Options inherited from parent commands
+
+```
+      --json[=true|false]              Print results as JSON instead of a table.
+      --non-interactive[=true|false]   Never prompt (e.g. for a picker); fail fast instead. On by default when stdin isn't a terminal.
+  -q, --quiet[=true|false]             Print only the ID of each result, one per line, and hide info messages.
+```
+
+### SEE ALSO
+
+* [linkwarden dashboard](linkwarden_dashboard.md)	 - View and configure the dashboard

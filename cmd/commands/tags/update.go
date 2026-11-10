@@ -12,7 +12,12 @@ func Update() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Rename a tag",
-		RunE:  executeUpdate,
+		Example: `  # Rename tag 14
+  linkwarden tags update --id 14 --name kubernetes
+
+  # Pick the tag from a list and rename it
+  linkwarden tags update --name kubernetes`,
+		RunE: executeUpdate,
 	}
 
 	cmd.Flags().Int("id", 0, "Tag ID.")

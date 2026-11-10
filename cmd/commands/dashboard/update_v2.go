@@ -14,7 +14,9 @@ func UpdateV2() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update-v2",
 		Short: "Update dashboard layout (v2)",
-		RunE:  executeUpdateV2,
+		Example: `  # layout.json: [{"type":"STATS","enabled":true,"order":0},{"type":"RECENT_LINKS","enabled":true,"order":1}]
+  linkwarden dashboard update-v2 --file layout.json`,
+		RunE: executeUpdateV2,
 	}
 
 	cmd.Flags().String("file", "", "Path to a JSON file containing the layout, "+

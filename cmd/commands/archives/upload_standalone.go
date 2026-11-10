@@ -15,7 +15,12 @@ func UploadStandalone() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upload-standalone",
 		Short: "Upload a local file as a new link's archive",
-		RunE:  executeUploadStandalone,
+		Example: `  # Save a page you downloaded yourself as a new link
+  linkwarden archives upload-standalone --url https://go.dev/doc/effective_go --file effective-go.html --format html
+
+  # Same with a PDF
+  linkwarden archives upload-standalone --url https://12factor.net --file twelve-factor.pdf --format pdf`,
+		RunE: executeUploadStandalone,
 	}
 
 	cmd.Flags().String("file", "", "Local file to upload.")

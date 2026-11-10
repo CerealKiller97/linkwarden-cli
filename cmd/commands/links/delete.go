@@ -13,7 +13,12 @@ func Delete() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a link",
-		RunE:  executeDelete,
+		Example: `  # Pick the link from a list, then confirm
+  linkwarden links delete
+
+  # Delete link 412 without asking (scripts, cron)
+  linkwarden links delete --id 412 --yes`,
+		RunE: executeDelete,
 	}
 
 	cmd.Flags().Int("id", 0, "Link ID.")

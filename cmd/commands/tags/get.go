@@ -12,7 +12,12 @@ func Get() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get a tag by ID",
-		RunE:  executeGet,
+		Example: `  # Pick the tag from a list
+  linkwarden tags get
+
+  # Get tag 14
+  linkwarden tags get --id 14`,
+		RunE: executeGet,
 	}
 
 	cmd.Flags().Int("id", 0, "Tag ID.")
