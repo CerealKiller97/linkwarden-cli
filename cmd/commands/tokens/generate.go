@@ -43,7 +43,7 @@ shell config. Needs an interactive terminal.`,
 }
 
 func execute(cmd *cobra.Command, _ []string) error {
-	promptResult, err := utils.Input("Token name:", func(s string) error {
+	promptResult, err := utils.Input(cmd.Context(), "Token name:", func(s string) error {
 		if strings.TrimSpace(s) == "" {
 			return errors.New("token name is required")
 		}
@@ -54,7 +54,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("prompt for token name: %w", err)
 	}
 
-	_, expirationResult, err := utils.Select("Token expiration:",
+	_, expirationResult, err := utils.Select(cmd.Context(), "Token expiration:",
 		[]string{"7 days", "30 days", "60 days", "90 days", "no expiration"})
 	if err != nil {
 		return fmt.Errorf("prompt for token expiration: %w", err)
@@ -76,7 +76,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 	// Prompt do you want app to set ENV Variable on your system?
 	// Only in Linux / macOS
 	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-		_, result, err := utils.Select("Do you want the CLI to set the token in your shell config?",
+		_, result, err := utils.Select(cmd.Context(), "Do you want the CLI to set the token in your shell config?",
 			[]string{"Yes", "No"})
 		if err != nil {
 			return fmt.Errorf("prompt: %w", err)

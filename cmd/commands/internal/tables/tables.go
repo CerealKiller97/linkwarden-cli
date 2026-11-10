@@ -3,6 +3,7 @@
 package tables
 
 import (
+	"context"
 	"strings"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -15,8 +16,8 @@ const colLinkURL = 2
 // Links builds the table of links that links, search, dashboard and archives
 // print. Call Render on it, after adding a Caption if needed. --json prints
 // links; call JSON to print something else, such as the one link of a get.
-func Links(title string, links []linkwarden.Link) *utils.Table {
-	t := utils.NewTable(title)
+func Links(ctx context.Context, title string, links []linkwarden.Link) *utils.Table {
+	t := utils.NewTable(ctx, title)
 	t.Header("ID", "Name", "URL", "Collection", "Tags")
 
 	for _, l := range links {
@@ -29,8 +30,8 @@ func Links(title string, links []linkwarden.Link) *utils.Table {
 }
 
 // Highlights builds the table of highlights that highlights and links print.
-func Highlights(title string, highlights []linkwarden.Highlight) *utils.Table {
-	t := utils.NewTable(title)
+func Highlights(ctx context.Context, title string, highlights []linkwarden.Highlight) *utils.Table {
+	t := utils.NewTable(ctx, title)
 	t.Header("ID", "Link ID", "Text", "Color", "Comment")
 
 	for _, h := range highlights {

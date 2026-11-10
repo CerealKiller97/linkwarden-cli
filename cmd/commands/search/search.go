@@ -73,7 +73,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("search links: %w", err)
 	}
 
-	renderSearchResultsTable(links)
+	renderSearchResultsTable(cmd.Context(), links)
 
 	return nil
 }

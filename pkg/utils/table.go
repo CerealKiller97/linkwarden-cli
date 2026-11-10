@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/url"
@@ -9,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/charmbracelet/x/term"
 	"github.com/mattn/go-isatty"
@@ -20,7 +22,7 @@ type Table struct {
 	data   tui.Table
 	out    io.Writer
 	source any
-	mode   *OutputMode // nil: the global mode; tests set it
+	app    *app.App
 }
 
 // JSON sets the value --json prints instead of the table: the API's own
@@ -38,15 +40,20 @@ func (t *Table) JSON(v any) *Table {
 // Case headers, ID first when there is one, and cells formatted by FormatCell.
 
 // NewTable starts a list table titled title (plural, e.g. "Links"), written to
-// stdout. Its title shows the row count: "Links (12)".
-func NewTable(title string) *Table {
-	return &Table{data: tui.Table{Title: title, ShowCount: true}, out: os.Stdout}
+// the output of the App in ctx. Its title shows the row count: "Links (12)".
+func NewTable(ctx context.Context, title string) *Table {
+	return newTable(ctx, tui.Table{Title: title, ShowCount: true})
 }
 
 // NewSummary starts a table whose rows aren't a list of records, like a
 // key/value listing or a row of totals, so its title has no row count.
-func NewSummary(title string) *Table {
-	return &Table{data: tui.Table{Title: title}, out: os.Stdout}
+func NewSummary(ctx context.Context, title string) *Table {
+	return newTable(ctx, tui.Table{Title: title})
+}
+
+func newTable(ctx context.Context, data tui.Table) *Table {
+	a := current(ctx)
+	return &Table{data: data, out: a.Stdout(), app: a}
 }
 
 // Caption sets a dim line shown between the title and the table, for totals
@@ -163,12 +170,7 @@ func (t *Table) Len() int { return len(t.data.Rows) }
 // With --json it prints the value set with JSON instead, and with --quiet only
 // the ID column.
 func (t *Table) Render() {
-	mode := outputMode
-	if t.mode != nil {
-		mode = *t.mode
-	}
-
-	switch mode {
+	switch t.currentApp().Mode {
 	case OutputJSON:
 		if err := WriteJSON(t.out, t.jsonValue()); err != nil {
 			log.Error().Err(err).Msg("write JSON")
@@ -240,9 +242,19 @@ func (t *Table) writeIDs() {
 	}
 }
 
+// currentApp is the App the table was made for. Tables built as struct
+// literals (tests) have none and use the legacy settings.
+func (t *Table) currentApp() *app.App {
+	if t.app == nil {
+		return current(context.Background())
+	}
+
+	return t.app
+}
+
 // browseSize returns the terminal size when the viewer should be used.
 func (t *Table) browseSize() (width, height int, ok bool) {
-	if t.out != os.Stdout || !isInteractive() || !isatty.IsTerminal(os.Stdout.Fd()) {
+	if t.out != os.Stdout || !isInteractive(t.currentApp()) || !isatty.IsTerminal(os.Stdout.Fd()) {
 		return 0, 0, false
 	}
 

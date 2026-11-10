@@ -101,7 +101,7 @@ func executeCreate(cmd *cobra.Command, args []string) error {
 
 	log.Info().Int("id", link.ID).Msg("Link created successfully")
 
-	return utils.PrintRecord(link, link.ID)
+	return utils.PrintRecord(cmd.Context(), link, link.ID)
 }
 
 // resolveCreateCollection picks the collection a single link is saved to: the

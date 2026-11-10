@@ -48,7 +48,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get link: %w", err)
 	}
 
-	renderLinkTable(link)
+	renderLinkTable(cmd.Context(), link)
 
 	return nil
 }

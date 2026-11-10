@@ -45,7 +45,7 @@ func executeGetHighlights(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get highlights: %w", err)
 	}
 
-	renderHighlightsTable(highlights)
+	renderHighlightsTable(cmd.Context(), highlights)
 
 	return nil
 }

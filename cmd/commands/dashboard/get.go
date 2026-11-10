@@ -32,7 +32,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get dashboard data: %w", err)
 	}
 
-	renderLinksTable(links)
+	renderLinksTable(cmd.Context(), links)
 
 	return nil
 }

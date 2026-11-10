@@ -87,7 +87,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("create highlight: %w", err)
 	}
 
-	renderHighlightTable(*highlight)
+	renderHighlightTable(cmd.Context(), *highlight)
 
 	return nil
 }

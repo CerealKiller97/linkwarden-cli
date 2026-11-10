@@ -52,5 +52,5 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 
 	log.Info().Int("id", tag.ID).Str("name", tag.Name).Msg("Tag updated successfully")
 
-	return utils.PrintRecord(tag, tag.ID)
+	return utils.PrintRecord(cmd.Context(), tag, tag.ID)
 }

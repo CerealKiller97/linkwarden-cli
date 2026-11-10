@@ -65,5 +65,5 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 
 	log.Info().Int("id", link.ID).Msg("Link updated successfully")
 
-	return utils.PrintRecord(link, link.ID)
+	return utils.PrintRecord(cmd.Context(), link, link.ID)
 }

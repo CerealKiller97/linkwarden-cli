@@ -41,7 +41,7 @@ func executeRevoke(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Revoke by index rather than by name: two tokens can share a name.
-	idx, result, err := utils.Select("Select token to revoke:", tokenNames)
+	idx, result, err := utils.Select(cmd.Context(), "Select token to revoke:", tokenNames)
 	if err != nil {
 		return err
 	}

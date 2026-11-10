@@ -75,7 +75,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("list links: %w", err)
 	}
 
-	renderLinksTable(links)
+	renderLinksTable(cmd.Context(), links)
 
 	return nil
 }

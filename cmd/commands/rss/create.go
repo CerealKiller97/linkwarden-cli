@@ -67,7 +67,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("create RSS subscription: %w", err)
 	}
 
-	renderRSSTable([]linkwarden.RSSSubscription{*sub}, sub)
+	renderRSSTable(cmd.Context(), []linkwarden.RSSSubscription{*sub}, sub)
 
 	return nil
 }

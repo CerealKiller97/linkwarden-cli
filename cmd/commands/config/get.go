@@ -32,7 +32,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get configuration: %w", err)
 	}
 
-	renderConfigTable(cfg)
+	renderConfigTable(cmd.Context(), cfg)
 
 	return nil
 }

@@ -1,19 +1,21 @@
 package links
 
 import (
+	"context"
+
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/tables"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
-func renderLinksTable(links []linkwarden.Link) {
-	tables.Links("Links", links).Render()
+func renderLinksTable(ctx context.Context, links []linkwarden.Link) {
+	tables.Links(ctx, "Links", links).Render()
 }
 
 // renderLinkTable prints one link, as a JSON object with --json.
-func renderLinkTable(link *linkwarden.Link) {
-	tables.Links("Links", []linkwarden.Link{*link}).JSON(link).Render()
+func renderLinkTable(ctx context.Context, link *linkwarden.Link) {
+	tables.Links(ctx, "Links", []linkwarden.Link{*link}).JSON(link).Render()
 }
 
-func renderHighlightsTable(highlights []linkwarden.Highlight) {
-	tables.Highlights("Highlights", highlights).Render()
+func renderHighlightsTable(ctx context.Context, highlights []linkwarden.Highlight) {
+	tables.Highlights(ctx, "Highlights", highlights).Render()
 }

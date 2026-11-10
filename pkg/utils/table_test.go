@@ -32,7 +32,7 @@ func TestTableRendersStaticWhenNotATerminal(t *testing.T) {
 	assert := require.New(t)
 
 	var out bytes.Buffer
-	tbl := NewTable("Example")
+	tbl := NewTable(t.Context(), "Example")
 	tbl.out = &out
 	tbl.Header("ID", "Name")
 	tbl.Row(1, "first")
@@ -51,7 +51,7 @@ func TestTableRendersStaticWhenNotATerminal(t *testing.T) {
 
 func TestNewSummaryHasNoCount(t *testing.T) {
 	var out bytes.Buffer
-	tbl := NewSummary("Totals")
+	tbl := NewSummary(t.Context(), "Totals")
 	tbl.out = &out
 	tbl.Header("Total")
 	tbl.Row(3)
@@ -112,7 +112,7 @@ func TestLinkTarget(t *testing.T) {
 func TestLinkColumnLinksOnlyThatColumn(t *testing.T) {
 	assert := require.New(t)
 
-	tbl := NewTable("Links")
+	tbl := NewTable(t.Context(), "Links")
 	tbl.Header("ID", "URL")
 	tbl.Row(1, "https://go.dev")
 	tbl.Row(2, "")

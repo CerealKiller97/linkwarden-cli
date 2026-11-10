@@ -51,7 +51,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("list tags: %w", err)
 	}
 
-	renderTagsTable(tagList, tagList)
+	renderTagsTable(cmd.Context(), tagList, tagList)
 
 	return nil
 }

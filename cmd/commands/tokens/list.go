@@ -30,7 +30,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get tokens: %w", err)
 	}
 
-	t := utils.NewTable("Tokens")
+	t := utils.NewTable(cmd.Context(), "Tokens")
 	t.Header("ID", "Name", "Session", "Expires", "Created")
 
 	for _, token := range tokenList {

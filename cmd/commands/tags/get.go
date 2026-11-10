@@ -45,7 +45,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get tag: %w", err)
 	}
 
-	renderTagsTable([]linkwarden.TagInfo{*tag}, tag)
+	renderTagsTable(cmd.Context(), []linkwarden.TagInfo{*tag}, tag)
 
 	return nil
 }

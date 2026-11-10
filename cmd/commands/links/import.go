@@ -217,7 +217,7 @@ func executeImport(cmd *cobra.Command, _ []string) error {
 			Msg("Failed to create link")
 	}
 
-	displayResults(results{
+	displayResults(ctx, results{
 		total:         total,
 		success:       int(success.Load()),
 		alreadyExists: int(alreadyExists.Load()),
@@ -302,8 +302,8 @@ const (
 	colFailed
 )
 
-func displayResults(r results) {
-	t := utils.NewSummary("Import Results")
+func displayResults(ctx context.Context, r results) {
+	t := utils.NewSummary(ctx, "Import Results")
 	t.Header("Total", "Success", "Already exists", "Failed")
 	t.Row(r.total, r.success, r.alreadyExists, r.failed)
 	t.JSON(r.report())

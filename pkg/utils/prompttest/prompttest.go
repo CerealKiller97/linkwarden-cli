@@ -35,10 +35,23 @@ type Script struct {
 	answers []Answer
 }
 
-// Use makes answers reply to the prompts the code under test shows, in order,
-// until the test ends. A prompt with no answer left, or a label that doesn't
-// match, fails the test and aborts the prompt. Answers left unused at the end
-// fail the test too.
+// New returns a Script that replies to the prompts the code under test shows,
+// in order. Pass it to apptest.WithPrompter. A prompt with no answer left, or
+// a label that doesn't match, fails the test and aborts the prompt. Answers
+// left unused at the end fail the test too.
+func New(t testing.TB, answers ...Answer) *Script {
+	t.Helper()
+
+	s := &Script{t: t, answers: answers}
+	t.Cleanup(s.checkUsed)
+
+	return s
+}
+
+// Use is New for tests that don't run with an apptest App yet: it makes the
+// script answer every prompt until the test ends.
+//
+// Legacy, removed once every command reads the App: pass New's Script to apptest.WithPrompter instead.
 func Use(t testing.TB, answers ...Answer) *Script {
 	t.Helper()
 
@@ -46,12 +59,16 @@ func Use(t testing.TB, answers ...Answer) *Script {
 	restore := utils.SetPrompter(s)
 	t.Cleanup(func() {
 		restore()
-		if len(s.answers) > 0 {
-			t.Errorf("prompttest: %d answer(s) never asked for, first %q", len(s.answers), s.answers[0].Label)
-		}
+		s.checkUsed()
 	})
 
 	return s
+}
+
+func (s *Script) checkUsed() {
+	if len(s.answers) > 0 {
+		s.t.Errorf("prompttest: %d answer(s) never asked for, first %q", len(s.answers), s.answers[0].Label)
+	}
 }
 
 func (s *Script) next(label string) (Answer, bool) {

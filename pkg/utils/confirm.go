@@ -47,7 +47,7 @@ func ConfirmWith(cmd *cobra.Command, question func() (string, error)) (bool, err
 		return true, nil
 	}
 
-	if !isInteractive() {
+	if !isInteractive(current(cmd.Context())) {
 		return false, ErrConfirmationRequired
 	}
 
@@ -56,7 +56,7 @@ func ConfirmWith(cmd *cobra.Command, question func() (string, error)) (bool, err
 		return false, err
 	}
 
-	_, answer, err := Select(q, []string{"No", "Yes"})
+	_, answer, err := Select(cmd.Context(), q, []string{"No", "Yes"})
 	if err != nil {
 		return false, fmt.Errorf("confirm: %w", err)
 	}

@@ -54,7 +54,7 @@ func executeUpdateV2(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("update dashboard layout: %w", err)
 	}
 
-	renderDashboardV2Stats(data)
+	renderDashboardV2Stats(cmd.Context(), data)
 
 	return nil
 }

@@ -32,7 +32,7 @@ func executeGetV2(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get dashboard data: %w", err)
 	}
 
-	renderDashboardV2Stats(data)
+	renderDashboardV2Stats(cmd.Context(), data)
 
 	return nil
 }

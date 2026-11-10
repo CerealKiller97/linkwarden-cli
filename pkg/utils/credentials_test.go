@@ -91,7 +91,7 @@ func TestNonInteractiveFlagWinsOverAvailablePrompter(t *testing.T) {
 	assert.ErrorIs(err, ErrConfirmationRequired)
 	assert.False(ok)
 
-	_, err = Password("Access token:", nil)
+	_, err = Password(t.Context(), "Access token:", nil)
 	assert.ErrorContains(err, "interactive terminal")
 	assert.Empty(*asked)
 }

@@ -107,7 +107,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	fmt.Println()
 
 	if existing.Token != "" {
-		_, answer, err := utils.Select(
+		_, answer, err := utils.Select(ctx,
 			fmt.Sprintf("You're already set up for %s. Overwrite it?", existing.URL), []string{"No", "Yes"})
 		if err != nil {
 			return err
@@ -123,7 +123,7 @@ func run(cmd *cobra.Command, _ []string) error {
 		defaultURL = utils.DefaultInstanceURL
 	}
 
-	rawURL, err := utils.InputDefault("Linkwarden URL:", defaultURL, validateURL)
+	rawURL, err := utils.InputDefault(ctx, "Linkwarden URL:", defaultURL, validateURL)
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func run(cmd *cobra.Command, _ []string) error {
 		labels[i] = m.Label
 	}
 
-	idx, _, err := utils.Select("How would you like to set up your account?", labels)
+	idx, _, err := utils.Select(ctx, "How would you like to set up your account?", labels)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	case method.Password:
 		token, err = passwordFlow(ctx, instanceURL)
 	default:
-		token, err = tokenFlow(instanceURL, method.Provider)
+		token, err = tokenFlow(ctx, instanceURL, method.Provider)
 	}
 	if err != nil {
 		return err
@@ -182,7 +182,7 @@ func run(cmd *cobra.Command, _ []string) error {
 // first. Linkwarden's Google/Apple/... sign-in is an OAuth redirect that only
 // ends in a browser session cookie, so the CLI can't receive a token from it
 // directly; instead the user signs in in the browser and creates a token there.
-func tokenFlow(instanceURL, provider string) (string, error) {
+func tokenFlow(ctx context.Context, instanceURL, provider string) (string, error) {
 	pageURL := accessTokensURL(instanceURL)
 
 	fmt.Println()
@@ -195,7 +195,7 @@ func tokenFlow(instanceURL, provider string) (string, error) {
 		fmt.Println("Couldn't open a browser; open the URL above manually.")
 	}
 
-	token, err := utils.Password("Access token:", required("access token"))
+	token, err := utils.Password(ctx, "Access token:", required("access token"))
 	if err != nil {
 		return "", err
 	}
@@ -247,12 +247,12 @@ func tokenSteps(pageURL, provider string, colorOn bool) []string {
 // passwordFlow asks for email/username and password, then exchanges them for a
 // long-lived access token.
 func passwordFlow(ctx context.Context, instanceURL string) (string, error) {
-	username, err := utils.Input("Email or username:", required("email or username"))
+	username, err := utils.Input(ctx, "Email or username:", required("email or username"))
 	if err != nil {
 		return "", err
 	}
 
-	password, err := utils.Password("Password:", required("password"))
+	password, err := utils.Password(ctx, "Password:", required("password"))
 	if err != nil {
 		return "", err
 	}

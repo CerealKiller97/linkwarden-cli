@@ -70,7 +70,7 @@ func executeUploadStandalone(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("upload standalone archive: %w", err)
 	}
 
-	renderLinkTable(*link)
+	renderLinkTable(cmd.Context(), *link)
 
 	return nil
 }

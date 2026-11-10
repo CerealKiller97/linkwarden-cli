@@ -113,7 +113,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		Int("id", collection.ID).
 		Msg("Collection created successfully")
 
-	return utils.PrintRecord(collection, collection.ID)
+	return utils.PrintRecord(cmd.Context(), collection, collection.ID)
 }
 
 // unorganizedParentID returns the ID of the Unorganized collection in
