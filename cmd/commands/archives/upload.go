@@ -19,7 +19,7 @@ func Upload() *cobra.Command {
 		RunE:  executeUpload,
 	}
 
-	cmd.Flags().String("link-id", "", "Link ID.")
+	cmd.Flags().Int("link-id", 0, "Link ID.")
 	cmd.Flags().String("file", "", "Local file to upload.")
 	choice.Flag(cmd, "format", "", "Archive format.", uploadFormats)
 	cmd.Flags().Bool("preview", false, "Store the uploaded file as the generated preview instead of the main archive.")
@@ -37,8 +37,8 @@ func executeUpload(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	linkID, err := utils.ResolveIDPaged(
-		cmd.Flag("link-id").Value.String(),
-		"--link-id",
+		cmd,
+		"link-id",
 		"Select Link:",
 		pickers.Links(cmd.Context(), client),
 	)

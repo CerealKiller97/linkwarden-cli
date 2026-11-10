@@ -40,14 +40,14 @@ Links already in the collection are skipped, as are URLs repeated within the
 file. A summary of how many were created, skipped and failed is printed at the
 end, and the command fails if any link could not be created.
 
-Without --collection, a picker asks for the target collection.`,
+Without --collection-id, a picker asks for the target collection.`,
 		Example: `  linkwarden links import --file reading-list.json
-  linkwarden links import --file reading-list.json --collection 3`,
+  linkwarden links import --file reading-list.json --collection-id 3`,
 		RunE: executeImport,
 	}
 
 	cmd.Flags().String("file", "", "JSON file of links to import.")
-	cmd.Flags().String("collection", "", "Collection ID to import into.")
+	cmd.Flags().Int("collection-id", 0, "Collection ID to import into.")
 	cmd.Flags().Int("concurrency", defaultConcurrency, "Number of links to create in parallel.")
 
 	if err := cmd.MarkFlagRequired("file"); err != nil {
@@ -111,8 +111,8 @@ func executeImport(cmd *cobra.Command, _ []string) error {
 	}
 
 	collectionID, err := utils.ResolveID(
-		cmd.Flag("collection").Value.String(),
-		"--collection",
+		cmd,
+		"collection-id",
 		"Select Collection where you want to upload links to:",
 		func() ([]utils.PickerItem, error) { return items, nil },
 	)

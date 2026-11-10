@@ -14,7 +14,7 @@ linkwarden links update [flags]
   -h, --help[=true|false]    help for update
       --icon string          New link icon.
       --icon-weight string   New link icon weight.
-      --id string            Link ID.
+      --id int               Link ID.
       --name string          New link name.
       --url string           New link URL.
 ```

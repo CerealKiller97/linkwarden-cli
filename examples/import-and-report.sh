@@ -48,7 +48,7 @@ main() {
   local report
   local status=0
   report="$("${LW}" --non-interactive links import --json \
-    --file "${file}" --collection "${collection}" 2> "${errlog}")" \
+    --file "${file}" --collection-id "${collection}" 2> "${errlog}")" \
     || status=$?
 
   if [[ -z "${report}" ]]; then

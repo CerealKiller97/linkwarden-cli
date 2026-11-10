@@ -10,7 +10,7 @@ linkwarden links get-highlights [flags]
 
 ```
   -h, --help[=true|false]   help for get-highlights
-      --id string           Link ID.
+      --id int              Link ID.
 ```
 
 ### Options inherited from parent commands

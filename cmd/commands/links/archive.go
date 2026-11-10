@@ -16,7 +16,7 @@ func Archive() *cobra.Command {
 		RunE:  executeArchive,
 	}
 
-	cmd.Flags().String("id", "", "Link ID.")
+	cmd.Flags().Int("id", 0, "Link ID.")
 
 	return cmd
 }
@@ -25,8 +25,8 @@ func executeArchive(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveIDPaged(
-		cmd.Flag("id").Value.String(),
-		"--id",
+		cmd,
+		"id",
 		"Select Link to archive:",
 		pickers.Links(cmd.Context(), client),
 	)

@@ -114,14 +114,14 @@ linkwarden --version
 ```bash
 git clone https://github.com/CerealKiller97/linkwarden-cli.git
 cd linkwarden-cli
-go build -o linkwarden .
+go build -o linkwarden ./cmd/linkwarden
 sudo mv linkwarden /usr/local/bin/
 ```
 
-Or install straight from the module path. The binary is named `linkwarden-cli` this way:
+Or install straight from the module path:
 
 ```bash
-go install github.com/CerealKiller97/linkwarden-cli@latest
+go install github.com/CerealKiller97/linkwarden-cli/cmd/linkwarden@latest
 ```
 
 ### 2. Authenticate
@@ -212,7 +212,7 @@ Real-world workflows built from the commands below.
 linkwarden links import --file reading-list.json
 
 # …or name it up front (handy in scripts)
-linkwarden links import --file reading-list.json --collection 3
+linkwarden links import --file reading-list.json --collection-id 3
 ```
 
 Links already in the target collection are skipped (URLs are compared ignoring case in the scheme and host and any
@@ -273,9 +273,10 @@ linkwarden tags create --label golang --label k8s --label architecture
 # Rename a tag (no --id given, so it opens a picker)
 linkwarden tags update --name kubernetes
 
-# Clean up (asks before deleting; --yes skips the question)
+# Clean up (asks before deleting; --yes skips the question).
+# --ids takes a comma-separated list, repeated flags, or both.
 linkwarden tags bulk-delete --ids 14,15,22
-linkwarden links bulk-delete --ids 301,302 --yes
+linkwarden links bulk-delete --ids 301 --ids 302 --yes
 ```
 
 ### 📄 Find an article and save it as a PDF
@@ -613,7 +614,7 @@ Options: `WithHTTPClient(*http.Client)` for timeouts, proxies or custom transpor
 go run ./scripts/gendocs # regenerate docs/cli/ after changing a command or flag
 go test ./...            # unit tests
 golangci-lint run        # lint (config in .golangci.yml)
-go build -o bin/linkwarden .
+go build -o bin/linkwarden ./cmd/linkwarden
 ```
 
 CI runs tests, checks that `docs/cli/` is up to date, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus

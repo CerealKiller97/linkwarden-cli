@@ -527,12 +527,12 @@ detect_platform() {
     MINGW* | MSYS* | CYGWIN* | Windows_NT)
       die "On Windows, install with winget instead:  winget install CerealKiller97.LinkwardenCLI"
       ;;
-    *) die "no prebuilt linkwarden for ${os}. Try: go install github.com/${REPO}@latest" ;;
+    *) die "no prebuilt linkwarden for ${os}. Try: go install github.com/${REPO}/cmd/linkwarden@latest" ;;
   esac
   case "${arch}" in
     x86_64 | amd64) ARCH="amd64" ;;
     arm64 | aarch64 | armv8*) ARCH="arm64" ;;
-    *) die "no prebuilt linkwarden for ${arch} CPUs. Try: go install github.com/${REPO}@latest" ;;
+    *) die "no prebuilt linkwarden for ${arch} CPUs. Try: go install github.com/${REPO}/cmd/linkwarden@latest" ;;
   esac
   # Rosetta 2 reports x86_64 to a translated shell; the native build is faster.
   if [[ "${OS}" == "darwin" && "${ARCH}" == "amd64" ]] \

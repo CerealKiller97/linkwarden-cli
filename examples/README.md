@@ -7,7 +7,7 @@ They need [`jq`](https://jqlang.org) (`brew install jq`) and a signed-in CLI (`l
 The scripts run `linkwarden` from your `PATH`. To try them with a build of this repo instead:
 
 ```bash
-go build -o bin/linkwarden .
+go build -o bin/linkwarden ./cmd/linkwarden
 export LINKWARDEN_BIN="$PWD/bin/linkwarden"
 ```
 

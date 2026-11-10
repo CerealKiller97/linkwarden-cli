@@ -46,7 +46,7 @@ func TestImportUploadsLinksFromFile(t *testing.T) {
 	assert.NoError(os.WriteFile(file, []byte(`[{"url":"https://example.com","title":"Example"}]`), 0o644))
 
 	cmd := Import()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
+	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 	assert.NoError(cmd.Execute())
 	assert.Equal(1, createCount)
 }
@@ -58,7 +58,7 @@ func TestImportEmptyFileErrors(t *testing.T) {
 	assert.NoError(os.WriteFile(file, []byte(`[]`), 0o644))
 
 	cmd := Import()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
+	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 	err := cmd.Execute()
 	assert.ErrorIs(err, errFileEmpty)
 }
@@ -87,7 +87,7 @@ func TestImportUnknownCollectionErrorsWithoutCreatingLinks(t *testing.T) {
 	assert.NoError(os.WriteFile(file, []byte(`[{"url":"https://example.com","title":"Example"}]`), 0o644))
 
 	cmd := Import()
-	cmd.SetArgs([]string{"--file", file, "--collection", "9999"})
+	cmd.SetArgs([]string{"--file", file, "--collection-id", "9999"})
 	err := cmd.Execute()
 	assert.ErrorIs(err, errCollectionNotFound)
 	assert.ErrorContains(err, "9999")
@@ -169,7 +169,7 @@ func TestImportSkipsLinksAlreadyInCollection(t *testing.T) {
 	)
 
 	cmd := Import()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
+	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 	assert.NoError(cmd.Execute())
 
 	assert.Equal(int64(1), creates.Load(), "only the one new URL is created")
@@ -183,7 +183,7 @@ func TestImportConflictCountsAsAlreadyExists(t *testing.T) {
 
 	file := writeLinksFile(t, "https://dup.example", "https://ok.example")
 	cmd := Import()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
+	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 	assert.NoError(cmd.Execute())
 	assert.Equal(int64(1), creates.Load())
 }
@@ -217,7 +217,7 @@ func TestImportFailedLinksReturnError(t *testing.T) {
 
 	file := writeLinksFile(t, "https://ok.example", "https://broken.example")
 	cmd := Import()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
+	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 
 	err := cmd.Execute()
 	assert.ErrorIs(err, errLinksFailed)
@@ -288,7 +288,7 @@ func TestImportStopsWhenInterrupted(t *testing.T) {
 	assert.NoError(os.WriteFile(file, []byte("["+strings.Join(items, ",")+"]"), 0o644))
 
 	cmd := Import()
-	cmd.SetArgs([]string{"--file", file, "--collection", "1"})
+	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 	err := cmd.ExecuteContext(ctx)
 
 	assert.ErrorIs(err, context.Canceled)

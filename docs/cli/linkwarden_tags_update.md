@@ -10,7 +10,7 @@ linkwarden tags update [flags]
 
 ```
   -h, --help[=true|false]   help for update
-      --id string           Tag ID.
+      --id int              Tag ID.
       --name string         New tag name.
 ```
 

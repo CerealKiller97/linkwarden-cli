@@ -15,7 +15,7 @@ func Update() *cobra.Command {
 		RunE:  executeUpdate,
 	}
 
-	cmd.Flags().String("id", "", "Tag ID.")
+	cmd.Flags().Int("id", 0, "Tag ID.")
 	cmd.Flags().String("name", "", "New tag name.")
 
 	if err := cmd.MarkFlagRequired("name"); err != nil {
@@ -29,8 +29,8 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveID(
-		cmd.Flag("id").Value.String(),
-		"--id",
+		cmd,
+		"id",
 		"Select Tag to update:",
 		tagsPickerFetch(cmd.Context(), client),
 	)

@@ -13,7 +13,7 @@ linkwarden highlights create [flags]
       --comment string      Optional comment.
       --end-offset int      End offset of the highlighted text.
   -h, --help[=true|false]   help for create
-      --link-id string      Link ID.
+      --link-id int         Link ID.
       --start-offset int    Start offset of the highlighted text.
       --text string         Highlighted text.
 ```

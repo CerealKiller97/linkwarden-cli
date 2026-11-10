@@ -14,7 +14,7 @@ linkwarden collections update [flags]
   -h, --help[=true|false]     help for update
       --icon string           New collection icon.
       --icon-weight string    New collection icon weight.
-      --id string             Collection ID.
+      --id int                Collection ID.
       --name string           New collection name.
       --parent-id int         New parent collection ID.
       --public[=true|false]   Make the collection public (--public=false makes it private).

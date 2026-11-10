@@ -10,7 +10,7 @@ linkwarden links get [flags]
 
 ```
   -h, --help[=true|false]   help for get
-      --id string           Link ID.
+      --id int              Link ID.
 ```
 
 ### Options inherited from parent commands

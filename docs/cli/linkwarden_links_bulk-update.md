@@ -11,7 +11,7 @@ linkwarden links bulk-update [flags]
 ```
       --collection-id int                   Move links to this collection ID.
   -h, --help[=true|false]                   help for bulk-update
-      --ids string                          Comma-separated list of link IDs to update.
+      --ids ints                            Link IDs to update. Comma-separated or repeated (--ids 1,2 --ids 3).
       --remove-previous-tags[=true|false]   Remove tags not in --tag before applying.
       --tag strings                         Tag name to apply (repeatable).
 ```

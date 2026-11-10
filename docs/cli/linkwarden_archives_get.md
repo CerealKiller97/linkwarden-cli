@@ -11,7 +11,7 @@ linkwarden archives get [flags]
 ```
       --format string          Archive format. One of: png|jpeg|pdf|html|readable. (default "png")
   -h, --help[=true|false]      help for get
-      --link-id string         Link ID.
+      --link-id int            Link ID.
       --output string          Path to save the archive file to. Without it, only content-type/size are printed.
       --preview[=true|false]   Retrieve the preview instead of the main archive file.
 ```

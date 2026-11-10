@@ -16,7 +16,7 @@ func BulkUpdate() *cobra.Command {
 		RunE:  executeBulkUpdate,
 	}
 
-	cmd.Flags().String("ids", "", "Comma-separated list of link IDs to update.")
+	utils.AddIDsFlag(cmd, "Link IDs to update.")
 	cmd.Flags().Int("collection-id", 0, "Move links to this collection ID.")
 	cmd.Flags().StringSlice("tag", nil, "Tag name to apply (repeatable).")
 	cmd.Flags().Bool("remove-previous-tags", false, "Remove tags not in --tag before applying.")
@@ -29,9 +29,9 @@ func BulkUpdate() *cobra.Command {
 }
 
 func executeBulkUpdate(cmd *cobra.Command, _ []string) error {
-	ids, err := parseIDs(cmd.Flag("ids").Value.String())
+	ids, err := utils.GetIDs(cmd)
 	if err != nil {
-		return fmt.Errorf("parse --ids: %w", err)
+		return err
 	}
 
 	collectionID, err := cmd.Flags().GetInt("collection-id")

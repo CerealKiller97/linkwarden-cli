@@ -10,7 +10,7 @@ linkwarden collections get [flags]
 
 ```
   -h, --help[=true|false]   help for get
-      --id string           Collection ID.
+      --id int              Collection ID.
 ```
 
 ### Options inherited from parent commands

@@ -10,7 +10,7 @@ linkwarden tags delete [flags]
 
 ```
   -h, --help[=true|false]   help for delete
-      --id string           Tag ID.
+      --id int              Tag ID.
   -y, --yes[=true|false]    Skip the confirmation prompt (required when there's no interactive terminal).
 ```
 

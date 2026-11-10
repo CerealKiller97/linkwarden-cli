@@ -10,7 +10,7 @@ linkwarden links delete [flags]
 
 ```
   -h, --help[=true|false]   help for delete
-      --id string           Link ID.
+      --id int              Link ID.
   -y, --yes[=true|false]    Skip the confirmation prompt (required when there's no interactive terminal).
 ```
 

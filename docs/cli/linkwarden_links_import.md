@@ -17,7 +17,7 @@ Links already in the collection are skipped, as are URLs repeated within the
 file. A summary of how many were created, skipped and failed is printed at the
 end, and the command fails if any link could not be created.
 
-Without --collection, a picker asks for the target collection.
+Without --collection-id, a picker asks for the target collection.
 
 ```
 linkwarden links import [flags]
@@ -27,13 +27,13 @@ linkwarden links import [flags]
 
 ```
   linkwarden links import --file reading-list.json
-  linkwarden links import --file reading-list.json --collection 3
+  linkwarden links import --file reading-list.json --collection-id 3
 ```
 
 ### Options
 
 ```
-      --collection string   Collection ID to import into.
+      --collection-id int   Collection ID to import into.
       --concurrency int     Number of links to create in parallel. (default 4)
       --file string         JSON file of links to import.
   -h, --help[=true|false]   help for import

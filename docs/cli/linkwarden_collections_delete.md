@@ -10,7 +10,7 @@ linkwarden collections delete [flags]
 
 ```
   -h, --help[=true|false]   help for delete
-      --id string           Collection ID.
+      --id int              Collection ID.
   -y, --yes[=true|false]    Skip the confirmation prompt (required when there's no interactive terminal).
 ```
 

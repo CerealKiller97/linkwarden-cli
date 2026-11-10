@@ -19,7 +19,7 @@ before:
 builds:
   - id: linkwarden
     binary: linkwarden
-    main: .
+    main: ./cmd/linkwarden
     env:
       - CGO_ENABLED=0
       - CFLAGS=-O3

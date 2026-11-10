@@ -12,7 +12,7 @@ linkwarden archives upload [flags]
       --file string            Local file to upload.
       --format string          Archive format. One of: png|jpeg|pdf|html.
   -h, --help[=true|false]      help for upload
-      --link-id string         Link ID.
+      --link-id int            Link ID.
       --preview[=true|false]   Store the uploaded file as the generated preview instead of the main archive.
 ```
 

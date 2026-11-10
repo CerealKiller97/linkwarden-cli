@@ -10,7 +10,7 @@ linkwarden links bulk-delete [flags]
 
 ```
   -h, --help[=true|false]   help for bulk-delete
-      --ids string          Comma-separated list of link IDs.
+      --ids ints            Link IDs. Comma-separated or repeated (--ids 1,2 --ids 3).
   -y, --yes[=true|false]    Skip the confirmation prompt (required when there's no interactive terminal).
 ```
 

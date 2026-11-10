@@ -3,14 +3,26 @@ package utils
 import (
 	"testing"
 
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 )
+
+// idCmd returns a command with an int --id flag, parsed from args.
+func idCmd(t *testing.T, args ...string) *cobra.Command {
+	t.Helper()
+
+	cmd := &cobra.Command{Use: "test"}
+	cmd.Flags().Int("id", 0, "ID.")
+	require.NoError(t, cmd.Flags().Parse(args))
+
+	return cmd
+}
 
 func TestResolveIDUsesFlagValueWithoutFetching(t *testing.T) {
 	assert := require.New(t)
 
 	called := false
-	id, err := ResolveID("42", "--id", "Pick", func() ([]PickerItem, error) {
+	id, err := ResolveID(idCmd(t, "--id", "42"), "id", "Pick", func() ([]PickerItem, error) {
 		called = true
 
 		return nil, nil
@@ -21,14 +33,30 @@ func TestResolveIDUsesFlagValueWithoutFetching(t *testing.T) {
 	assert.False(called)
 }
 
-func TestResolveIDInvalidFlagValue(t *testing.T) {
-	assert := require.New(t)
+func TestResolveIDRejectsNonNumericFlagValue(t *testing.T) {
+	cmd := &cobra.Command{Use: "test"}
+	cmd.Flags().Int("id", 0, "ID.")
 
-	_, err := ResolveID("not-a-number", "--id", "Pick", func() ([]PickerItem, error) {
-		return nil, nil
-	})
+	require.Error(t, cmd.Flags().Parse([]string{"--id", "not-a-number"}))
+}
 
-	assert.Error(err)
+func TestResolveIDRejectsNonPositiveFlagValue(t *testing.T) {
+	for _, value := range []string{"0", "-3"} {
+		t.Run(value, func(t *testing.T) {
+			assert := require.New(t)
+
+			called := false
+			_, err := ResolveID(idCmd(t, "--id="+value), "id", "Pick", func() ([]PickerItem, error) {
+				called = true
+
+				return nil, nil
+			})
+
+			assert.ErrorIs(err, ErrInvalidID)
+			assert.Contains(err.Error(), "--id")
+			assert.False(called)
+		})
+	}
 }
 
 // TestResolveIDNonInteractiveReturnsErrorWithoutFetching covers the scripting/CI
@@ -40,7 +68,7 @@ func TestResolveIDNonInteractiveReturnsErrorWithoutFetching(t *testing.T) {
 	assert := require.New(t)
 
 	called := false
-	_, err := ResolveID("", "--id", "Pick", func() ([]PickerItem, error) {
+	_, err := ResolveID(idCmd(t), "id", "Pick", func() ([]PickerItem, error) {
 		called = true
 
 		return []PickerItem{{Label: "a", Value: 1}}, nil
@@ -70,7 +98,7 @@ func TestResolveIDNonInteractiveOverrideReturnsErrorWithoutFetching(t *testing.T
 	t.Cleanup(func() { SetNonInteractive(false) })
 
 	called := false
-	_, err := ResolveID("", "--id", "Pick", func() ([]PickerItem, error) {
+	_, err := ResolveID(idCmd(t), "id", "Pick", func() ([]PickerItem, error) {
 		called = true
 
 		return []PickerItem{{Label: "a", Value: 1}}, nil

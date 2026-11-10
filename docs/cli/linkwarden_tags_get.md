@@ -10,7 +10,7 @@ linkwarden tags get [flags]
 
 ```
   -h, --help[=true|false]   help for get
-      --id string           Tag ID.
+      --id int              Tag ID.
 ```
 
 ### Options inherited from parent commands

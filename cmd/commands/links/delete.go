@@ -16,7 +16,7 @@ func Delete() *cobra.Command {
 		RunE:  executeDelete,
 	}
 
-	cmd.Flags().String("id", "", "Link ID.")
+	cmd.Flags().Int("id", 0, "Link ID.")
 	utils.AddYesFlag(cmd)
 
 	return cmd
@@ -26,8 +26,8 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveIDPaged(
-		cmd.Flag("id").Value.String(),
-		"--id",
+		cmd,
+		"id",
 		"Select Link to delete:",
 		pickers.Links(cmd.Context(), client),
 	)

@@ -15,7 +15,7 @@ func GetHighlights() *cobra.Command {
 		RunE:  executeGetHighlights,
 	}
 
-	cmd.Flags().String("id", "", "Link ID.")
+	cmd.Flags().Int("id", 0, "Link ID.")
 
 	return cmd
 }
@@ -24,8 +24,8 @@ func executeGetHighlights(cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveIDPaged(
-		cmd.Flag("id").Value.String(),
-		"--id",
+		cmd,
+		"id",
 		"Select Link:",
 		pickers.Links(cmd.Context(), client),
 	)

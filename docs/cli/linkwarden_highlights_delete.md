@@ -10,8 +10,8 @@ linkwarden highlights delete [flags]
 
 ```
   -h, --help[=true|false]   help for delete
-      --id string           Highlight ID.
-      --link-id string      Link ID (used to pick a highlight when --id is not set).
+      --id int              Highlight ID.
+      --link-id int         Link ID (used to pick a highlight when --id is not set).
   -y, --yes[=true|false]    Skip the confirmation prompt (required when there's no interactive terminal).
 ```
 
