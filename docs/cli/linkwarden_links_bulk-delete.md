@@ -6,6 +6,19 @@ Delete multiple links
 linkwarden links bulk-delete [flags]
 ```
 
+### Examples
+
+```bash
+# Delete two links (asks first)
+linkwarden links bulk-delete --ids 301,302
+
+# Same, without asking (scripts, cron)
+linkwarden links bulk-delete --ids 301 --ids 302 --yes
+
+# Delete every link that matches a search
+linkwarden links list --search "old draft" -q | paste -sd, - | xargs -I{} linkwarden links bulk-delete --ids {} --yes
+```
+
 ### Options
 
 ```

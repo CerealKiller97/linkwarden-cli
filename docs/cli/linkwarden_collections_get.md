@@ -6,6 +6,19 @@ Get a collection by ID
 linkwarden collections get [flags]
 ```
 
+### Examples
+
+```bash
+# Pick the collection from a list
+linkwarden collections get
+
+# Get collection 7
+linkwarden collections get --id 7
+
+# Print only its name
+linkwarden collections get --id 7 --json | jq -r .name
+```
+
 ### Options
 
 ```

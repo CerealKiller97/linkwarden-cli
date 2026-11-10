@@ -6,6 +6,16 @@ List all available tokens
 linkwarden tokens list [flags]
 ```
 
+### Examples
+
+```bash
+# List your API tokens
+linkwarden tokens list
+
+# Same, as JSON
+linkwarden tokens list --json
+```
+
 ### Options
 
 ```

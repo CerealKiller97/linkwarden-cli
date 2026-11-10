@@ -6,6 +6,16 @@ List RSS subscriptions
 linkwarden rss list [flags]
 ```
 
+### Examples
+
+```bash
+# List your feed subscriptions
+linkwarden rss list
+
+# Same, as JSON
+linkwarden rss list --json
+```
+
 ### Options
 
 ```

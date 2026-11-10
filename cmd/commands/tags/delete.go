@@ -12,7 +12,12 @@ func Delete() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a tag",
-		RunE:  executeDelete,
+		Example: `  # Pick the tag from a list, then confirm
+  linkwarden tags delete
+
+  # Delete tag 14 without asking
+  linkwarden tags delete --id 14 --yes`,
+		RunE: executeDelete,
 	}
 
 	cmd.Flags().Int("id", 0, "Tag ID.")

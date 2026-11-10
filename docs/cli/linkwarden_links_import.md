@@ -26,8 +26,14 @@ linkwarden links import [flags]
 ### Examples
 
 ```bash
+# Pick the target collection from a list
 linkwarden links import --file reading-list.json
+
+# Import into collection 3
 linkwarden links import --file reading-list.json --collection-id 3
+
+# Create 8 links at a time instead of 4
+linkwarden links import --file reading-list.json --collection-id 3 --concurrency 8
 ```
 
 ### Options

@@ -6,6 +6,16 @@ Delete multiple tags
 linkwarden tags bulk-delete [flags]
 ```
 
+### Examples
+
+```bash
+# Delete three tags (asks first)
+linkwarden tags bulk-delete --ids 14,15,22
+
+# Same, without asking
+linkwarden tags bulk-delete --ids 14 --ids 15 --ids 22 --yes
+```
+
 ### Options
 
 ```

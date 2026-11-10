@@ -6,6 +6,16 @@ Rename a tag
 linkwarden tags update [flags]
 ```
 
+### Examples
+
+```bash
+# Rename tag 14
+linkwarden tags update --id 14 --name kubernetes
+
+# Pick the tag from a list and rename it
+linkwarden tags update --name kubernetes
+```
+
 ### Options
 
 ```

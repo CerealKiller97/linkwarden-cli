@@ -6,6 +6,16 @@ List collections
 linkwarden collections list [flags]
 ```
 
+### Examples
+
+```bash
+# List your collections
+linkwarden collections list
+
+# ID and name of each, tab-separated
+linkwarden collections list --json | jq -r '.[] | "\(.id)\t\(.name)"'
+```
+
 ### Options
 
 ```

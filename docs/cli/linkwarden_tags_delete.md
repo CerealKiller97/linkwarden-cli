@@ -6,6 +6,16 @@ Delete a tag
 linkwarden tags delete [flags]
 ```
 
+### Examples
+
+```bash
+# Pick the tag from a list, then confirm
+linkwarden tags delete
+
+# Delete tag 14 without asking
+linkwarden tags delete --id 14 --yes
+```
+
 ### Options
 
 ```

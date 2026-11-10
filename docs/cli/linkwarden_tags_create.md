@@ -6,6 +6,16 @@ Create or update tags in bulk
 linkwarden tags create [flags]
 ```
 
+### Examples
+
+```bash
+# Create a tag
+linkwarden tags create --label golang
+
+# Create several at once
+linkwarden tags create --label golang --label k8s --label architecture
+```
+
 ### Options
 
 ```

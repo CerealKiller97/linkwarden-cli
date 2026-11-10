@@ -14,7 +14,15 @@ func Update() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update a link",
-		RunE:  executeUpdate,
+		Example: `  # Rename link 412
+  linkwarden links update --id 412 --name "Effective Go"
+
+  # Point it at a new URL
+  linkwarden links update --id 412 --url https://go.dev/doc/effective_go
+
+  # Pick the link from a list and change its description
+  linkwarden links update --description "The classic Go style guide"`,
+		RunE: executeUpdate,
 	}
 
 	cmd.Flags().Int("id", 0, "Link ID.")

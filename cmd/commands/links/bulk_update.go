@@ -13,7 +13,12 @@ func BulkUpdate() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bulk-update",
 		Short: "Apply a collection/tag change to multiple links",
-		RunE:  executeBulkUpdate,
+		Example: `  # Move three links into collection 7
+  linkwarden links bulk-update --ids 412,418,421 --collection-id 7
+
+  # Replace their tags
+  linkwarden links bulk-update --ids 412,418,421 --tag reading --tag weekend --remove-previous-tags`,
+		RunE: executeBulkUpdate,
 	}
 
 	utils.AddIDsFlag(cmd, "Link IDs to update.")

@@ -6,6 +6,16 @@ Delete an RSS subscription
 linkwarden rss delete [flags]
 ```
 
+### Examples
+
+```bash
+# Pick the subscription from a list, then confirm
+linkwarden rss delete
+
+# Delete subscription 5 without asking
+linkwarden rss delete --id 5 --yes
+```
+
 ### Options
 
 ```

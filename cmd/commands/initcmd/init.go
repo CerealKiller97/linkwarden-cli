@@ -86,6 +86,8 @@ func Command() *cobra.Command {
 		Long: "Walks you through signing in to your Linkwarden instance, with an access token " +
 			"(recommended), your email and password, or a provider such as Google or Apple, " +
 			"and saves the result to the CLI's config file.",
+		Example: `  # Sign in (run it again any time to switch accounts or instances)
+  linkwarden init`,
 		Args:        cobra.NoArgs,
 		Annotations: map[string]string{SkipAuthAnnotation: "true"},
 		RunE:        run,

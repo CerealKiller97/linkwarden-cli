@@ -6,6 +6,19 @@ Get a link by ID
 linkwarden links get [flags]
 ```
 
+### Examples
+
+```bash
+# Pick the link from a list
+linkwarden links get
+
+# Get link 412
+linkwarden links get --id 412
+
+# Print only its URL
+linkwarden links get --id 412 --json | jq -r .url
+```
+
 ### Options
 
 ```

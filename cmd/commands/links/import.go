@@ -41,8 +41,14 @@ file. A summary of how many were created, skipped and failed is printed at the
 end, and the command fails if any link could not be created.
 
 Without --collection-id, a picker asks for the target collection.`,
-		Example: `  linkwarden links import --file reading-list.json
-  linkwarden links import --file reading-list.json --collection-id 3`,
+		Example: `  # Pick the target collection from a list
+  linkwarden links import --file reading-list.json
+
+  # Import into collection 3
+  linkwarden links import --file reading-list.json --collection-id 3
+
+  # Create 8 links at a time instead of 4
+  linkwarden links import --file reading-list.json --collection-id 3 --concurrency 8`,
 		RunE: executeImport,
 	}
 

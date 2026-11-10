@@ -6,6 +6,25 @@ List links
 linkwarden links list [flags]
 ```
 
+### Examples
+
+```bash
+# Your newest links
+linkwarden links list
+
+# Links in collection 3
+linkwarden links list --collection-id 3
+
+# Pinned links with tag 14
+linkwarden links list --tag-id 14 --pinned-only
+
+# Links that match a search
+linkwarden links list --search kubernetes
+
+# The URL of each link, one per line
+linkwarden links list --json | jq -r '.[].url'
+```
+
 ### Options
 
 ```

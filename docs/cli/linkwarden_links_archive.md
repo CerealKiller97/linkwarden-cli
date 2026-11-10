@@ -6,6 +6,16 @@ Trigger archiving of a link
 linkwarden links archive [flags]
 ```
 
+### Examples
+
+```bash
+# Archive link 412 again (fresh screenshot, PDF and HTML)
+linkwarden links archive --id 412
+
+# Pick the link from a list
+linkwarden links archive
+```
+
 ### Options
 
 ```

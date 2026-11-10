@@ -6,6 +6,16 @@ Get public runtime configuration
 linkwarden config get [flags]
 ```
 
+### Examples
+
+```bash
+# Show your instance's public configuration
+linkwarden config get
+
+# Same, as JSON
+linkwarden config get --json
+```
+
 ### Options
 
 ```

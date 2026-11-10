@@ -6,6 +6,16 @@ Delete a collection
 linkwarden collections delete [flags]
 ```
 
+### Examples
+
+```bash
+# Pick the collection from a list, then confirm
+linkwarden collections delete
+
+# Delete collection 7 without asking (scripts, cron)
+linkwarden collections delete --id 7 --yes
+```
+
 ### Options
 
 ```

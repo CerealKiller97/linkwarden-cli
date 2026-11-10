@@ -6,6 +6,19 @@ Import Linkwarden data from a data source
 linkwarden migrations import [flags]
 ```
 
+### Examples
+
+```bash
+# Restore a Linkwarden export
+linkwarden migrations import --file linkwarden-2026-10-06.json --format linkwarden
+
+# Browser bookmarks exported as HTML (Chrome, Firefox, Safari…)
+linkwarden migrations import --file bookmarks.html --format html
+
+# Pocket export
+linkwarden migrations import --file pocket.json --format pocket
+```
+
 ### Options
 
 ```

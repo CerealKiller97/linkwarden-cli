@@ -12,7 +12,12 @@ func Create() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create an RSS subscription",
-		RunE:  executeCreate,
+		Example: `  # Follow a feed into collection 3
+  linkwarden rss create --name "The Go Blog" --url https://go.dev/blog/feed.atom --collection-id 3
+
+  # Name the destination collection instead
+  linkwarden rss create --name "The Go Blog" --url https://go.dev/blog/feed.atom --collection-name Go`,
+		RunE: executeCreate,
 	}
 
 	cmd.Flags().String("name", "", "Subscription name.")

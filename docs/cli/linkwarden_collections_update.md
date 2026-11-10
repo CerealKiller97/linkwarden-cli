@@ -6,6 +6,20 @@ Update a collection
 linkwarden collections update [flags]
 ```
 
+### Examples
+
+```bash
+# Rename collection 7
+linkwarden collections update --id 7 --name "Weekend Reads"
+
+# Make it public, then private again
+linkwarden collections update --id 7 --public
+linkwarden collections update --id 7 --public=false
+
+# Pick a collection from a list and move it inside collection 9
+linkwarden collections update --parent-id 9
+```
+
 ### Options
 
 ```

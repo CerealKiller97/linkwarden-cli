@@ -13,7 +13,16 @@ func Update() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update a collection",
-		RunE:  executeUpdate,
+		Example: `  # Rename collection 7
+  linkwarden collections update --id 7 --name "Weekend Reads"
+
+  # Make it public, then private again
+  linkwarden collections update --id 7 --public
+  linkwarden collections update --id 7 --public=false
+
+  # Pick a collection from a list and move it inside collection 9
+  linkwarden collections update --parent-id 9`,
+		RunE: executeUpdate,
 	}
 
 	cmd.Flags().Int("id", 0, "Collection ID.")

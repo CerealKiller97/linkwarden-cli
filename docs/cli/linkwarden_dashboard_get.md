@@ -6,6 +6,16 @@ Get dashboard data (v1)
 linkwarden dashboard get [flags]
 ```
 
+### Examples
+
+```bash
+# Show the dashboard data
+linkwarden dashboard get
+
+# Same, as JSON
+linkwarden dashboard get --json
+```
+
 ### Options
 
 ```

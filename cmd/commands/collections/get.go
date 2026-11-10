@@ -12,7 +12,15 @@ func Get() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get a collection by ID",
-		RunE:  executeGet,
+		Example: `  # Pick the collection from a list
+  linkwarden collections get
+
+  # Get collection 7
+  linkwarden collections get --id 7
+
+  # Print only its name
+  linkwarden collections get --id 7 --json | jq -r .name`,
+		RunE: executeGet,
 	}
 
 	cmd.Flags().Int("id", 0, "Collection ID.")

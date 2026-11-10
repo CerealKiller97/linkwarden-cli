@@ -6,6 +6,16 @@ Upload a local file as a link's archive
 linkwarden archives upload [flags]
 ```
 
+### Examples
+
+```bash
+# Replace a link's PDF archive with a local file
+linkwarden archives upload --link-id 412 --file effective-go.pdf --format pdf
+
+# Use an image as the link's preview
+linkwarden archives upload --link-id 412 --file cover.png --format png --preview
+```
+
 ### Options
 
 ```

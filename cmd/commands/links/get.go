@@ -12,7 +12,15 @@ func Get() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get a link by ID",
-		RunE:  executeGet,
+		Example: `  # Pick the link from a list
+  linkwarden links get
+
+  # Get link 412
+  linkwarden links get --id 412
+
+  # Print only its URL
+  linkwarden links get --id 412 --json | jq -r .url`,
+		RunE: executeGet,
 	}
 
 	cmd.Flags().Int("id", 0, "Link ID.")

@@ -12,7 +12,15 @@ func List() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List tags",
-		RunE:  executeList,
+		Example: `  # List your tags
+  linkwarden tags list
+
+  # Tags that match a search
+  linkwarden tags list --search go
+
+  # Tag IDs only, one per line
+  linkwarden tags list -q`,
+		RunE: executeList,
 	}
 
 	cmd.Flags().String("search", "", "Search query string.")

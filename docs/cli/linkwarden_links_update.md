@@ -6,6 +6,19 @@ Update a link
 linkwarden links update [flags]
 ```
 
+### Examples
+
+```bash
+# Rename link 412
+linkwarden links update --id 412 --name "Effective Go"
+
+# Point it at a new URL
+linkwarden links update --id 412 --url https://go.dev/doc/effective_go
+
+# Pick the link from a list and change its description
+linkwarden links update --description "The classic Go style guide"
+```
+
 ### Options
 
 ```

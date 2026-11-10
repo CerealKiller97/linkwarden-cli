@@ -6,6 +6,16 @@ Apply a collection/tag change to multiple links
 linkwarden links bulk-update [flags]
 ```
 
+### Examples
+
+```bash
+# Move three links into collection 7
+linkwarden links bulk-update --ids 412,418,421 --collection-id 7
+
+# Replace their tags
+linkwarden links bulk-update --ids 412,418,421 --tag reading --tag weekend --remove-previous-tags
+```
+
 ### Options
 
 ```

@@ -6,6 +6,16 @@ Create an RSS subscription
 linkwarden rss create [flags]
 ```
 
+### Examples
+
+```bash
+# Follow a feed into collection 3
+linkwarden rss create --name "The Go Blog" --url https://go.dev/blog/feed.atom --collection-id 3
+
+# Name the destination collection instead
+linkwarden rss create --name "The Go Blog" --url https://go.dev/blog/feed.atom --collection-name Go
+```
+
 ### Options
 
 ```

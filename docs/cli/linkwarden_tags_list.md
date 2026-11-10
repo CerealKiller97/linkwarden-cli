@@ -6,6 +6,19 @@ List tags
 linkwarden tags list [flags]
 ```
 
+### Examples
+
+```bash
+# List your tags
+linkwarden tags list
+
+# Tags that match a search
+linkwarden tags list --search go
+
+# Tag IDs only, one per line
+linkwarden tags list -q
+```
+
 ### Options
 
 ```

@@ -6,6 +6,16 @@ Delete a link
 linkwarden links delete [flags]
 ```
 
+### Examples
+
+```bash
+# Pick the link from a list, then confirm
+linkwarden links delete
+
+# Delete link 412 without asking (scripts, cron)
+linkwarden links delete --id 412 --yes
+```
+
 ### Options
 
 ```

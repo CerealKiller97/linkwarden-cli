@@ -6,6 +6,16 @@ Get highlights for a link
 linkwarden links get-highlights [flags]
 ```
 
+### Examples
+
+```bash
+# Show the highlights on link 412
+linkwarden links get-highlights --id 412
+
+# Pick the link from a list, and print JSON
+linkwarden links get-highlights --json
+```
+
 ### Options
 
 ```

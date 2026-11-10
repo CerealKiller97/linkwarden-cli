@@ -6,6 +6,13 @@ Update dashboard layout (v2)
 linkwarden dashboard update-v2 [flags]
 ```
 
+### Examples
+
+```bash
+# layout.json: [{"type":"STATS","enabled":true,"order":0},{"type":"RECENT_LINKS","enabled":true,"order":1}]
+linkwarden dashboard update-v2 --file layout.json
+```
+
 ### Options
 
 ```

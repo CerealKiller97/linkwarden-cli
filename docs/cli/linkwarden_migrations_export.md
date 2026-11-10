@@ -6,6 +6,16 @@ Export Linkwarden data to a JSON file
 linkwarden migrations export [flags]
 ```
 
+### Examples
+
+```bash
+# Export everything to ./linkwarden-export-<timestamp>.json
+linkwarden migrations export
+
+# Dated backup, e.g. from cron
+linkwarden --non-interactive migrations export --output ~/backups/linkwarden-$(date +%F).json
+```
+
 ### Options
 
 ```

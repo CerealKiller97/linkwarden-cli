@@ -12,7 +12,12 @@ func Create() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create or update tags in bulk",
-		RunE:  executeCreate,
+		Example: `  # Create a tag
+  linkwarden tags create --label golang
+
+  # Create several at once
+  linkwarden tags create --label golang --label k8s --label architecture`,
+		RunE: executeCreate,
 	}
 
 	cmd.Flags().StringSlice("label", nil, "Tag label (repeatable).")

@@ -6,6 +6,19 @@ Search links
 linkwarden search [flags]
 ```
 
+### Examples
+
+```bash
+# Search your links
+linkwarden search --query "kubernetes operators"
+
+# Oldest matches first
+linkwarden search --query golang --sort oldest
+
+# IDs only, one per line
+linkwarden search --query golang -q
+```
+
 ### Options
 
 ```

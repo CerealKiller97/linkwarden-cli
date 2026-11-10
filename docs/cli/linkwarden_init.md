@@ -10,6 +10,13 @@ Walks you through signing in to your Linkwarden instance, with an access token (
 linkwarden init [flags]
 ```
 
+### Examples
+
+```bash
+# Sign in (run it again any time to switch accounts or instances)
+linkwarden init
+```
+
 ### Options
 
 ```

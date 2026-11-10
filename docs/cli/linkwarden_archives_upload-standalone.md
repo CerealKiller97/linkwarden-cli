@@ -6,6 +6,16 @@ Upload a local file as a new link's archive
 linkwarden archives upload-standalone [flags]
 ```
 
+### Examples
+
+```bash
+# Save a page you downloaded yourself as a new link
+linkwarden archives upload-standalone --url https://go.dev/doc/effective_go --file effective-go.html --format html
+
+# Same with a PDF
+linkwarden archives upload-standalone --url https://12factor.net --file twelve-factor.pdf --format pdf
+```
+
 ### Options
 
 ```

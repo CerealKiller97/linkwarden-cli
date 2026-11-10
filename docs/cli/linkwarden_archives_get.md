@@ -6,6 +6,19 @@ Retrieve a link's archive file
 linkwarden archives get [flags]
 ```
 
+### Examples
+
+```bash
+# Check whether a PDF snapshot exists (prints its type and size)
+linkwarden archives get --link-id 412 --format pdf
+
+# Save it to a file
+linkwarden archives get --link-id 412 --format pdf --output effective-go.pdf
+
+# Pick the link from a list and save its screenshot (PNG is the default)
+linkwarden archives get --output screenshot.png
+```
+
 ### Options
 
 ```

@@ -11,7 +11,12 @@ func List() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List RSS subscriptions",
-		RunE:  executeList,
+		Example: `  # List your feed subscriptions
+  linkwarden rss list
+
+  # Same, as JSON
+  linkwarden rss list --json`,
+		RunE: executeList,
 	}
 
 	return cmd

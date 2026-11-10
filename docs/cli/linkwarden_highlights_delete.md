@@ -6,6 +6,19 @@ Delete a highlight
 linkwarden highlights delete [flags]
 ```
 
+### Examples
+
+```bash
+# Pick a link, then one of its highlights
+linkwarden highlights delete
+
+# Pick from the highlights on link 412
+linkwarden highlights delete --link-id 412
+
+# Delete highlight 31 without asking
+linkwarden highlights delete --id 31 --yes
+```
+
 ### Options
 
 ```

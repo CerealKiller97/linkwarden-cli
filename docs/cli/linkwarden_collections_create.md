@@ -10,6 +10,19 @@ Create a collection
 linkwarden collections create [flags]
 ```
 
+### Examples
+
+```bash
+# Create a collection
+linkwarden collections create --name "Reading List" --color "#f59e0b"
+
+# Nest a collection inside collection 9
+linkwarden collections create --name Kubernetes --parent-id 9 --icon cube
+
+# Create one and keep its ID for a script
+COLLECTION=$(linkwarden collections create --name Inbox -q)
+```
+
 ### Options
 
 ```

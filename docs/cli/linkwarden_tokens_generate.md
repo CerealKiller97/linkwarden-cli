@@ -14,6 +14,13 @@ shell config. Needs an interactive terminal.
 linkwarden tokens generate [flags]
 ```
 
+### Examples
+
+```bash
+# Asks for a name and an expiry, then prints the new token
+linkwarden tokens generate
+```
+
 ### Options
 
 ```

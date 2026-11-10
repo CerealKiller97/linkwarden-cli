@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
@@ -117,4 +118,109 @@ func TestEveryCommandHasShort(t *testing.T) {
 	}
 
 	walk(Root())
+}
+
+// Every command you can run needs an Example: they show up in --help and docs/cli/.
+func TestEveryCommandHasExample(t *testing.T) {
+	for _, c := range ownCommands(Root()) {
+		if c.Runnable() {
+			require.NotEmpty(t, c.Example, "%q has no Example", c.CommandPath())
+		}
+	}
+}
+
+// Every "linkwarden …" line in an Example must name a real command and only use
+// flags it has, with values they accept, so examples can't drift from the flags.
+func TestExamplesParse(t *testing.T) {
+	for _, c := range ownCommands(Root()) {
+		for _, line := range exampleCommands(c.Example) {
+			args, err := splitArgs(line)
+			require.NoError(t, err, "%q: %s", c.CommandPath(), line)
+
+			root := Root()
+			found, rest, err := root.Find(args[1:])
+			require.NoError(t, err, "%q: %s", c.CommandPath(), line)
+			require.NotEqual(t, root, found, "%q: %s names no subcommand", c.CommandPath(), line)
+			require.NoError(t, found.ParseFlags(rest), "%q: %s", c.CommandPath(), line)
+		}
+	}
+}
+
+// ownCommands lists every command under root except Cobra's help and completion.
+func ownCommands(root *cobra.Command) []*cobra.Command {
+	var all []*cobra.Command
+	var walk func(c *cobra.Command)
+	walk = func(c *cobra.Command) {
+		if c.Hidden || c.Name() == "help" || c.Name() == "completion" {
+			return
+		}
+		all = append(all, c)
+		for _, sub := range c.Commands() {
+			walk(sub)
+		}
+	}
+	walk(root)
+
+	return all
+}
+
+// exampleCommands returns the lines of an Example that run linkwarden, with
+// backslash continuations joined and anything after a pipe dropped.
+func exampleCommands(example string) []string {
+	var cmds []string
+	var cur string
+	for _, line := range strings.Split(example, "\n") {
+		line = strings.TrimSpace(line)
+		if cur != "" {
+			line = cur + " " + line
+			cur = ""
+		}
+		if strings.HasSuffix(line, `\`) {
+			cur = strings.TrimSuffix(line, `\`)
+			continue
+		}
+		if !strings.HasPrefix(line, "linkwarden ") {
+			continue
+		}
+		line, _, _ = strings.Cut(line, " | ")
+		cmds = append(cmds, line)
+	}
+
+	return cmds
+}
+
+// splitArgs splits a command line into words like a shell would for the simple
+// quoting examples use: single and double quotes, no escapes or expansion.
+func splitArgs(line string) ([]string, error) {
+	var args []string
+	var word strings.Builder
+	inWord := false
+	var quote rune
+	for _, r := range line {
+		switch {
+		case quote != 0 && r == quote:
+			quote = 0
+		case quote != 0:
+			word.WriteRune(r)
+		case r == '"' || r == '\'':
+			quote, inWord = r, true
+		case r == ' ' || r == '\t':
+			if inWord {
+				args = append(args, word.String())
+				word.Reset()
+				inWord = false
+			}
+		default:
+			word.WriteRune(r)
+			inWord = true
+		}
+	}
+	if quote != 0 {
+		return nil, fmt.Errorf("unclosed %c quote", quote)
+	}
+	if inWord {
+		args = append(args, word.String())
+	}
+
+	return args, nil
 }

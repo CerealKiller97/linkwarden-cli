@@ -6,6 +6,16 @@ Fetch a favicon for a URL
 linkwarden favicon get [flags]
 ```
 
+### Examples
+
+```bash
+# Print the favicon's type and size
+linkwarden favicon get --url https://go.dev
+
+# Save it to a file
+linkwarden favicon get --url https://go.dev --output go.ico
+```
+
 ### Options
 
 ```

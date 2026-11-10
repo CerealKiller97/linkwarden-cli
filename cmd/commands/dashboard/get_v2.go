@@ -11,7 +11,12 @@ func GetV2() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-v2",
 		Short: "Get dashboard data (v2)",
-		RunE:  executeGetV2,
+		Example: `  # Show the v2 dashboard data
+  linkwarden dashboard get-v2
+
+  # Same, as JSON
+  linkwarden dashboard get-v2 --json`,
+		RunE: executeGetV2,
 	}
 
 	return cmd

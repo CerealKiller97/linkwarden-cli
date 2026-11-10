@@ -6,6 +6,16 @@ Get a tag by ID
 linkwarden tags get [flags]
 ```
 
+### Examples
+
+```bash
+# Pick the tag from a list
+linkwarden tags get
+
+# Get tag 14
+linkwarden tags get --id 14
+```
+
 ### Options
 
 ```

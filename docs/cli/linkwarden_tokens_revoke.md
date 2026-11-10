@@ -6,6 +6,16 @@ Revoke a token
 linkwarden tokens revoke [flags]
 ```
 
+### Examples
+
+```bash
+# Pick the token from a list, then confirm
+linkwarden tokens revoke
+
+# Pick the token, and skip the confirmation
+linkwarden tokens revoke --yes
+```
+
 ### Options
 
 ```

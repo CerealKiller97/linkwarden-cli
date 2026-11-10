@@ -11,7 +11,12 @@ func Get() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get public runtime configuration",
-		RunE:  executeGet,
+		Example: `  # Show your instance's public configuration
+  linkwarden config get
+
+  # Same, as JSON
+  linkwarden config get --json`,
+		RunE: executeGet,
 	}
 
 	return cmd
