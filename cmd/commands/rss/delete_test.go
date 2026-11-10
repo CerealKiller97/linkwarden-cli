@@ -21,7 +21,7 @@ func TestDeleteUsesIDFlag(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Delete()
+	cmd := Delete(nil)
 	cmd.SetArgs([]string{"--id", "5", "--yes"})
 	assert.NoError(cmd.Execute())
 }
@@ -31,7 +31,7 @@ func TestDeleteInvalidIDErrors(t *testing.T) {
 
 	utils.SetVars("test-token", "http://unused.invalid")
 
-	cmd := Delete()
+	cmd := Delete(nil)
 	cmd.SetArgs([]string{"--id", "not-a-number", "--yes"})
 	assert.Error(cmd.Execute())
 }
@@ -47,7 +47,7 @@ func TestDeleteRequiresYesWithoutTerminal(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Delete()
+	cmd := Delete(nil)
 	cmd.SetArgs([]string{"--id", "5"})
 	err := cmd.Execute()
 	assert.ErrorIs(err, utils.ErrConfirmationRequired)

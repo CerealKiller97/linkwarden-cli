@@ -3,12 +3,13 @@ package links
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func List() *cobra.Command {
+func List(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List links",
@@ -26,7 +27,9 @@ func List() *cobra.Command {
 
   # The URL of each link, one per line
   linkwarden links list --json | jq -r '.[].url'`,
-		RunE: executeList,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeList(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("collection-id", 0, "Filter by collection ID.")
@@ -38,7 +41,7 @@ func List() *cobra.Command {
 	return cmd
 }
 
-func executeList(cmd *cobra.Command, _ []string) error {
+func executeList(app *app.App, cmd *cobra.Command, _ []string) error {
 	collectionID, err := cmd.Flags().GetInt("collection-id")
 	if err != nil {
 		return err
@@ -75,7 +78,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("list links: %w", err)
 	}
 
-	renderLinksTable(cmd.Context(), links)
+	renderLinksTable(app, links)
 
 	return nil
 }

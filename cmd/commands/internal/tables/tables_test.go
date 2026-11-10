@@ -13,7 +13,7 @@ func TestLinksOneRowPerLink(t *testing.T) {
 		{ID: 2, Name: "Lip Gloss"},
 	}
 
-	require.Equal(t, 2, Links(t.Context(), "Links", links).Len())
+	require.Equal(t, 2, Links(nil, "Links", links).Len())
 }
 
 func TestTagNames(t *testing.T) {
@@ -24,5 +24,5 @@ func TestTagNames(t *testing.T) {
 }
 
 func TestHighlightsOneRowPerHighlight(t *testing.T) {
-	require.Equal(t, 1, Highlights(t.Context(), "Highlights", []linkwarden.Highlight{{ID: 1, LinkID: 9, Text: "quote"}}).Len())
+	require.Equal(t, 1, Highlights(nil, "Highlights", []linkwarden.Highlight{{ID: 1, LinkID: 9, Text: "quote"}}).Len())
 }

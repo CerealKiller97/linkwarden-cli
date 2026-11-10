@@ -23,7 +23,7 @@ func TestListRendersTags(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := List()
+	cmd := List(nil)
 	cmd.SetArgs([]string{"--search", "tech"})
 	assert.NoError(cmd.Execute())
 	assert.Equal("search=tech", gotQuery)
@@ -39,6 +39,6 @@ func TestListPropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := List()
+	cmd := List(nil)
 	assert.Error(cmd.Execute())
 }

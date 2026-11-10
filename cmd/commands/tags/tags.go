@@ -1,19 +1,22 @@
 package tags
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
+	"github.com/spf13/cobra"
+)
 
-func Command() *cobra.Command {
+func Command(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "tags",
 		Short: "Manage tags",
 	}
 
-	cmd.AddCommand(List())
-	cmd.AddCommand(Get())
-	cmd.AddCommand(Create())
-	cmd.AddCommand(Update())
-	cmd.AddCommand(Delete())
-	cmd.AddCommand(BulkDelete())
+	cmd.AddCommand(List(app))
+	cmd.AddCommand(Get(app))
+	cmd.AddCommand(Create(app))
+	cmd.AddCommand(Update(app))
+	cmd.AddCommand(Delete(app))
+	cmd.AddCommand(BulkDelete(app))
 
 	return cmd
 }

@@ -29,20 +29,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func registerCommands(root *cobra.Command) {
-	root.AddCommand(initcmd.Command())
-	root.AddCommand(links.Command())
-	root.AddCommand(tokens.Command())
-	root.AddCommand(collections.Command())
-	root.AddCommand(migrations.Command())
-	root.AddCommand(tags.Command())
-	root.AddCommand(rss.Command())
-	root.AddCommand(search.Command())
-	root.AddCommand(dashboard.Command())
-	root.AddCommand(highlights.Command())
-	root.AddCommand(archives.Command())
-	root.AddCommand(config.Command())
-	root.AddCommand(favicon.Command())
+// registerCommands adds every command to root. They all share app, which
+// PersistentPreRunE fills in once flags are parsed and before any command runs.
+func registerCommands(root *cobra.Command, app *app.App) {
+	root.AddCommand(initcmd.Command(app))
+	root.AddCommand(links.Command(app))
+	root.AddCommand(tokens.Command(app))
+	root.AddCommand(collections.Command(app))
+	root.AddCommand(migrations.Command(app))
+	root.AddCommand(tags.Command(app))
+	root.AddCommand(rss.Command(app))
+	root.AddCommand(search.Command(app))
+	root.AddCommand(dashboard.Command(app))
+	root.AddCommand(highlights.Command(app))
+	root.AddCommand(archives.Command(app))
+	root.AddCommand(config.Command(app))
+	root.AddCommand(favicon.Command(app))
 
 	root.PersistentFlags().Bool("non-interactive", false, "Never prompt (e.g. for a picker); fail fast instead. "+
 		"On by default when stdin isn't a terminal.")
@@ -54,22 +56,19 @@ func registerCommands(root *cobra.Command) {
 		// failure, not a usage mistake: don't bury it under the help text.
 		cmd.SilenceUsage = true
 
-		a, err := newApp(cmd)
+		built, err := newApp(cmd)
 		if err != nil {
 			return err
 		}
-		ctx := cmd.Context()
-		if ctx == nil {
-			ctx = context.Background()
-		}
-		cmd.SetContext(app.WithApp(ctx, a))
+		// Every command was built holding this pointer; fill in what it points to.
+		*app = *built
 
 		// Until every command reads the App, keep the legacy package
 		// variables in step with it.
-		utils.SetNonInteractive(a.NonInteractive)
-		utils.SetOutputMode(a.Mode)
+		utils.SetNonInteractive(app.NonInteractive)
+		utils.SetOutputMode(app.Mode)
 		if cmd.Annotations[initcmd.SkipAuthAnnotation] == "" {
-			utils.SetVars(a.Token, a.InstanceURL)
+			utils.SetVars(app.Token, app.InstanceURL)
 		}
 
 		return nil
@@ -179,7 +178,7 @@ add --json for machine-readable output, or -q for bare IDs.`,
 		SilenceErrors: true,
 	}
 
-	registerCommands(rootCmd)
+	registerCommands(rootCmd, app.New())
 
 	return rootCmd
 }

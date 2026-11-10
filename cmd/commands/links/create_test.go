@@ -68,7 +68,7 @@ func TestCreateSavesSingleLink(t *testing.T) {
 
 	posts, _ := fakeCreateServer(t, twoCollections, 0)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"https://go.dev", "--name", "Go", "--description", "The Go site",
 		"--collection-id", "7", "--tag", "go", "--tag", "lang"})
 	assert.NoError(cmd.Execute())
@@ -89,7 +89,7 @@ func TestCreateDefaultsToUnorganized(t *testing.T) {
 
 	posts, _ := fakeCreateServer(t, `[{"id":7,"name":"Go"},{"id":3,"name":"Unorganized"}]`, 0)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"https://go.dev"})
 	assert.NoError(cmd.Execute())
 
@@ -102,7 +102,7 @@ func TestCreateUnknownCollectionErrors(t *testing.T) {
 
 	_, count := fakeCreateServer(t, twoCollections, 0)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"https://go.dev", "--collection-id", "9999"})
 	err := cmd.Execute()
 	assert.ErrorIs(err, errCollectionNotFound)
@@ -114,7 +114,7 @@ func TestCreateConflictReportsAlreadyExists(t *testing.T) {
 
 	fakeCreateServer(t, twoCollections, http.StatusConflict)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"https://go.dev"})
 	err := cmd.Execute()
 	assert.ErrorIs(err, errLinkExists)
@@ -125,7 +125,7 @@ func TestCreateRequiresURL(t *testing.T) {
 	assert := require.New(t)
 
 	for _, args := range [][]string{{}, {"https://a.example", "https://b.example"}} {
-		cmd := Create()
+		cmd := Create(nil)
 		cmd.SetArgs(args)
 		cmd.SetOut(io.Discard)
 		cmd.SetErr(io.Discard)
@@ -136,7 +136,7 @@ func TestCreateRequiresURL(t *testing.T) {
 func TestCreateRejectsFileFlag(t *testing.T) {
 	assert := require.New(t)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"--file", "links.json"})
 	cmd.SetOut(io.Discard)
 	cmd.SetErr(io.Discard)

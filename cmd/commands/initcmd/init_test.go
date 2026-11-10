@@ -104,7 +104,7 @@ func TestCommandFailsWithoutInteractiveTerminal(t *testing.T) {
 	utils.SetNonInteractive(true)
 	t.Cleanup(func() { utils.SetNonInteractive(false) })
 
-	cmd := Command()
+	cmd := Command(nil)
 	cmd.SetArgs(nil)
 	require.ErrorContains(t, cmd.Execute(), "interactive terminal")
 }

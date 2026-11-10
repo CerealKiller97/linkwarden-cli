@@ -1,7 +1,6 @@
 package testutils_test
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
@@ -15,28 +14,29 @@ func TestNewAppAppliesOptions(t *testing.T) {
 
 	// Arrange
 	const instanceURL = "http://example.invalid"
+	wantMode := app.OutputJSON
+	opts := []app.Option{app.WithMode(wantMode), app.WithNonInteractive(true)}
 
 	// Act
-	ctx, a := testutils.NewApp(t, instanceURL, app.WithMode(app.OutputJSON), app.WithNonInteractive(true))
+	app, out := testutils.NewApp(instanceURL, opts...)
 
 	// Assert
-	assert.Same(a, app.From(ctx))
-	assert.Equal(testutils.Token, a.Token)
-	assert.Equal(instanceURL, a.InstanceURL)
-	assert.Equal(app.OutputJSON, a.Mode)
-	assert.True(a.NonInteractive)
-	assert.IsType(&bytes.Buffer{}, a.Out)
+	assert.Equal(testutils.Token, app.Token)
+	assert.Equal(instanceURL, app.InstanceURL)
+	assert.Equal(wantMode, app.Mode)
+	assert.True(app.NonInteractive)
+	assert.Same(out, app.Stdout())
 }
 
-func TestNewAppContextReturnsOutputBuffer(t *testing.T) {
+func TestNewAppPrintsToReturnedBuffer(t *testing.T) {
 	t.Parallel()
 	assert := require.New(t)
 
 	// Arrange
-	ctx, out := testutils.NewAppContext(t, "http://example.invalid")
+	app, out := testutils.NewApp("http://example.invalid")
 
 	// Act
-	_, err := app.From(ctx).Stdout().Write([]byte("hello"))
+	_, err := app.Stdout().Write([]byte("hello"))
 
 	// Assert
 	assert.NoError(err)
@@ -48,12 +48,12 @@ func TestWithPrompterMarksPromptsScripted(t *testing.T) {
 	assert := require.New(t)
 
 	// Arrange
-	p := app.TerminalPrompter{}
+	prompter := app.TerminalPrompter{}
 
 	// Act
-	_, a := testutils.NewApp(t, "http://example.invalid", testutils.WithPrompter(p))
+	app, _ := testutils.NewApp("http://example.invalid", testutils.WithPrompter(prompter))
 
 	// Assert
-	assert.Equal(p, a.Prompts())
-	assert.True(a.Scripted)
+	assert.Equal(prompter, app.Prompts())
+	assert.True(app.Scripted)
 }

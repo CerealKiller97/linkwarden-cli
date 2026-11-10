@@ -45,7 +45,7 @@ func TestImportUploadsLinksFromFile(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "links.json")
 	assert.NoError(os.WriteFile(file, []byte(`[{"url":"https://example.com","title":"Example"}]`), 0o644))
 
-	cmd := Import()
+	cmd := Import(nil)
 	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 	assert.NoError(cmd.Execute())
 	assert.Equal(1, createCount)
@@ -57,7 +57,7 @@ func TestImportEmptyFileErrors(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "links.json")
 	assert.NoError(os.WriteFile(file, []byte(`[]`), 0o644))
 
-	cmd := Import()
+	cmd := Import(nil)
 	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 	err := cmd.Execute()
 	assert.ErrorIs(err, errFileEmpty)
@@ -86,7 +86,7 @@ func TestImportUnknownCollectionErrorsWithoutCreatingLinks(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "links.json")
 	assert.NoError(os.WriteFile(file, []byte(`[{"url":"https://example.com","title":"Example"}]`), 0o644))
 
-	cmd := Import()
+	cmd := Import(nil)
 	cmd.SetArgs([]string{"--file", file, "--collection-id", "9999"})
 	err := cmd.Execute()
 	assert.ErrorIs(err, errCollectionNotFound)
@@ -168,7 +168,7 @@ func TestImportSkipsLinksAlreadyInCollection(t *testing.T) {
 		"https://new.example", // repeated in the file
 	)
 
-	cmd := Import()
+	cmd := Import(nil)
 	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 	assert.NoError(cmd.Execute())
 
@@ -182,7 +182,7 @@ func TestImportConflictCountsAsAlreadyExists(t *testing.T) {
 	_, creates, _ := fakeLinkServer(t, nil, 50, "dup.example")
 
 	file := writeLinksFile(t, "https://dup.example", "https://ok.example")
-	cmd := Import()
+	cmd := Import(nil)
 	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 	assert.NoError(cmd.Execute())
 	assert.Equal(int64(1), creates.Load())
@@ -216,7 +216,7 @@ func TestImportFailedLinksReturnError(t *testing.T) {
 	utils.SetVars("test-token", server.URL)
 
 	file := writeLinksFile(t, "https://ok.example", "https://broken.example")
-	cmd := Import()
+	cmd := Import(nil)
 	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 
 	err := cmd.Execute()
@@ -287,7 +287,7 @@ func TestImportStopsWhenInterrupted(t *testing.T) {
 	file := filepath.Join(t.TempDir(), "links.json")
 	assert.NoError(os.WriteFile(file, []byte("["+strings.Join(items, ",")+"]"), 0o644))
 
-	cmd := Import()
+	cmd := Import(nil)
 	cmd.SetArgs([]string{"--file", file, "--collection-id", "1"})
 	err := cmd.ExecuteContext(ctx)
 

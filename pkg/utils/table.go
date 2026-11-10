@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net/url"
@@ -40,20 +39,20 @@ func (t *Table) JSON(v any) *Table {
 // Case headers, ID first when there is one, and cells formatted by FormatCell.
 
 // NewTable starts a list table titled title (plural, e.g. "Links"), written to
-// the output of the App in ctx. Its title shows the row count: "Links (12)".
-func NewTable(ctx context.Context, title string) *Table {
-	return newTable(ctx, tui.Table{Title: title, ShowCount: true})
+// app's output (stdout when app is nil). Its title shows the row count: "Links (12)".
+func NewTable(app *app.App, title string) *Table {
+	return newTable(app, tui.Table{Title: title, ShowCount: true})
 }
 
 // NewSummary starts a table whose rows aren't a list of records, like a
 // key/value listing or a row of totals, so its title has no row count.
-func NewSummary(ctx context.Context, title string) *Table {
-	return newTable(ctx, tui.Table{Title: title})
+func NewSummary(app *app.App, title string) *Table {
+	return newTable(app, tui.Table{Title: title})
 }
 
-func newTable(ctx context.Context, data tui.Table) *Table {
-	a := current(ctx)
-	return &Table{data: data, out: a.Stdout(), app: a}
+func newTable(app *app.App, data tui.Table) *Table {
+	app = orLegacy(app)
+	return &Table{data: data, out: app.Stdout(), app: app}
 }
 
 // Caption sets a dim line shown between the title and the table, for totals
@@ -246,7 +245,7 @@ func (t *Table) writeIDs() {
 // literals (tests) have none and use the legacy settings.
 func (t *Table) currentApp() *app.App {
 	if t.app == nil {
-		return current(context.Background())
+		return orLegacy(nil)
 	}
 
 	return t.app

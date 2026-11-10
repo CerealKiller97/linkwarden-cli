@@ -34,7 +34,7 @@ func isolateInit(t *testing.T, browserErr error) *[]string {
 func runInit(t *testing.T) error {
 	t.Helper()
 
-	cmd := Command()
+	cmd := Command(nil)
 	cmd.SetArgs(nil)
 
 	return cmd.Execute()

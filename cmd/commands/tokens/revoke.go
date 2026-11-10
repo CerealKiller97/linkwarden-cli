@@ -3,12 +3,13 @@ package tokens
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
-func Revoke() *cobra.Command {
+func Revoke(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "revoke",
 		Short: "Revoke a token",
@@ -17,7 +18,9 @@ func Revoke() *cobra.Command {
 
   # Pick the token, and skip the confirmation
   linkwarden tokens revoke --yes`,
-		RunE: executeRevoke,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeRevoke(app, cmd, args)
+		},
 	}
 
 	utils.AddYesFlag(cmd)
@@ -25,7 +28,7 @@ func Revoke() *cobra.Command {
 	return cmd
 }
 
-func executeRevoke(cmd *cobra.Command, _ []string) error {
+func executeRevoke(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	spinner := utils.StartSpinner("Fetching tokens…")
@@ -41,12 +44,12 @@ func executeRevoke(cmd *cobra.Command, _ []string) error {
 	}
 
 	// Revoke by index rather than by name: two tokens can share a name.
-	idx, result, err := utils.Select(cmd.Context(), "Select token to revoke:", tokenNames)
+	idx, result, err := utils.Select(app, "Select token to revoke:", tokenNames)
 	if err != nil {
 		return err
 	}
 
-	ok, err := utils.Confirm(cmd, fmt.Sprintf("Revoke token %q? Anything using it will stop working.", result))
+	ok, err := utils.Confirm(app, cmd, fmt.Sprintf("Revoke token %q? Anything using it will stop working.", result))
 	if err != nil {
 		return err
 	}

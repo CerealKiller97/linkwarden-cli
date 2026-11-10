@@ -49,7 +49,7 @@ func TestConfirmAsksAndHonorsTheAnswer(t *testing.T) {
 			assert := require.New(t)
 			asked := useSelectAnswer(t, answer, nil)
 
-			ok, err := Confirm(newConfirmCommand(t), "Delete link 3?")
+			ok, err := Confirm(nil, newConfirmCommand(t), "Delete link 3?")
 
 			assert.NoError(err)
 			assert.Equal(want, ok)
@@ -62,7 +62,7 @@ func TestConfirmAbortedPromptIsAnError(t *testing.T) {
 	assert := require.New(t)
 	useSelectAnswer(t, "", tui.ErrAborted)
 
-	ok, err := Confirm(newConfirmCommand(t), "Delete?")
+	ok, err := Confirm(nil, newConfirmCommand(t), "Delete?")
 
 	assert.ErrorIs(err, tui.ErrAborted, "Esc must not read as Yes or a silent No")
 	assert.False(ok)
@@ -73,7 +73,7 @@ func TestConfirmWithQuestionErrorAsksNothing(t *testing.T) {
 	asked := useSelectAnswer(t, "Yes", nil)
 
 	boom := errors.New("fetching collection")
-	ok, err := ConfirmWith(newConfirmCommand(t), func() (string, error) { return "", boom })
+	ok, err := ConfirmWith(nil, newConfirmCommand(t), func() (string, error) { return "", boom })
 
 	assert.ErrorIs(err, boom)
 	assert.False(ok)
@@ -87,11 +87,11 @@ func TestNonInteractiveFlagWinsOverAvailablePrompter(t *testing.T) {
 	SetNonInteractive(true)
 	t.Cleanup(func() { SetNonInteractive(false) })
 
-	ok, err := Confirm(newConfirmCommand(t), "Delete?")
+	ok, err := Confirm(nil, newConfirmCommand(t), "Delete?")
 	assert.ErrorIs(err, ErrConfirmationRequired)
 	assert.False(ok)
 
-	_, err = Password(t.Context(), "Access token:", nil)
+	_, err = Password(nil, "Access token:", nil)
 	assert.ErrorContains(err, "interactive terminal")
 	assert.Empty(*asked)
 }

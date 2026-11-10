@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"context"
-
 	"bytes"
 	"testing"
 
@@ -66,8 +64,7 @@ func TestPrintFileInfoByMode(t *testing.T) {
 }
 
 func newModeTable(out *bytes.Buffer, mode OutputMode) *Table {
-	ctx := app.WithApp(context.Background(), app.New(app.WithOutput(out), app.WithMode(mode)))
-	tbl := NewTable(ctx, "Example")
+	tbl := NewTable(app.New(app.WithOutput(out), app.WithMode(mode)), "Example")
 	tbl.Header("ID", "Name")
 	tbl.Row(1, "first")
 	tbl.Row(2, nil)
@@ -109,8 +106,7 @@ func TestTableQuietWithoutIDColumnPrintsNothing(t *testing.T) {
 	assert := require.New(t)
 
 	var out bytes.Buffer
-	ctx := app.WithApp(t.Context(), app.New(app.WithOutput(&out), app.WithMode(OutputIDs)))
-	tbl := NewSummary(ctx, "Totals")
+	tbl := NewSummary(app.New(app.WithOutput(&out), app.WithMode(OutputIDs)), "Totals")
 	tbl.Header("Total", "Failed")
 	tbl.Row(3, 0)
 	tbl.Render()

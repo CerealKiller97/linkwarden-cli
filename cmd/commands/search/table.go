@@ -1,12 +1,11 @@
 package search
 
 import (
-	"context"
-
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/tables"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
-func renderSearchResultsTable(ctx context.Context, links []linkwarden.Link) {
-	tables.Links(ctx, "Search Results", links).Render()
+func renderSearchResultsTable(app *app.App, links []linkwarden.Link) {
+	tables.Links(app, "Search Results", links).Render()
 }

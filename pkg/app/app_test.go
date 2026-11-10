@@ -2,7 +2,6 @@ package app_test
 
 import (
 	"bytes"
-	"context"
 	"os"
 	"testing"
 
@@ -10,72 +9,52 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestFromReturnsStoredApp(t *testing.T) {
-	t.Parallel()
-	assert := require.New(t)
-
-	// Arrange
-	a := app.New(app.WithCredentials("t", "https://links.example.com"))
-	ctx := app.WithApp(t.Context(), a)
-
-	// Act
-	got := app.From(ctx)
-
-	// Assert
-	assert.Same(a, got)
-}
-
-func TestFromPanicsWithoutApp(t *testing.T) {
-	t.Parallel()
-	assert := require.New(t)
-
-	// Arrange
-	ctx := context.Background()
-
-	// Act & Assert
-	assert.Panics(func() { app.From(ctx) })
-}
-
 func TestNewAppliesOptions(t *testing.T) {
 	t.Parallel()
 	assert := require.New(t)
 
 	// Arrange
 	var out bytes.Buffer
-	p := app.TerminalPrompter{}
-
-	// Act
-	a := app.New(
+	prompter := app.TerminalPrompter{}
+	wantMode := app.OutputIDs
+	opts := []app.Option{
 		app.WithCredentials("tok", "https://links.example.com"),
-		app.WithMode(app.OutputIDs),
+		app.WithMode(wantMode),
 		app.WithNonInteractive(true),
 		app.WithOutput(&out),
-		app.WithPrompter(p),
-	)
+		app.WithPrompter(prompter),
+	}
+
+	// Act
+	app := app.New(opts...)
 
 	// Assert
-	assert.Equal("tok", a.Token)
-	assert.Equal("https://links.example.com", a.InstanceURL)
-	assert.Equal(app.OutputIDs, a.Mode)
-	assert.True(a.NonInteractive)
-	assert.Same(&out, a.Stdout())
-	assert.Equal(p, a.Prompts())
-	assert.False(a.Scripted)
+	assert.Equal("tok", app.Token)
+	assert.Equal("https://links.example.com", app.InstanceURL)
+	assert.Equal(wantMode, app.Mode)
+	assert.True(app.NonInteractive)
+	assert.Same(&out, app.Stdout())
+	assert.Equal(prompter, app.Prompts())
+	assert.False(app.Scripted)
 }
 
 func TestNewDefaults(t *testing.T) {
 	t.Parallel()
 	assert := require.New(t)
 
+	// Arrange
+	wantMode := app.OutputTable
+	wantPrompter := app.TerminalPrompter{}
+
 	// Act
-	a := app.New()
+	app := app.New()
 
 	// Assert
-	assert.Equal(os.Stdout, a.Stdout())
-	assert.IsType(app.TerminalPrompter{}, a.Prompts())
-	assert.Equal(app.OutputTable, a.Mode)
-	assert.False(a.NonInteractive)
-	assert.Empty(a.Token)
+	assert.Equal(os.Stdout, app.Stdout())
+	assert.IsType(wantPrompter, app.Prompts())
+	assert.Equal(wantMode, app.Mode)
+	assert.False(app.NonInteractive)
+	assert.Empty(app.Token)
 }
 
 func TestZeroAppDefaults(t *testing.T) {
@@ -83,13 +62,15 @@ func TestZeroAppDefaults(t *testing.T) {
 	assert := require.New(t)
 
 	// Arrange
-	var a app.App
+	wantMode := app.OutputTable
+	wantPrompter := app.TerminalPrompter{}
+	var app app.App
 
 	// Act
-	out, prompter := a.Stdout(), a.Prompts()
+	out, prompter := app.Stdout(), app.Prompts()
 
 	// Assert
 	assert.Equal(os.Stdout, out)
-	assert.IsType(app.TerminalPrompter{}, prompter)
-	assert.Equal(app.OutputTable, a.Mode)
+	assert.IsType(wantPrompter, prompter)
+	assert.Equal(wantMode, app.Mode)
 }

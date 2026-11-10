@@ -1,14 +1,13 @@
 package config
 
 import (
-	"context"
-
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
-func renderConfigTable(ctx context.Context, cfg *linkwarden.PublicConfig) {
-	t := utils.NewSummary(ctx, "Instance Configuration")
+func renderConfigTable(app *app.App, cfg *linkwarden.PublicConfig) {
+	t := utils.NewSummary(app, "Instance Configuration")
 	t.Header("Setting", "Value")
 
 	t.Row("DISABLE_REGISTRATION", cfg.DisableRegistration)

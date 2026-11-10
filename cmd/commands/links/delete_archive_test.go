@@ -26,7 +26,7 @@ func TestDeleteArchiveParsesIDs(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := DeleteArchive()
+	cmd := DeleteArchive(nil)
 	cmd.SetArgs([]string{"--ids", "1,2", "--ids", "3", "--yes"})
 	assert.NoError(cmd.Execute())
 	assert.Equal([]int{1, 2, 3}, gotBody.LinkIDs)
@@ -37,7 +37,7 @@ func TestDeleteArchiveInvalidIDsErrors(t *testing.T) {
 
 	utils.SetVars("test-token", "http://unused.invalid")
 
-	cmd := DeleteArchive()
+	cmd := DeleteArchive(nil)
 	cmd.SetArgs([]string{"--ids", "not-a-number", "--yes"})
 	assert.Error(cmd.Execute())
 }
@@ -53,7 +53,7 @@ func TestDeleteArchiveRequiresYesWithoutTerminal(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := DeleteArchive()
+	cmd := DeleteArchive(nil)
 	cmd.SetArgs([]string{"--ids", "1,2"})
 	err := cmd.Execute()
 	assert.ErrorIs(err, utils.ErrConfirmationRequired)

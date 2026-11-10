@@ -25,7 +25,7 @@ func TestBulkUpdateBuildsRequestFromFlags(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := BulkUpdate()
+	cmd := BulkUpdate(nil)
 	cmd.SetArgs([]string{
 		"--ids", "1,2",
 		"--collection-id", "7",
@@ -46,7 +46,7 @@ func TestBulkUpdateInvalidIDsErrors(t *testing.T) {
 
 	utils.SetVars("test-token", "http://unused.invalid")
 
-	cmd := BulkUpdate()
+	cmd := BulkUpdate(nil)
 	cmd.SetArgs([]string{"--ids", "not-a-number"})
 	assert.Error(cmd.Execute())
 }

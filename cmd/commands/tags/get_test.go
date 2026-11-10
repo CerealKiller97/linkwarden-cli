@@ -21,7 +21,7 @@ func TestGetUsesIDFlag(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Get()
+	cmd := Get(nil)
 	cmd.SetArgs([]string{"--id", "1"})
 	assert.NoError(cmd.Execute())
 }
@@ -31,7 +31,7 @@ func TestGetInvalidIDErrors(t *testing.T) {
 
 	utils.SetVars("test-token", "http://unused.invalid")
 
-	cmd := Get()
+	cmd := Get(nil)
 	cmd.SetArgs([]string{"--id", "not-a-number"})
 	assert.Error(cmd.Execute())
 }

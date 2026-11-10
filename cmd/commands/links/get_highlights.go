@@ -4,11 +4,12 @@ import (
 	"fmt"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-func GetHighlights() *cobra.Command {
+func GetHighlights(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get-highlights",
 		Short: "Get highlights for a link",
@@ -17,7 +18,9 @@ func GetHighlights() *cobra.Command {
 
   # Pick the link from a list, and print JSON
   linkwarden links get-highlights --json`,
-		RunE: executeGetHighlights,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeGetHighlights(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("id", 0, "Link ID.")
@@ -25,11 +28,11 @@ func GetHighlights() *cobra.Command {
 	return cmd
 }
 
-func executeGetHighlights(cmd *cobra.Command, _ []string) error {
+func executeGetHighlights(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveIDPaged(
-		cmd,
+		app, cmd,
 		"id",
 		"Select Link:",
 		pickers.Links(cmd.Context(), client),
@@ -45,7 +48,7 @@ func executeGetHighlights(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get highlights: %w", err)
 	}
 
-	renderHighlightsTable(cmd.Context(), highlights)
+	renderHighlightsTable(app, highlights)
 
 	return nil
 }

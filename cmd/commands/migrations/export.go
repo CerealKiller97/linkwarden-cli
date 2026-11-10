@@ -6,12 +6,13 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
-func Export() *cobra.Command {
+func Export(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "export",
 		Short: "Export Linkwarden data to a JSON file",
@@ -20,7 +21,9 @@ func Export() *cobra.Command {
 
   # Dated backup, e.g. from cron
   linkwarden --non-interactive migrations export --output ~/backups/linkwarden-$(date +%F).json`,
-		RunE: executeExport,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeExport(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().String("output", "", "Path to write the export to. Defaults to ./linkwarden-export-<timestamp>.json.")
@@ -28,7 +31,7 @@ func Export() *cobra.Command {
 	return cmd
 }
 
-func executeExport(cmd *cobra.Command, _ []string) error {
+func executeExport(app *app.App, cmd *cobra.Command, _ []string) error {
 	output, err := cmd.Flags().GetString("output")
 	if err != nil {
 		return err

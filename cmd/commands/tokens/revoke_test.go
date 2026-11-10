@@ -21,7 +21,7 @@ func TestRevokeFetchesTokensBeforePrompting(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Revoke()
+	cmd := Revoke(nil)
 	err := cmd.Execute()
 	assert.True(listCalled)
 	// The picker needs an interactive terminal; in a non-interactive test run it
@@ -40,14 +40,14 @@ func TestRevokePropagatesListError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Revoke()
+	cmd := Revoke(nil)
 	assert.Error(cmd.Execute())
 }
 
 func TestRevokeHasYesFlag(t *testing.T) {
 	assert := require.New(t)
 
-	flag := Revoke().Flags().Lookup("yes")
+	flag := Revoke(nil).Flags().Lookup("yes")
 	assert.NotNil(flag)
 	assert.Equal("y", flag.Shorthand)
 }

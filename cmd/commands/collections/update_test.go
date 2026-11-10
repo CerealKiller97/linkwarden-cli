@@ -36,7 +36,7 @@ func TestUpdateSendsFlagsAsRequestBody(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Update()
+	cmd := Update(nil)
 	cmd.SetArgs([]string{"--id", "3", "--name", "Renamed", "--public"})
 	assert.NoError(cmd.Execute())
 	assert.Equal("Renamed", gotBody["name"])
@@ -51,7 +51,7 @@ func TestUpdatePublicFalseMakesPrivate(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Update()
+	cmd := Update(nil)
 	cmd.SetArgs([]string{"--id", "3", "--public=false"})
 	assert.NoError(cmd.Execute())
 	assert.Equal("Old", gotBody["name"])
@@ -66,7 +66,7 @@ func TestUpdateOmittedPublicKeepsCurrent(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Update()
+	cmd := Update(nil)
 	cmd.SetArgs([]string{"--id", "3", "--name", "Renamed"})
 	assert.NoError(cmd.Execute())
 	assert.Equal(true, gotBody["isPublic"])
@@ -82,7 +82,7 @@ func TestUpdatePropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Update()
+	cmd := Update(nil)
 	cmd.SetArgs([]string{"--id", "3"})
 	assert.Error(cmd.Execute())
 }

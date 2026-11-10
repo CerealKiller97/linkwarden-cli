@@ -32,7 +32,7 @@ func TestUploadStandaloneSendsFileAndURL(t *testing.T) {
 
 	filePath := writeTempFile(t, "page.html", "<html></html>")
 
-	cmd := UploadStandalone()
+	cmd := UploadStandalone(nil)
 	cmd.SetArgs([]string{"--file", filePath, "--url", "https://example.com/page", "--format", "html", "--preview"})
 	assert.NoError(cmd.Execute())
 	assert.Equal("https://example.com/page", gotURLField)
@@ -50,7 +50,7 @@ func TestUploadStandalonePropagatesAPIError(t *testing.T) {
 
 	filePath := writeTempFile(t, "page.html", "<html></html>")
 
-	cmd := UploadStandalone()
+	cmd := UploadStandalone(nil)
 	cmd.SetArgs([]string{"--file", filePath, "--url", "https://example.com/page", "--format", "html"})
 	assert.Error(cmd.Execute())
 }

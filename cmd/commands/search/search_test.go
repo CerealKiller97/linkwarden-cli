@@ -23,7 +23,7 @@ func TestExecuteUsesQueryFlags(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Command()
+	cmd := Command(nil)
 	cmd.SetArgs([]string{"--query", "go", "--sort", "name-asc", "--cursor", "3"})
 	assert.NoError(cmd.Execute())
 	assert.Equal("cursor=3&searchQueryString=go&sort=2", gotQuery)
@@ -41,7 +41,7 @@ func TestExecuteOmitsUnsetSort(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Command()
+	cmd := Command(nil)
 	cmd.SetArgs([]string{})
 	assert.NoError(cmd.Execute())
 	assert.Equal("", gotQuery)
@@ -57,6 +57,6 @@ func TestExecutePropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Command()
+	cmd := Command(nil)
 	assert.Error(cmd.Execute())
 }

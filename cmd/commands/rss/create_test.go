@@ -25,7 +25,7 @@ func TestCreateSendsRequestedFields(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"--name", "News", "--url", "https://news.example.com/rss", "--collection-id", "7"})
 	assert.NoError(cmd.Execute())
 	assert.Equal("News", gotBody.Name)
@@ -42,7 +42,7 @@ func TestCreatePropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"--name", "News", "--url", "https://news.example.com/rss"})
 	assert.Error(cmd.Execute())
 }

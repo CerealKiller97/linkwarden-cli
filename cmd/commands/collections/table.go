@@ -1,16 +1,15 @@
 package collections
 
 import (
-	"context"
-
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 )
 
 // renderCollectionsTable prints collections; --json prints jsonValue, the whole list or the one
 // record a get or create returned.
-func renderCollectionsTable(ctx context.Context, collections []linkwarden.Collection, jsonValue any) {
-	t := utils.NewTable(ctx, "Collections")
+func renderCollectionsTable(app *app.App, collections []linkwarden.Collection, jsonValue any) {
+	t := utils.NewTable(app, "Collections")
 	t.Header("ID", "Name", "Description", "Color")
 
 	for _, c := range collections {

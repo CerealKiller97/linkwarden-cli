@@ -21,7 +21,7 @@ func TestGetRendersLinks(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Get()
+	cmd := Get(nil)
 	assert.NoError(cmd.Execute())
 }
 
@@ -35,6 +35,6 @@ func TestGetPropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Get()
+	cmd := Get(nil)
 	assert.Error(cmd.Execute())
 }

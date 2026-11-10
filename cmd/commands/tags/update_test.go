@@ -21,7 +21,7 @@ func TestUpdateUsesIDAndNameFlags(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Update()
+	cmd := Update(nil)
 	cmd.SetArgs([]string{"--id", "3", "--name", "Renamed"})
 	assert.NoError(cmd.Execute())
 }
@@ -36,7 +36,7 @@ func TestUpdatePropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Update()
+	cmd := Update(nil)
 	cmd.SetArgs([]string{"--id", "3", "--name", "Renamed"})
 	assert.Error(cmd.Execute())
 }

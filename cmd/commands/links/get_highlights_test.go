@@ -21,7 +21,7 @@ func TestGetHighlightsUsesIDFlag(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := GetHighlights()
+	cmd := GetHighlights(nil)
 	cmd.SetArgs([]string{"--id", "6"})
 	assert.NoError(cmd.Execute())
 }
@@ -36,7 +36,7 @@ func TestGetHighlightsPropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := GetHighlights()
+	cmd := GetHighlights(nil)
 	cmd.SetArgs([]string{"--id", "6"})
 	assert.Error(cmd.Execute())
 }

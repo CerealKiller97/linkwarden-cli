@@ -1,13 +1,11 @@
-// Package testutils holds helpers for tests. NewAppContext and NewApp build the *app.App
-// a test runs a command with, so each test has its own credentials, output
+// Package testutils holds helpers for tests. NewApp builds the *app.App a
+// test runs a command with, so each test has its own credentials, output
 // mode, output buffer and prompter instead of sharing package variables, and
 // can run in parallel.
 package testutils
 
 import (
 	"bytes"
-	"context"
-	"testing"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 )
@@ -18,31 +16,18 @@ const Token = "test-token"
 // WithPrompter answers prompts with p (such as a prompttest.Script), and
 // treats stdin as an interactive terminal (--non-interactive still wins).
 func WithPrompter(p app.Prompter) app.Option {
-	return func(a *app.App) {
-		a.Prompter = p
-		a.Scripted = true
+	return func(app *app.App) {
+		app.Prompter = p
+		app.Scripted = true
 	}
 }
 
-// NewAppContext returns a context carrying an App that talks to instanceURL with Token
-// and prints results to the returned buffer. opts (app.WithMode,
-// app.WithNonInteractive, WithPrompter, ...) apply on top. Run the command with
-// cmd.ExecuteContext(ctx).
-func NewAppContext(t testing.TB, instanceURL string, opts ...app.Option) (context.Context, *bytes.Buffer) {
-	t.Helper()
+// NewApp returns an App that talks to instanceURL with Token and prints
+// results to the returned buffer. opts (app.WithMode, app.WithNonInteractive,
+// WithPrompter, ...) apply on top. Pass the App to the command under test.
+func NewApp(instanceURL string, opts ...app.Option) (*app.App, *bytes.Buffer) {
+	out := &bytes.Buffer{}
+	base := []app.Option{app.WithCredentials(Token, instanceURL), app.WithOutput(out)}
 
-	ctx, a := NewApp(t, instanceURL, opts...)
-
-	return ctx, a.Out.(*bytes.Buffer)
-}
-
-// NewApp is NewAppContext for tests that need the App itself, for example to read its
-// InstanceURL.
-func NewApp(t testing.TB, instanceURL string, opts ...app.Option) (context.Context, *app.App) {
-	t.Helper()
-
-	base := []app.Option{app.WithCredentials(Token, instanceURL), app.WithOutput(&bytes.Buffer{})}
-	a := app.New(append(base, opts...)...)
-
-	return app.WithApp(t.Context(), a), a
+	return app.New(append(base, opts...)...), out
 }

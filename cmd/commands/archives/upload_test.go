@@ -42,7 +42,7 @@ func TestUploadSendsFile(t *testing.T) {
 
 	filePath := writeTempFile(t, "screenshot.png", "fake-png-bytes")
 
-	cmd := Upload()
+	cmd := Upload(nil)
 	cmd.SetArgs([]string{"--link-id", "2", "--file", filePath, "--format", "png"})
 	assert.NoError(cmd.Execute())
 }
@@ -52,7 +52,7 @@ func TestUploadMissingFileErrors(t *testing.T) {
 
 	utils.SetVars("test-token", "http://unused.invalid")
 
-	cmd := Upload()
+	cmd := Upload(nil)
 	cmd.SetArgs([]string{"--link-id", "2", "--file", "/nonexistent/file.png", "--format", "png"})
 	assert.Error(cmd.Execute())
 }
@@ -60,7 +60,7 @@ func TestUploadMissingFileErrors(t *testing.T) {
 func TestUploadRejectsReadableFormat(t *testing.T) {
 	utils.SetVars("test-token", "http://unused.invalid")
 
-	cmd := Upload()
+	cmd := Upload(nil)
 	cmd.SetArgs([]string{"--link-id", "2", "--file", "page.json", "--format", "readable"})
 	require.ErrorContains(t, cmd.Execute(), "must be one of png|jpeg|pdf|html")
 }

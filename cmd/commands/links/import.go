@@ -9,6 +9,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
@@ -23,7 +24,7 @@ var (
 
 const defaultConcurrency = 4
 
-func Import() *cobra.Command {
+func Import(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import links from a JSON file",
@@ -49,7 +50,9 @@ Without --collection-id, a picker asks for the target collection.`,
 
   # Create 8 links at a time instead of 4
   linkwarden links import --file reading-list.json --collection-id 3 --concurrency 8`,
-		RunE: executeImport,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeImport(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().String("file", "", "JSON file of links to import.")
@@ -73,7 +76,7 @@ type failure struct {
 	item item
 }
 
-func executeImport(cmd *cobra.Command, _ []string) error {
+func executeImport(app *app.App, cmd *cobra.Command, _ []string) error {
 	concurrency, err := cmd.Flags().GetInt("concurrency")
 	if err != nil {
 		return err
@@ -117,7 +120,7 @@ func executeImport(cmd *cobra.Command, _ []string) error {
 	}
 
 	collectionID, err := utils.ResolveID(
-		cmd,
+		app, cmd,
 		"collection-id",
 		"Select Collection where you want to upload links to:",
 		func() ([]utils.PickerItem, error) { return items, nil },
@@ -217,7 +220,7 @@ func executeImport(cmd *cobra.Command, _ []string) error {
 			Msg("Failed to create link")
 	}
 
-	displayResults(ctx, results{
+	displayResults(app, results{
 		total:         total,
 		success:       int(success.Load()),
 		alreadyExists: int(alreadyExists.Load()),
@@ -302,8 +305,8 @@ const (
 	colFailed
 )
 
-func displayResults(ctx context.Context, r results) {
-	t := utils.NewSummary(ctx, "Import Results")
+func displayResults(app *app.App, r results) {
+	t := utils.NewSummary(app, "Import Results")
 	t.Header("Total", "Success", "Already exists", "Failed")
 	t.Row(r.total, r.success, r.alreadyExists, r.failed)
 	t.JSON(r.report())

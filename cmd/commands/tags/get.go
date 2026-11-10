@@ -3,12 +3,13 @@ package tags
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func Get() *cobra.Command {
+func Get(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get a tag by ID",
@@ -17,7 +18,9 @@ func Get() *cobra.Command {
 
   # Get tag 14
   linkwarden tags get --id 14`,
-		RunE: executeGet,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeGet(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("id", 0, "Tag ID.")
@@ -25,11 +28,11 @@ func Get() *cobra.Command {
 	return cmd
 }
 
-func executeGet(cmd *cobra.Command, _ []string) error {
+func executeGet(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveID(
-		cmd,
+		app, cmd,
 		"id",
 		"Select Tag:",
 		tagsPickerFetch(cmd.Context(), client),
@@ -45,7 +48,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get tag: %w", err)
 	}
 
-	renderTagsTable(cmd.Context(), []linkwarden.TagInfo{*tag}, tag)
+	renderTagsTable(app, []linkwarden.TagInfo{*tag}, tag)
 
 	return nil
 }

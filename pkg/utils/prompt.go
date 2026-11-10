@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"sync"
@@ -47,7 +46,7 @@ func selectOptions(items []PickerItem) []tui.SelectOption {
 // ResolveIDPaged is ResolveID for long lists the API returns a page at a
 // time: the picker shows the first page and fetches the next ones as the user
 // pages or filters past what's loaded.
-func ResolveIDPaged(cmd *cobra.Command, flag, label string, fetch PageFetch) (int, error) {
+func ResolveIDPaged(app *app.App, cmd *cobra.Command, flag, label string, fetch PageFetch) (int, error) {
 	flagHint := "--" + flag
 
 	if cmd.Flags().Changed(flag) {
@@ -63,7 +62,7 @@ func ResolveIDPaged(cmd *cobra.Command, flag, label string, fetch PageFetch) (in
 		return id, nil
 	}
 
-	if !isInteractive(current(cmd.Context())) {
+	if !isInteractive(orLegacy(app)) {
 		return 0, fmt.Errorf("no %s given and no interactive terminal available; pass %s explicitly for non-interactive use", flagHint, flagHint)
 	}
 
@@ -131,13 +130,13 @@ func (p *pickerPages) value(idx int) int {
 // Select shows an interactive picker over options and returns the chosen index
 // and option. Unlike ResolveID there's no flag to fall back on, so without an
 // interactive terminal it fails fast instead of waiting on a prompt.
-func Select(ctx context.Context, label string, options []string) (int, string, error) {
-	a := current(ctx)
-	if !isInteractive(a) {
+func Select(app *app.App, label string, options []string) (int, string, error) {
+	app = orLegacy(app)
+	if !isInteractive(app) {
 		return 0, "", errNoTerminal(label)
 	}
 
-	idx, err := a.Prompts().Select(label, options)
+	idx, err := app.Prompts().Select(label, options)
 	if err != nil {
 		return 0, "", err
 	}
@@ -147,13 +146,13 @@ func Select(ctx context.Context, label string, options []string) (int, string, e
 
 // Input asks for a line of text, re-prompting until validate (if non-nil)
 // passes. Without an interactive terminal it fails fast.
-func Input(ctx context.Context, label string, validate func(string) error) (string, error) {
-	a := current(ctx)
-	if !isInteractive(a) {
+func Input(app *app.App, label string, validate func(string) error) (string, error) {
+	app = orLegacy(app)
+	if !isInteractive(app) {
 		return "", errNoTerminal(label)
 	}
 
-	return a.Prompts().Input(label, validate)
+	return app.Prompts().Input(label, validate)
 }
 
 func errNoTerminal(label string) error {
@@ -165,15 +164,15 @@ func errNoTerminal(label string) error {
 // to list the available items and shows a picker for label. If stdin isn't a
 // terminal (a script, CI, piped input, ...), it fails fast with an actionable error
 // naming --flag instead of hanging on a prompt nobody can answer.
-func ResolveID(cmd *cobra.Command, flag, label string, fetch func() ([]PickerItem, error)) (int, error) {
-	return ResolveIDPaged(cmd, flag, label, func(int) ([]PickerItem, int, error) {
+func ResolveID(app *app.App, cmd *cobra.Command, flag, label string, fetch func() ([]PickerItem, error)) (int, error) {
+	return ResolveIDPaged(app, cmd, flag, label, func(int) ([]PickerItem, int, error) {
 		items, err := fetch()
 		return items, 0, err
 	})
 }
 
-func isInteractive(a *app.App) bool {
-	return isInteractiveFor(a.NonInteractive, a.Scripted || isatty.IsTerminal(os.Stdin.Fd()))
+func isInteractive(app *app.App) bool {
+	return isInteractiveFor(app.NonInteractive, app.Scripted || isatty.IsTerminal(os.Stdin.Fd()))
 }
 
 // isInteractiveFor is the pure decision behind isInteractive: the
@@ -189,22 +188,22 @@ func isInteractiveFor(forcedNonInteractive, isTerminal bool) bool {
 
 // InputDefault is Input with def pre-filled as a placeholder: pressing Enter on
 // an empty field accepts def. Without an interactive terminal it fails fast.
-func InputDefault(ctx context.Context, label, def string, validate func(string) error) (string, error) {
-	a := current(ctx)
-	if !isInteractive(a) {
+func InputDefault(app *app.App, label, def string, validate func(string) error) (string, error) {
+	app = orLegacy(app)
+	if !isInteractive(app) {
 		return "", errNoTerminal(label)
 	}
 
-	return a.Prompts().InputDefault(label, def, validate)
+	return app.Prompts().InputDefault(label, def, validate)
 }
 
 // Password is Input with the typed characters masked. Without an interactive
 // terminal it fails fast.
-func Password(ctx context.Context, label string, validate func(string) error) (string, error) {
-	a := current(ctx)
-	if !isInteractive(a) {
+func Password(app *app.App, label string, validate func(string) error) (string, error) {
+	app = orLegacy(app)
+	if !isInteractive(app) {
 		return "", errNoTerminal(label)
 	}
 
-	return a.Prompts().Password(label, validate)
+	return app.Prompts().Password(label, validate)
 }

@@ -3,13 +3,14 @@ package collections
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
-func Delete() *cobra.Command {
+func Delete(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a collection",
@@ -18,7 +19,9 @@ func Delete() *cobra.Command {
 
   # Delete collection 7 without asking (scripts, cron)
   linkwarden collections delete --id 7 --yes`,
-		RunE: executeDelete,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeDelete(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("id", 0, "Collection ID.")
@@ -27,11 +30,11 @@ func Delete() *cobra.Command {
 	return cmd
 }
 
-func executeDelete(cmd *cobra.Command, _ []string) error {
+func executeDelete(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveID(
-		cmd,
+		app, cmd,
 		"id",
 		"Select Collection to delete:",
 		collectionsPickerFetch(cmd.Context(), client),
@@ -42,7 +45,7 @@ func executeDelete(cmd *cobra.Command, _ []string) error {
 
 	// Deleting a collection also deletes every link in it, so name both. The
 	// lookup only happens when someone is actually asked.
-	ok, err := utils.ConfirmWith(cmd, func() (string, error) {
+	ok, err := utils.ConfirmWith(app, cmd, func() (string, error) {
 		spinner := utils.StartSpinner("Fetching collection…")
 		collection, err := client.Collections.Get(cmd.Context(), id)
 		spinner.Stop()

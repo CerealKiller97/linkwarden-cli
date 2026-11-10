@@ -3,12 +3,13 @@ package collections
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func Get() *cobra.Command {
+func Get(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get a collection by ID",
@@ -20,7 +21,9 @@ func Get() *cobra.Command {
 
   # Print only its name
   linkwarden collections get --id 7 --json | jq -r .name`,
-		RunE: executeGet,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeGet(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("id", 0, "Collection ID.")
@@ -28,11 +31,11 @@ func Get() *cobra.Command {
 	return cmd
 }
 
-func executeGet(cmd *cobra.Command, _ []string) error {
+func executeGet(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveID(
-		cmd,
+		app, cmd,
 		"id",
 		"Select Collection:",
 		collectionsPickerFetch(cmd.Context(), client),
@@ -48,7 +51,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("get collection: %w", err)
 	}
 
-	renderCollectionsTable(cmd.Context(), []linkwarden.Collection{*collection}, collection)
+	renderCollectionsTable(app, []linkwarden.Collection{*collection}, collection)
 
 	return nil
 }

@@ -22,7 +22,7 @@ func TestResolveIDUsesFlagValueWithoutFetching(t *testing.T) {
 	assert := require.New(t)
 
 	called := false
-	id, err := ResolveID(idCmd(t, "--id", "42"), "id", "Pick", func() ([]PickerItem, error) {
+	id, err := ResolveID(nil, idCmd(t, "--id", "42"), "id", "Pick", func() ([]PickerItem, error) {
 		called = true
 
 		return nil, nil
@@ -46,7 +46,7 @@ func TestResolveIDRejectsNonPositiveFlagValue(t *testing.T) {
 			assert := require.New(t)
 
 			called := false
-			_, err := ResolveID(idCmd(t, "--id="+value), "id", "Pick", func() ([]PickerItem, error) {
+			_, err := ResolveID(nil, idCmd(t, "--id="+value), "id", "Pick", func() ([]PickerItem, error) {
 				called = true
 
 				return nil, nil
@@ -68,7 +68,7 @@ func TestResolveIDNonInteractiveReturnsErrorWithoutFetching(t *testing.T) {
 	assert := require.New(t)
 
 	called := false
-	_, err := ResolveID(idCmd(t), "id", "Pick", func() ([]PickerItem, error) {
+	_, err := ResolveID(nil, idCmd(t), "id", "Pick", func() ([]PickerItem, error) {
 		called = true
 
 		return []PickerItem{{Label: "a", Value: 1}}, nil
@@ -98,7 +98,7 @@ func TestResolveIDNonInteractiveOverrideReturnsErrorWithoutFetching(t *testing.T
 	t.Cleanup(func() { SetNonInteractive(false) })
 
 	called := false
-	_, err := ResolveID(idCmd(t), "id", "Pick", func() ([]PickerItem, error) {
+	_, err := ResolveID(nil, idCmd(t), "id", "Pick", func() ([]PickerItem, error) {
 		called = true
 
 		return []PickerItem{{Label: "a", Value: 1}}, nil

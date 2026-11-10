@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
@@ -16,7 +17,7 @@ var errLinkExists = errors.New("link already exists")
 // none is chosen.
 const unorganizedCollectionName = "Unorganized"
 
-func Create() *cobra.Command {
+func Create(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create <url>",
 		Short: "Save a link",
@@ -35,7 +36,9 @@ To save many links at once from a JSON file, use "links import".`,
   # Add tags
   linkwarden links create https://k8spatterns.io --tag kubernetes --tag books`,
 		Args: createArgs,
-		RunE: executeCreate,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeCreate(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().String("name", "", "Link name. Defaults to the page's title.")
@@ -55,7 +58,7 @@ func createArgs(_ *cobra.Command, args []string) error {
 	return nil
 }
 
-func executeCreate(cmd *cobra.Command, args []string) error {
+func executeCreate(app *app.App, cmd *cobra.Command, args []string) error {
 	tagNames, err := cmd.Flags().GetStringSlice("tag")
 	if err != nil {
 		return err
@@ -75,7 +78,7 @@ func executeCreate(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("get collections: %w", err)
 	}
 
-	collection, err := resolveCreateCollection(cmd, collections)
+	collection, err := resolveCreateCollection(app, cmd, collections)
 	if err != nil {
 		return err
 	}
@@ -101,14 +104,14 @@ func executeCreate(cmd *cobra.Command, args []string) error {
 
 	log.Info().Int("id", link.ID).Msg("Link created successfully")
 
-	return utils.PrintRecord(cmd.Context(), link, link.ID)
+	return utils.PrintRecord(app, link, link.ID)
 }
 
 // resolveCreateCollection picks the collection a single link is saved to: the
 // one --collection-id names, else Unorganized, else whatever the picker returns.
 // The collection must exist: an unknown ID would make the server create a
 // fresh "Unorganized" collection for the link.
-func resolveCreateCollection(cmd *cobra.Command, collections []linkwarden.Collection) (linkwarden.Collection, error) {
+func resolveCreateCollection(app *app.App, cmd *cobra.Command, collections []linkwarden.Collection) (linkwarden.Collection, error) {
 	byID := make(map[int]linkwarden.Collection, len(collections))
 	items := make([]utils.PickerItem, len(collections))
 	for i, c := range collections {
@@ -125,7 +128,7 @@ func resolveCreateCollection(cmd *cobra.Command, collections []linkwarden.Collec
 	}
 
 	id, err := utils.ResolveID(
-		cmd,
+		app, cmd,
 		"collection-id",
 		"Select Collection to save the link to:",
 		func() ([]utils.PickerItem, error) { return items, nil },
