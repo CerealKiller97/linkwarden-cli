@@ -48,26 +48,6 @@ curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/
 
 ![The installer detecting the system, downloading and checking the release, and installing linkwarden](.github/assets/install.gif)
 
-It picks the right build for your OS and CPU, checks it against the release's `checksums.txt`, and
-installs `linkwarden` into `/usr/local/bin`, asking for `sudo` when needed. It also installs tab
-completions for your shell (`--no-completions` skips them). Pick `~/.local/bin` in its menu, or pass
-`--dir`, to install just for you without `sudo`. If that folder isn't on your `PATH`, it offers to add
-it. Pass options after `bash -s --`:
-
-```bash
-# Pin a version, pick the folder, and don't ask anything (handy in CI and Dockerfiles)
-curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh | bash -s -- --version 1.0.0 --dir ~/bin --yes
-```
-
-Run it with `--help` for every option, or `--uninstall` to remove it again. Prefer to read a script
-before you run it? Download it first:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh -o install.sh
-less install.sh
-bash install.sh
-```
-
 **🍺 Homebrew** (macOS and Linux):
 
 ```bash
