@@ -223,22 +223,22 @@ trailing `/`), as are URLs repeated within the file. The rest are imported behin
 
 ```bash
 # Browser bookmarks exported as HTML (Chrome, Firefox, Safari…)
-linkwarden migrations import --file bookmarks.html --format 1
+linkwarden migrations import --file bookmarks.html --format html
 
 # Pocket export
-linkwarden migrations import --file pocket.json --format 4
+linkwarden migrations import --file pocket.json --format pocket
 
 # Wallabag export
-linkwarden migrations import --file wallabag.json --format 2
+linkwarden migrations import --file wallabag.json --format wallabag
 ```
 
-| `--format` | Source          |
-| :--------: | --------------- |
-|    `0`     | Linkwarden JSON |
-|    `1`     | Bookmarks HTML  |
-|    `2`     | Wallabag JSON   |
-|    `3`     | Omnivore JSON   |
-|    `4`     | Pocket JSON     |
+| `--format`   | Source          |
+| ------------ | --------------- |
+| `linkwarden` | Linkwarden JSON |
+| `html`       | Bookmarks HTML  |
+| `wallabag`   | Wallabag JSON   |
+| `omnivore`   | Omnivore JSON   |
+| `pocket`     | Pocket JSON     |
 
 ### 💾 Nightly backups with cron
 
@@ -254,7 +254,7 @@ linkwarden --non-interactive migrations export --output ~/backups/linkwarden-$(d
 Restoring into a fresh instance is the same file in reverse:
 
 ```bash
-LINKWARDEN_URL=https://new.example.com linkwarden migrations import --file linkwarden-2026-10-06.json --format 0
+LINKWARDEN_URL=https://new.example.com linkwarden migrations import --file linkwarden-2026-10-06.json --format linkwarden
 ```
 
 ### 🏷️ Retag and reorganize in bulk
@@ -282,18 +282,20 @@ linkwarden links bulk-delete --ids 301,302 --yes
 
 ```bash
 linkwarden search --query "kubernetes operators"
-linkwarden archives get --link-id 418 --format 2 --output k8s-patterns.pdf
+linkwarden archives get --link-id 418 --format pdf --output k8s-patterns.pdf
 ```
 
 Leave out `--output` to print only the content type and size, which is a quick way to check whether a snapshot exists.
 
-| `--format` | Archive                     |
-| :--------: | --------------------------- |
-|    `0`     | PNG screenshot              |
-|    `1`     | JPEG screenshot             |
-|    `2`     | PDF                         |
-|    `3`     | Readability JSON (get only) |
-|    `4`     | Monolith HTML               |
+| `--format` | Archive                                      |
+| ---------- | -------------------------------------------- |
+| `png`      | PNG screenshot (the default for `get`)       |
+| `jpeg`     | JPEG screenshot                              |
+| `pdf`      | PDF                                          |
+| `html`     | Single-file HTML page (Monolith)             |
+| `readable` | Readability article text as JSON (get only) |
+
+Shell completion suggests these names, as it does for `migrations import --format` and `search --sort`.
 
 Need a fresh snapshot? Trigger re-archiving first:
 
@@ -524,9 +526,9 @@ The API has no list-all endpoint, so `delete` without `--id` asks for a link fir
 <summary><b><code>archives</code></b>: download or upload snapshots</summary>
 
 ```bash
-linkwarden archives get               --link-id ID --format N [--output PATH] [--preview]
-linkwarden archives upload            --link-id ID --file PATH --format N [--preview]
-linkwarden archives upload-standalone --url URL --file PATH --format N [--preview]
+linkwarden archives get               --link-id ID [--format png|jpeg|pdf|html|readable] [--output PATH] [--preview]
+linkwarden archives upload            --link-id ID --file PATH --format png|jpeg|pdf|html [--preview]
+linkwarden archives upload-standalone --url URL --file PATH --format png|jpeg|pdf|html [--preview]
 ```
 
 `upload-standalone` creates a new link from a local file, for example a page you saved yourself.
@@ -537,7 +539,7 @@ linkwarden archives upload-standalone --url URL --file PATH --format N [--previe
 
 ```bash
 linkwarden migrations export [--output PATH]   # default: ./linkwarden-export-<timestamp>.json
-linkwarden migrations import --file PATH --format N
+linkwarden migrations import --file PATH --format linkwarden|html|wallabag|omnivore|pocket
 ```
 </details>
 
@@ -545,7 +547,7 @@ linkwarden migrations import --file PATH --format N
 <summary><b><code>search</code> · <code>dashboard</code> · <code>config</code> · <code>favicon</code> · <code>completion</code></b></summary>
 
 ```bash
-linkwarden search --query TEXT [--sort N] [--cursor N]
+linkwarden search --query TEXT [--sort newest|oldest|name-asc|name-desc|description-asc|description-desc] [--cursor N]
 
 linkwarden dashboard get                    # v1 dashboard data
 linkwarden dashboard get-v2                 # v2 dashboard data

@@ -3,10 +3,21 @@ package search
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/choice"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
+
+// sortOrders are Linkwarden's link sort orders, in the order of the API's codes.
+var sortOrders = []choice.Option[int]{
+	{Name: "newest", Value: 0, Description: "Date added, newest first"},
+	{Name: "oldest", Value: 1, Description: "Date added, oldest first"},
+	{Name: "name-asc", Value: 2, Description: "Name, A to Z"},
+	{Name: "name-desc", Value: 3, Description: "Name, Z to A"},
+	{Name: "description-asc", Value: 4, Description: "Description, A to Z"},
+	{Name: "description-desc", Value: 5, Description: "Description, Z to A"},
+}
 
 func Command() *cobra.Command {
 	cmd := &cobra.Command{
@@ -16,7 +27,7 @@ func Command() *cobra.Command {
 	}
 
 	cmd.Flags().String("query", "", "Search query string.")
-	cmd.Flags().Int("sort", 0, "Sort order.")
+	choice.Flag(cmd, "sort", "", "Sort order (the server's default when omitted).", sortOrders)
 	cmd.Flags().Int("cursor", 0, "Pagination cursor.")
 
 	return cmd
@@ -33,11 +44,11 @@ func execute(cmd *cobra.Command, _ []string) error {
 	}
 
 	var sort *int
-	if cmd.Flags().Changed("sort") {
-		s, err := cmd.Flags().GetInt("sort")
-		if err != nil {
-			return err
-		}
+	s, set, err := choice.Get[int](cmd, "sort")
+	if err != nil {
+		return err
+	}
+	if set {
 		sort = &s
 	}
 

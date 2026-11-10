@@ -33,7 +33,7 @@ func TestImportSendsFileContentsAndFormat(t *testing.T) {
 	require.NoError(t, os.WriteFile(filePath, []byte("<html>bookmarks</html>"), 0o600))
 
 	cmd := Import()
-	cmd.SetArgs([]string{"--file", filePath, "--format", "1"})
+	cmd.SetArgs([]string{"--file", filePath, "--format", "html"})
 	assert.NoError(cmd.Execute())
 	assert.Equal(1, gotBody.Format)
 	assert.Equal("<html>bookmarks</html>", gotBody.Data)
@@ -45,6 +45,6 @@ func TestImportMissingFileErrors(t *testing.T) {
 	utils.SetVars("test-token", "http://unused.invalid")
 
 	cmd := Import()
-	cmd.SetArgs([]string{"--file", "/nonexistent/file.json", "--format", "0"})
+	cmd.SetArgs([]string{"--file", "/nonexistent/file.json", "--format", "linkwarden"})
 	assert.Error(cmd.Execute())
 }

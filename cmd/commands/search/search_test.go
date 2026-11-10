@@ -24,7 +24,7 @@ func TestExecuteUsesQueryFlags(t *testing.T) {
 	utils.SetVars("test-token", server.URL)
 
 	cmd := Command()
-	cmd.SetArgs([]string{"--query", "go", "--sort", "2", "--cursor", "3"})
+	cmd.SetArgs([]string{"--query", "go", "--sort", "name-asc", "--cursor", "3"})
 	assert.NoError(cmd.Execute())
 	assert.Equal("cursor=3&searchQueryString=go&sort=2", gotQuery)
 }

@@ -3,7 +3,9 @@ package archives
 import (
 	"fmt"
 	"os"
+	"slices"
 
+	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/choice"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
@@ -11,7 +13,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const formatHelp = "Archive format: 0=PNG, 1=JPEG, 2=PDF, 3=Readability JSON, 4=Monolith HTML."
+// uploadFormats are the archive formats a file can be uploaded as.
+var uploadFormats = []choice.Option[linkwarden.ArchiveFormat]{
+	{Name: "png", Value: linkwarden.ArchiveFormatPNG, Description: "PNG screenshot"},
+	{Name: "jpeg", Value: linkwarden.ArchiveFormatJPEG, Description: "JPEG screenshot"},
+	{Name: "pdf", Value: linkwarden.ArchiveFormatPDF, Description: "PDF"},
+	{Name: "html", Value: linkwarden.ArchiveFormatMonolithHTML, Description: "Single-file HTML page (Monolith)"},
+}
+
+// getFormats are the archive formats that can be retrieved: the upload formats
+// plus the Readability text Linkwarden extracts itself.
+var getFormats = append(slices.Clone(uploadFormats),
+	choice.Option[linkwarden.ArchiveFormat]{Name: "readable", Value: linkwarden.ArchiveFormatReadabilityJSON, Description: "Readability article text (JSON)"},
+)
 
 func Get() *cobra.Command {
 	cmd := &cobra.Command{
@@ -21,7 +35,7 @@ func Get() *cobra.Command {
 	}
 
 	cmd.Flags().String("link-id", "", "Link ID.")
-	cmd.Flags().Int("format", 0, formatHelp)
+	choice.Flag(cmd, "format", "png", "Archive format.", getFormats)
 	cmd.Flags().Bool("preview", false, "Retrieve the preview instead of the main archive file.")
 	cmd.Flags().String("output", "", "Path to save the archive file to. Without it, only content-type/size are printed.")
 
@@ -41,13 +55,9 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("resolve link ID: %w", err)
 	}
 
-	var format linkwarden.ArchiveFormat
-	if cmd.Flags().Changed("format") {
-		f, err := cmd.Flags().GetInt("format")
-		if err != nil {
-			return err
-		}
-		format = linkwarden.ArchiveFormat(f)
+	format, _, err := choice.Get[linkwarden.ArchiveFormat](cmd, "format")
+	if err != nil {
+		return err
 	}
 
 	preview, err := cmd.Flags().GetBool("preview")
