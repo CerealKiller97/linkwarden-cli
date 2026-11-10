@@ -158,7 +158,7 @@ aurs:
     homepage: https://github.com/CerealKiller97/linkwarden-cli
     license: AGPL-3.0-only
     maintainers:
-      - Stefan Bogdanović <bogdanovicstefan1997@gmail.com>
+      - Stefan Bogdanović <stefan@stefanbogdanovic.dev>
     provides: [linkwarden-cli]
     conflicts: [linkwarden-cli]
     private_key: "{{ .Env.AUR_KEY }}"
@@ -166,7 +166,7 @@ aurs:
     commit_msg_template: "Update to {{ .Tag }}"
     commit_author:
       name: Stefan Bogdanović
-      email: bogdanovicstefan1997@gmail.com
+      email: stefan@stefanbogdanovic.dev
     skip_upload: true
     package: |-
       cd "${srcdir}"/linkwarden_*/
@@ -195,7 +195,7 @@ winget:
     commit_msg_template: "New version: {{ .PackageIdentifier }} {{ .Version }}"
     commit_author:
       name: Stefan Bogdanović
-      email: bogdanovicstefan1997@gmail.com
+      email: stefan@stefanbogdanovic.dev
     skip_upload: auto
     repository:
       owner: CerealKiller97
