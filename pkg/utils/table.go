@@ -17,10 +17,10 @@ import (
 
 // Table collects rows for one of the CLI's result tables.
 type Table struct {
-	data   tui.Table
 	out    io.Writer
 	source any
 	mode   *OutputMode // nil: the global mode; tests set it
+	data   tui.Table
 }
 
 // JSON sets the value --json prints instead of the table: the API's own

@@ -86,10 +86,10 @@ func ResolveIDPaged(cmd *cobra.Command, flag, label string, fetch PageFetch) (in
 // the picker shows them, so its indexes line up. Pages load on a Bubble Tea
 // goroutine, possibly still running when the user picks, hence the lock.
 type pickerPages struct {
-	mu    sync.Mutex
+	fetch PageFetch
 	items []PickerItem
 	next  int
-	fetch PageFetch
+	mu    sync.Mutex
 }
 
 // loader returns the tui.LoadMore that fetches the next page, or nil when the

@@ -77,6 +77,16 @@ release:
   # A copy of the installer pinned to this release, at releases/download/vX.Y.Z/install.sh.
   extra_files:
     - glob: ./install.sh
+  # Appended after the CHANGELOG.md notes passed with --release-notes.
+  footer: |
+
+    ### 🐳 Docker
+
+    ```bash
+    docker run --rm -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/linkwarden-cli:{{ .Version }} --version
+    ```
+
+    Multi-arch image for `linux/amd64` and `linux/arm64`. Add `-it` for interactive prompts.
 
 # 🐳 docker run --rm -e LINKWARDEN_TOKEN ghcr.io/cerealkiller97/linkwarden-cli links list
 # One buildx build per release pushes a linux/amd64 + linux/arm64 manifest. --snapshot builds
@@ -138,6 +148,9 @@ homebrew_casks:
 
 # 🐧 yay -S linkwarden-cli-bin
 # AUR has no pull requests: the PKGBUILD is pushed straight to the package's AUR git repo over SSH.
+# ⏸️ Not published yet: AUR has temporarily closed new account registrations because of malicious
+# packages, so there's no account to push to. The PKGBUILD is still rendered into dist/aur/.
+# Once registrations reopen, add the AUR_KEY secret and set skip_upload back to auto.
 aurs:
   - name: linkwarden-cli-bin
     ids: [linkwarden]
@@ -154,7 +167,7 @@ aurs:
     commit_author:
       name: Stefan Bogdanović
       email: stefan@stefanbogdanovic.dev
-    skip_upload: auto
+    skip_upload: true
     package: |-
       cd "${srcdir}"/linkwarden_*/
       install -Dm755 "./linkwarden" "${pkgdir}/usr/bin/linkwarden"
