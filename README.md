@@ -40,7 +40,7 @@ archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self
 
 ### 1. Install
 
-**⚡ One-liner** (macOS and Linux, x86_64 and ARM64):
+**macOS / Linux**
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh | bash
@@ -48,79 +48,31 @@ curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/
 
 ![The installer detecting the system, downloading and checking the release, and installing linkwarden](.github/assets/install.gif)
 
-It picks the right build for your OS and CPU, checks it against the release's `checksums.txt`, and
-installs `linkwarden` into `/usr/local/bin`, asking for `sudo` when needed. It also installs tab
-completions for your shell (`--no-completions` skips them). Pick `~/.local/bin` in its menu, or pass
-`--dir`, to install just for you without `sudo`. If that folder isn't on your `PATH`, it offers to add
-it. Pass options after `bash -s --`:
-
-```bash
-# Pin a version, pick the folder, and don't ask anything (handy in CI and Dockerfiles)
-curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh | bash -s -- --version 1.0.0 --dir ~/bin --yes
-```
-
-Run it with `--help` for every option, or `--uninstall` to remove it again. Prefer to read a script
-before you run it? Download it first:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh -o install.sh
-less install.sh
-bash install.sh
-```
-
-**🍺 Homebrew** (macOS and Linux):
+**Homebrew**
 
 ```bash
 brew install CerealKiller97/tap/linkwarden-cli
 ```
 
-**🐧 Arch Linux** (AUR, coming soon): the AUR has temporarily closed new account registrations
-because of malicious packages, so `linkwarden-cli-bin` isn't published yet. It will be once
-registrations reopen. Until then, use the install script, Docker or a prebuilt binary.
-
-**🪟 Windows** (winget):
+**Windows**
 
 ```powershell
 winget install CerealKiller97.LinkwardenCLI
 ```
 
-Homebrew and winget install shell completions for bash, zsh and fish where the platform supports them.
-
-**🐳 Docker** (linux/amd64 and linux/arm64):
+**Docker**
 
 ```bash
-docker run --rm -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/linkwarden-cli links list
+docker run --rm -it -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/linkwarden-cli links list
 ```
 
-Add `-it` for interactive prompts. Tags are `latest` and each release version without the `v`, e.g. `1.0.0`.
-
-**📦 Prebuilt binary:** grab the archive for your OS and CPU (x86_64 or ARM64) from
-[Releases](https://github.com/CerealKiller97/linkwarden-cli/releases/latest):
-
-```bash
-# macOS on Apple Silicon. Swap darwin_arm64 for linux_amd64, linux_arm64, darwin_amd64…
-# VERSION resolves to the latest release; set it yourself (e.g. VERSION=1.0.0) to pin one.
-VERSION=$(curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/CerealKiller97/linkwarden-cli/releases/latest)
-VERSION=${VERSION##*/v}
-curl -sSL "https://github.com/CerealKiller97/linkwarden-cli/releases/download/v${VERSION}/linkwarden_${VERSION}_darwin_arm64.tar.gz" | tar -xz
-sudo mv "linkwarden_${VERSION}_darwin_arm64/linkwarden" /usr/local/bin/
-linkwarden --version
-```
-
-**🛠️ From source** (requires **Go 1.27+**):
-
-```bash
-git clone https://github.com/CerealKiller97/linkwarden-cli.git
-cd linkwarden-cli
-go build -o linkwarden ./cmd/linkwarden
-sudo mv linkwarden /usr/local/bin/
-```
-
-Or install straight from the module path:
+**Go**
 
 ```bash
 go install github.com/CerealKiller97/linkwarden-cli/cmd/linkwarden@latest
 ```
+
+Or download a binary from [Releases](https://github.com/CerealKiller97/linkwarden-cli/releases/latest).
 
 ### 2. Authenticate
 
