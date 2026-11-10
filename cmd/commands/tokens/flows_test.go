@@ -57,13 +57,14 @@ func (f *fakeTokensAPI) start(t *testing.T) {
 	utils.SetVars("test-token", srv.URL)
 }
 
-// homeWithShell points HOME and SHELL at a temporary home so nothing touches the
+// homeWithShell points HOME (USERPROFILE on Windows) and SHELL at a temporary home so nothing touches the
 // real shell config, and returns the zsh config path the CLI would write.
 func homeWithShell(t *testing.T) string {
 	t.Helper()
 
 	home := t.TempDir()
 	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home) // os.UserHomeDir reads this on Windows
 	t.Setenv("SHELL", "/bin/zsh")
 
 	return filepath.Join(home, ".zshenv")

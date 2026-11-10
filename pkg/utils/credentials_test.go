@@ -141,7 +141,7 @@ func TestAppendTokenToShellFileCreatesOwnerOnlyFile(t *testing.T) {
 	}
 	assert := require.New(t)
 	t.Setenv("SHELL", "/bin/zsh")
-	t.Setenv("HOME", t.TempDir())
+	setHome(t, t.TempDir())
 
 	assert.NoError(AppendTokenToShellFile("secret"))
 
@@ -153,7 +153,7 @@ func TestAppendTokenToShellFileCreatesOwnerOnlyFile(t *testing.T) {
 func TestAppendTokenToShellFileKeepsEarlierLines(t *testing.T) {
 	assert := require.New(t)
 	t.Setenv("SHELL", "/bin/bash")
-	t.Setenv("HOME", t.TempDir())
+	setHome(t, t.TempDir())
 
 	assert.NoError(AppendTokenToShellFile("first"))
 	assert.NoError(AppendTokenToShellFile("second"))
