@@ -15,7 +15,7 @@ import (
 
 // fakeLinkwarden serves the three endpoints init uses. Only sessionToken may
 // mint tokens, and only apiToken may call /users/me.
-func fakeLinkwarden(t *testing.T, sessionToken, apiToken string) *httptest.Server {
+func fakeLinkwarden(t *testing.T, sessionToken string, apiToken string) *httptest.Server {
 	t.Helper()
 
 	respond := func(w http.ResponseWriter, status int, body any) {

@@ -310,7 +310,7 @@ func displayResults(app *app.App, r results) {
 	t.Header("Total", "Success", "Already exists", "Failed")
 	t.Row(r.total, r.success, r.alreadyExists, r.failed)
 	t.JSON(r.report())
-	t.Tone(func(_, col int, value string) utils.Tone {
+	t.Tone(func(_ int, col int, value string) utils.Tone {
 		if value == "0" {
 			return utils.ToneNone
 		}

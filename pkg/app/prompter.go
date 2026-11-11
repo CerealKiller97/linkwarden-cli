@@ -10,7 +10,7 @@ import "github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 type Prompter interface {
 	Select(label string, options []string) (int, error)
 	Input(label string, validate func(string) error) (string, error)
-	InputDefault(label, def string, validate func(string) error) (string, error)
+	InputDefault(label string, def string, validate func(string) error) (string, error)
 	Password(label string, validate func(string) error) (string, error)
 }
 
@@ -25,7 +25,7 @@ func (TerminalPrompter) Input(label string, validate func(string) error) (string
 	return tui.Input(label, validate)
 }
 
-func (TerminalPrompter) InputDefault(label, def string, validate func(string) error) (string, error) {
+func (TerminalPrompter) InputDefault(label string, def string, validate func(string) error) (string, error) {
 	return tui.InputDefault(label, def, validate)
 }
 

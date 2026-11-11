@@ -89,7 +89,10 @@ func newApp(cmd *cobra.Command) (*app.App, error) {
 		return nil, err
 	}
 
-	opts := []app.Option{app.WithMode(mode), app.WithNonInteractive(nonInteractive)}
+	opts := []app.Option{
+		app.WithMode(mode),
+		app.WithNonInteractive(nonInteractive),
+	}
 
 	if cmd.Annotations[initcmd.SkipAuthAnnotation] != "" {
 		return app.New(opts...), nil
@@ -105,7 +108,9 @@ func newApp(cmd *cobra.Command) (*app.App, error) {
 		return nil, err
 	}
 
-	return app.New(append(opts, app.WithCredentials(token, instanceURL))...), nil
+	opts = append(opts, app.WithCredentials(token, instanceURL))
+
+	return app.New(opts...), nil
 }
 
 var errJSONAndQuiet = errors.New("--json and --quiet can't be used together")
@@ -143,7 +148,7 @@ var errNotLoggedIn = errors.New(`not logged in: run "linkwarden init" or set LIN
 // wins over the config file; with it, the URL comes from LINKWARDEN_URL or the
 // default, as before the config file existed. Without it, the config file's token
 // is used, with its URL unless LINKWARDEN_URL overrides it.
-func resolveCredentials(envToken, envURL string, cfg utils.Config) (string, string, error) {
+func resolveCredentials(envToken string, envURL string, cfg utils.Config) (string, string, error) {
 	if envToken != "" {
 		return envToken, utils.NormalizeInstanceURL(envURL), nil
 	}

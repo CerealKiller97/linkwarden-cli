@@ -58,7 +58,7 @@ type App struct {
 type Option func(*App)
 
 // WithCredentials sets the token and instance URL API requests use.
-func WithCredentials(token, instanceURL string) Option {
+func WithCredentials(token string, instanceURL string) Option {
 	return func(app *App) {
 		app.Token = token
 		app.InstanceURL = instanceURL

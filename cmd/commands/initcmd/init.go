@@ -76,7 +76,7 @@ func signInMethods(cfg *linkwarden.LoginConfig) []signInMethod {
 var openBrowser = utils.OpenBrowser
 
 // newClient builds an SDK client; a variable so tests can point it elsewhere.
-var newClient = func(baseURL, token string) *linkwarden.Client {
+var newClient = func(baseURL string, token string) *linkwarden.Client {
 	return linkwarden.New(baseURL, token)
 }
 
@@ -185,7 +185,7 @@ func run(app *app.App, cmd *cobra.Command, _ []string) error {
 // first. Linkwarden's Google/Apple/... sign-in is an OAuth redirect that only
 // ends in a browser session cookie, so the CLI can't receive a token from it
 // directly; instead the user signs in in the browser and creates a token there.
-func tokenFlow(app *app.App, instanceURL, provider string) (string, error) {
+func tokenFlow(app *app.App, instanceURL string, provider string) (string, error) {
 	pageURL := accessTokensURL(instanceURL)
 
 	fmt.Println()
@@ -208,7 +208,7 @@ func tokenFlow(app *app.App, instanceURL, provider string) (string, error) {
 
 // tokenSteps is the numbered how-to tokenFlow prints, with an extra sign-in
 // step for an SSO provider.
-func tokenSteps(pageURL, provider string, colorOn bool) []string {
+func tokenSteps(pageURL string, provider string, colorOn bool) []string {
 	step := stepStyle
 	link := linkStyle
 	c := func(style lipgloss.Style, s string) string {
@@ -265,7 +265,7 @@ func passwordFlow(ctx context.Context, app *app.App, instanceURL string) (string
 
 // loginForToken signs in with a username and password, then uses that session to
 // mint a non-expiring access token for the CLI, so the password is never stored.
-func loginForToken(ctx context.Context, instanceURL, username, password string) (string, error) {
+func loginForToken(ctx context.Context, instanceURL string, username string, password string) (string, error) {
 	session, err := newClient(instanceURL, "").Session.Create(ctx, linkwarden.CreateSessionRequest{
 		Username:    username,
 		Password:    password,
@@ -289,7 +289,7 @@ func loginForToken(ctx context.Context, instanceURL, username, password string) 
 }
 
 // verify checks token against the instance and returns the signed-in user.
-func verify(ctx context.Context, instanceURL, token string) (*linkwarden.User, error) {
+func verify(ctx context.Context, instanceURL string, token string) (*linkwarden.User, error) {
 	user, err := newClient(instanceURL, token).Users.Me(ctx)
 	if err != nil {
 		if hasStatus(err, http.StatusUnauthorized) {

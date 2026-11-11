@@ -121,7 +121,7 @@ func (s *Script) Input(label string, validate func(string) error) (string, error
 }
 
 // InputDefault types the next answer; an empty one accepts def.
-func (s *Script) InputDefault(label, def string, validate func(string) error) (string, error) {
+func (s *Script) InputDefault(label string, def string, validate func(string) error) (string, error) {
 	return s.text(label, def, validate)
 }
 
@@ -133,7 +133,7 @@ func (s *Script) Password(label string, validate func(string) error) (string, er
 // text types an answer the way the real prompt would take it: an empty answer
 // takes def, and an answer the prompt's validation rejects fails the test,
 // because the real prompt would keep asking.
-func (s *Script) text(label, def string, validate func(string) error) (string, error) {
+func (s *Script) text(label string, def string, validate func(string) error) (string, error) {
 	a, ok := s.next(label)
 	if !ok {
 		return "", tui.ErrAborted

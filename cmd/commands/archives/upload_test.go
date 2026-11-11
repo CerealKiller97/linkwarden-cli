@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func writeTempFile(t *testing.T, name, contents string) string {
+func writeTempFile(t *testing.T, name string, contents string) string {
 	t.Helper()
 
 	path := filepath.Join(t.TempDir(), name)

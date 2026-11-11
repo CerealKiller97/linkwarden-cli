@@ -46,7 +46,7 @@ func selectOptions(items []PickerItem) []tui.SelectOption {
 // ResolveIDPaged is ResolveID for long lists the API returns a page at a
 // time: the picker shows the first page and fetches the next ones as the user
 // pages or filters past what's loaded.
-func ResolveIDPaged(app *app.App, cmd *cobra.Command, flag, label string, fetch PageFetch) (int, error) {
+func ResolveIDPaged(app *app.App, cmd *cobra.Command, flag string, label string, fetch PageFetch) (int, error) {
 	flagHint := "--" + flag
 
 	if cmd.Flags().Changed(flag) {
@@ -164,7 +164,7 @@ func errNoTerminal(label string) error {
 // to list the available items and shows a picker for label. If stdin isn't a
 // terminal (a script, CI, piped input, ...), it fails fast with an actionable error
 // naming --flag instead of hanging on a prompt nobody can answer.
-func ResolveID(app *app.App, cmd *cobra.Command, flag, label string, fetch func() ([]PickerItem, error)) (int, error) {
+func ResolveID(app *app.App, cmd *cobra.Command, flag string, label string, fetch func() ([]PickerItem, error)) (int, error) {
 	return ResolveIDPaged(app, cmd, flag, label, func(int) ([]PickerItem, int, error) {
 		items, err := fetch()
 		return items, 0, err
@@ -178,7 +178,7 @@ func isInteractive(app *app.App) bool {
 // isInteractiveFor is the pure decision behind isInteractive: the
 // --non-interactive override always wins; otherwise it's whatever stdin
 // actually is.
-func isInteractiveFor(forcedNonInteractive, isTerminal bool) bool {
+func isInteractiveFor(forcedNonInteractive bool, isTerminal bool) bool {
 	if forcedNonInteractive {
 		return false
 	}
@@ -188,7 +188,7 @@ func isInteractiveFor(forcedNonInteractive, isTerminal bool) bool {
 
 // InputDefault is Input with def pre-filled as a placeholder: pressing Enter on
 // an empty field accepts def. Without an interactive terminal it fails fast.
-func InputDefault(app *app.App, label, def string, validate func(string) error) (string, error) {
+func InputDefault(app *app.App, label string, def string, validate func(string) error) (string, error) {
 	app = orLegacy(app)
 	if !isInteractive(app) {
 		return "", errNoTerminal(label)

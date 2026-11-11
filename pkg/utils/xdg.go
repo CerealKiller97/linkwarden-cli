@@ -37,7 +37,7 @@ func StateFile(name string) (string, error) {
 // collection ID from one instance is never used against another. <instance> is
 // instanceURL's host, port and path (see instanceKey). It does not create the
 // directory.
-func InstanceStateFile(name, instanceURL string) (string, error) {
+func InstanceStateFile(name string, instanceURL string) (string, error) {
 	dir, err := StateFile(name)
 	if err != nil {
 		return "", err

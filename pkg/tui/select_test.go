@@ -149,7 +149,7 @@ func TestSelectWithRunsProgram(t *testing.T) {
 }
 
 // options returns n options labelled prefix 1…n.
-func options(prefix string, from, n int) []SelectOption {
+func options(prefix string, from int, n int) []SelectOption {
 	opts := make([]SelectOption, n)
 	for i := range opts {
 		opts[i] = SelectOption{Label: fmt.Sprintf("%s %d", prefix, from+i)}

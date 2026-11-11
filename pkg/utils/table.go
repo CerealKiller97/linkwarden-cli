@@ -114,8 +114,8 @@ func FormatCell(v any) string {
 
 // Tone colors data cells: fn gets each cell's 0-based row, column and text.
 // Colors only show in static output when ColorEnabled.
-func (t *Table) Tone(fn func(row, col int, value string) Tone) {
-	t.data.Tone = func(row, col int) Tone {
+func (t *Table) Tone(fn func(row int, col int, value string) Tone) {
+	t.data.Tone = func(row int, col int) Tone {
 		if row < 0 || row >= len(t.data.Rows) || col < 0 || col >= len(t.data.Rows[row]) {
 			return ToneNone
 		}
@@ -128,7 +128,7 @@ func (t *Table) Tone(fn func(row, col int, value string) Tone) {
 // ellipsis to fit, but the link opens the whole URL. Cells that aren't an
 // http(s) URL, such as EmptyCell, stay plain text.
 func (t *Table) LinkColumn(col int) {
-	t.data.Link = func(row, c int) string {
+	t.data.Link = func(row int, c int) string {
 		if c != col || row < 0 || row >= len(t.data.Rows) || col >= len(t.data.Rows[row]) {
 			return ""
 		}
@@ -252,7 +252,7 @@ func (t *Table) currentApp() *app.App {
 }
 
 // browseSize returns the terminal size when the viewer should be used.
-func (t *Table) browseSize() (width, height int, ok bool) {
+func (t *Table) browseSize() (width int, height int, ok bool) {
 	if t.out != os.Stdout || !isInteractive(t.currentApp()) || !isatty.IsTerminal(os.Stdout.Fd()) {
 		return 0, 0, false
 	}
@@ -268,7 +268,7 @@ func (t *Table) browseSize() (width, height int, ok bool) {
 // shouldBrowse reports whether rows data rows (plus chrome rows of borders,
 // header, title and caption, and a line for the next prompt) overflow a
 // terminal height rows tall.
-func shouldBrowse(rows, chrome, height int) bool {
+func shouldBrowse(rows int, chrome int, height int) bool {
 	return height > 0 && rows+chrome+1 > height
 }
 

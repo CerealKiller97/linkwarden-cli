@@ -17,13 +17,13 @@ import (
 type Table struct {
 	// Tone, when set, picks a color for a data cell (row and col are 0-based
 	// into Rows). Only static output uses it.
-	Tone func(row, col int) Tone
+	Tone func(row int, col int) Tone
 
 	// Link, when set, returns the URL a data cell links to, or "" for none. In
 	// color output the cell becomes a terminal hyperlink (OSC 8) to that URL,
 	// so clicking it opens the whole URL even when the cell shows it cut short
 	// with an ellipsis. Plain output has no links.
-	Link  func(row, col int) string
+	Link  func(row int, col int) string
 	Title string
 
 	// Caption, when set, is a dim line between the title and the table, for
@@ -85,7 +85,7 @@ func RenderStatic(t Table, color bool) string {
 		BorderHeader(true).
 		Headers(t.Headers...).
 		Rows(t.Rows...).
-		StyleFunc(func(row, col int) lipgloss.Style { return staticCellStyle(t, row, col) })
+		StyleFunc(func(row int, col int) lipgloss.Style { return staticCellStyle(t, row, col) })
 
 	// Plain output gets a bare title: the badge's padding only makes sense
 	// with its background color behind it.
@@ -96,7 +96,7 @@ func RenderStatic(t Table, color bool) string {
 	return header(t, true) + tbl.String() + "\n"
 }
 
-func staticCellStyle(t Table, row, col int) lipgloss.Style {
+func staticCellStyle(t Table, row int, col int) lipgloss.Style {
 	if row == lgtable.HeaderRow {
 		return headerCell
 	}
@@ -151,7 +151,7 @@ func ChromeHeight(t Table) int {
 // BrowseTable shows t as an interactive bubbles/table, inline in the terminal,
 // fitted to width×height (the terminal's size). It returns when the user quits
 // with q, Esc or Ctrl+C, leaving the table on screen.
-func BrowseTable(t Table, width, height int, o Options) error {
+func BrowseTable(t Table, width int, height int, o Options) error {
 	_, err := run(newBrowseModel(t, width, height), o)
 	if errors.Is(err, ErrAborted) {
 		return nil
@@ -173,7 +173,7 @@ type browseModel struct {
 // so the shell prompt doesn't scroll the table.
 const browseChrome = 7
 
-func newBrowseModel(t Table, width, height int) browseModel {
+func newBrowseModel(t Table, width int, height int) browseModel {
 	// The outer border takes two columns.
 	cols := fitColumns(t, width-2)
 	extra := ChromeHeight(t) - TableChromeHeight
@@ -221,7 +221,7 @@ func newBrowseModel(t Table, width, height int) browseModel {
 
 // visibleRows is how many data rows fit in a terminal height rows tall
 // (at least 3), never more than there are rows.
-func visibleRows(rows, height int) int {
+func visibleRows(rows int, height int) int {
 	return max(min(rows, height-browseChrome), 3)
 }
 
@@ -231,7 +231,7 @@ const headerHeight = 2
 
 // tableHeight is the height to give bubbles/table so that visibleRows data
 // rows show below the header.
-func tableHeight(rows, height int) int {
+func tableHeight(rows int, height int) int {
 	return visibleRows(rows, height) + headerHeight
 }
 
@@ -363,7 +363,7 @@ func fitCells(t Table) Table {
 // row, col, in a terminal hyperlink to t.Link's URL for it, if any. The link
 // escapes take no columns, so table widths are unchanged; RenderStatic's plain
 // output strips them along with colors.
-func linkCell(t Table, row, col int, text string) string {
+func linkCell(t Table, row int, col int, text string) string {
 	if t.Link == nil {
 		return text
 	}

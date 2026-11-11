@@ -137,7 +137,7 @@ func printManualSetupInstructions(token string) {
 		return style.Render(s)
 	}
 
-	printStep := func(n int, label, command string) {
+	printStep := func(n int, label string, command string) {
 		fmt.Printf("%s %s\n", c(step, fmt.Sprintf("%d.", n)), label)
 		fmt.Printf("   %s\n", c(cmdColor, command))
 	}

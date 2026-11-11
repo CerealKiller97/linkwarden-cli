@@ -38,7 +38,7 @@ func StartSpinner(label string, out io.Writer) *Spinner {
 	return startSpinner(label, spinnerDelay, spinnerMinVisible, out)
 }
 
-func startSpinner(label string, delay, minVisible time.Duration, out io.Writer, extra ...tea.ProgramOption) *Spinner {
+func startSpinner(label string, delay time.Duration, minVisible time.Duration, out io.Writer, extra ...tea.ProgramOption) *Spinner {
 	s := &Spinner{done: make(chan struct{})}
 	opts := append([]tea.ProgramOption{
 		tea.WithInput(nil),
@@ -80,7 +80,7 @@ type spinnerModel struct {
 	stopped    bool
 }
 
-func newSpinnerModel(label string, delay, minVisible time.Duration) spinnerModel {
+func newSpinnerModel(label string, delay time.Duration, minVisible time.Duration) spinnerModel {
 	return spinnerModel{
 		label:      label,
 		delay:      delay,
