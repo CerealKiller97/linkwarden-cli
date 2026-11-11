@@ -25,10 +25,10 @@ Friendly pickers when you're at the keyboard, clean JSON and fail-fast errors wh
 </div>
 
 > [!NOTE]
-> <a id="community-driven"></a>**Community-driven, not official.** linkwarden-cli is an independent project. It isn't made or
-> endorsed by the Linkwarden team, so please don't send questions about the CLI to Linkwarden support. It is actively
-> maintained and supported here, and it works with both Linkwarden Cloud and self-hosted instances. Bugs, questions
-> and feature requests go to [this repository's issues](https://github.com/CerealKiller97/linkwarden-cli/issues).
+> <a id="community-driven"></a>**A community-driven CLI.** linkwarden-cli is built and maintained by the community, separately
+> from the Linkwarden team, and it's actively supported here. It works with both Linkwarden Cloud and self-hosted
+> instances. Bugs, questions and feature requests go to
+> [this repository's issues](https://github.com/CerealKiller97/linkwarden-cli/issues).
 
 ## Features
 
@@ -613,7 +613,7 @@ The workflow uses these repository secrets:
 
 Built with [Cobra](https://github.com/spf13/cobra) · [Bubble Tea](https://github.com/charmbracelet/bubbletea) · [Bubbles](https://github.com/charmbracelet/bubbles) · [Lip Gloss](https://github.com/charmbracelet/lipgloss) · Demos recorded with [VHS](https://github.com/charmbracelet/vhs)
 
-A community-driven project, not affiliated with or endorsed by Linkwarden.<br>
+A community-driven CLI for Linkwarden.<br>
 Found a bug or missing a feature? [Open an issue](https://github.com/CerealKiller97/linkwarden-cli/issues/new).
 
 </div>
