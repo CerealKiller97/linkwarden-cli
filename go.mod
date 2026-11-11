@@ -6,7 +6,7 @@ require (
 	charm.land/bubbles/v2 v2.2.1
 	charm.land/bubbletea/v2 v2.1.1
 	charm.land/lipgloss/v2 v2.0.6
-	github.com/CerealKiller97/linkwarden-go-sdk v1.0.1
+	github.com/CerealKiller97/linkwarden-go-sdk v1.1.0
 	github.com/charmbracelet/x/ansi v0.11.9
 	github.com/charmbracelet/x/term v0.2.2
 	github.com/mattn/go-isatty v0.0.24
