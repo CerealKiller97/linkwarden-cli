@@ -3,13 +3,14 @@ package links
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
-func BulkUpdate() *cobra.Command {
+func BulkUpdate(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bulk-update",
 		Short: "Apply a collection/tag change to multiple links",
@@ -18,7 +19,9 @@ func BulkUpdate() *cobra.Command {
 
   # Replace their tags
   linkwarden links bulk-update --ids 412,418,421 --tag reading --tag weekend --remove-previous-tags`,
-		RunE: executeBulkUpdate,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeBulkUpdate(app, cmd, args)
+		},
 	}
 
 	utils.AddIDsFlag(cmd, "Link IDs to update.")
@@ -33,7 +36,7 @@ func BulkUpdate() *cobra.Command {
 	return cmd
 }
 
-func executeBulkUpdate(cmd *cobra.Command, _ []string) error {
+func executeBulkUpdate(app *app.App, cmd *cobra.Command, _ []string) error {
 	ids, err := utils.GetIDs(cmd)
 	if err != nil {
 		return err

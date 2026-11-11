@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
+
 	"github.com/spf13/cobra"
 )
 
@@ -25,8 +27,8 @@ func AddYesFlag(cmd *cobra.Command) {
 
 // Confirm asks question as a No/Yes prompt before a destructive action and
 // reports whether to go ahead. See ConfirmWith.
-func Confirm(cmd *cobra.Command, question string) (bool, error) {
-	return ConfirmWith(cmd, func() (string, error) { return question, nil })
+func Confirm(app *app.App, cmd *cobra.Command, question string) (bool, error) {
+	return ConfirmWith(app, cmd, func() (string, error) { return question, nil })
 }
 
 // ConfirmWith is Confirm with a question that is only built when the prompt is
@@ -37,7 +39,7 @@ func Confirm(cmd *cobra.Command, question string) (bool, error) {
 // terminal (or with --non-interactive) it returns ErrConfirmationRequired
 // rather than deleting anything unasked. Otherwise "No" is the first, default
 // answer, so a stray Enter cancels.
-func ConfirmWith(cmd *cobra.Command, question func() (string, error)) (bool, error) {
+func ConfirmWith(app *app.App, cmd *cobra.Command, question func() (string, error)) (bool, error) {
 	yes, err := cmd.Flags().GetBool(yesFlag)
 	if err != nil {
 		return false, err
@@ -47,7 +49,7 @@ func ConfirmWith(cmd *cobra.Command, question func() (string, error)) (bool, err
 		return true, nil
 	}
 
-	if !isInteractive() {
+	if !isInteractive(orLegacy(app)) {
 		return false, ErrConfirmationRequired
 	}
 
@@ -56,7 +58,7 @@ func ConfirmWith(cmd *cobra.Command, question func() (string, error)) (bool, err
 		return false, err
 	}
 
-	_, answer, err := Select(q, []string{"No", "Yes"})
+	_, answer, err := Select(app, q, []string{"No", "Yes"})
 	if err != nil {
 		return false, fmt.Errorf("confirm: %w", err)
 	}

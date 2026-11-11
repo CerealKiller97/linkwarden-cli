@@ -105,7 +105,7 @@ func TestRenderStaticTonesColorCells(t *testing.T) {
 		Title:   "Results",
 		Headers: []string{"Success", "Failed"},
 		Rows:    [][]string{{"9", "1"}},
-		Tone: func(_, col int) Tone {
+		Tone: func(_ int, col int) Tone {
 			if col == 1 {
 				return ToneDanger
 			}
@@ -199,7 +199,7 @@ func linkedTable() Table {
 		Headers: []string{"ID", "URL"},
 		Rows:    [][]string{{"1", longURL}, {"2", "-"}},
 		Width:   40,
-		Link: func(row, col int) string {
+		Link: func(row int, col int) string {
 			if row == 0 && col == 1 {
 				return longURL
 			}

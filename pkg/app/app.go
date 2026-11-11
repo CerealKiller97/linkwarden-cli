@@ -1,0 +1,135 @@
+// Package app holds the state one run of the CLI works with: the instance and
+// token to talk to, how to print results, and whether prompts may be shown.
+// The root command builds an App from its flags, the environment and the
+// config file, and passes it to every command, which hands it on to the
+// helpers in pkg/utils.
+//
+// Keeping this out of package variables lets tests build their own App per
+// test (see pkg/testutils) and run in parallel.
+package app
+
+import (
+	"io"
+	"log/slog"
+	"os"
+
+	"github.com/CerealKiller97/linkwarden-go-sdk"
+	"github.com/rs/zerolog/log"
+)
+
+// OutputMode is how commands print their results on stdout. It is set from the
+// global --json and --quiet flags.
+type OutputMode int
+
+const (
+	// OutputTable prints the CLI's usual tables (the default).
+	OutputTable OutputMode = iota
+	// OutputJSON prints results as indented JSON, using the API's field names.
+	OutputJSON
+	// OutputIDs prints only the ID of each result, one per line, for piping
+	// into another command. Tables without an ID column print nothing.
+	OutputIDs
+)
+
+// App is the state of one run of the CLI. Build one with New. The zero value
+// is usable too: table output on stdout, terminal prompts, no credentials.
+type App struct {
+	// Out is where results are printed. Nil means os.Stdout.
+	Out io.Writer
+	// Prompter answers prompts. Nil means TerminalPrompter.
+	Prompter Prompter
+
+	// Token and InstanceURL are the credentials API requests use.
+	Token       string
+	InstanceURL string
+
+	// Mode is how results are printed; see OutputMode.
+	Mode OutputMode
+
+	// NonInteractive forces non-interactive mode (--non-interactive), so
+	// commands fail fast instead of prompting.
+	NonInteractive bool
+	// Scripted reports that Prompter answers from a script (tests), so prompts
+	// run even though stdin isn't a terminal. --non-interactive still wins.
+	Scripted bool
+}
+
+// Option configures the App New builds.
+type Option func(*App)
+
+// WithCredentials sets the token and instance URL API requests use.
+func WithCredentials(token string, instanceURL string) Option {
+	return func(app *App) {
+		app.Token = token
+		app.InstanceURL = instanceURL
+	}
+}
+
+// WithMode sets how results are printed; see OutputMode.
+func WithMode(mode OutputMode) Option {
+	return func(app *App) { app.Mode = mode }
+}
+
+// WithNonInteractive forces non-interactive mode when on (--non-interactive).
+func WithNonInteractive(on bool) Option {
+	return func(app *App) { app.NonInteractive = on }
+}
+
+// WithOutput prints results to w instead of os.Stdout.
+func WithOutput(w io.Writer) Option {
+	return func(app *App) { app.Out = w }
+}
+
+// WithPrompter answers prompts with p instead of the terminal.
+func WithPrompter(p Prompter) Option {
+	return func(app *App) { app.Prompter = p }
+}
+
+// New returns an App that prints tables to os.Stdout and prompts in the
+// terminal, with no credentials, changed by opts.
+func New(opts ...Option) *App {
+	app := &App{}
+	for _, opt := range opts {
+		opt(app)
+	}
+
+	return app
+}
+
+// Client returns a Linkwarden API client for the App's instance and token.
+func (app *App) Client() *linkwarden.Client {
+	return linkwarden.New(app.InstanceURL, app.Token, linkwarden.WithLogger(slogBridge()))
+}
+
+// Stdout is where results are printed: Out, or os.Stdout when it's nil.
+func (app *App) Stdout() io.Writer {
+	if app.Out == nil {
+		return os.Stdout
+	}
+
+	return app.Out
+}
+
+// Prompts returns the Prompter that answers prompts: Prompter, or the terminal
+// when it's nil.
+func (app *App) Prompts() Prompter {
+	if app.Prompter == nil {
+		return TerminalPrompter{}
+	}
+
+	return app.Prompter
+}
+
+// slogBridge adapts the global zerolog logger to the *slog.Logger the SDK
+// expects. zerolog.Logger is an io.Writer, so slog's text output is forwarded
+// through it; slog's own timestamp is dropped because zerolog adds one.
+func slogBridge() *slog.Logger {
+	return slog.New(slog.NewTextHandler(log.Logger, &slog.HandlerOptions{
+		ReplaceAttr: func(groups []string, a slog.Attr) slog.Attr {
+			if len(groups) == 0 && a.Key == slog.TimeKey {
+				return slog.Attr{}
+			}
+			return a
+		},
+	}))
+}

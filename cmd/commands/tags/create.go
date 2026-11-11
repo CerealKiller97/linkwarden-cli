@@ -3,12 +3,13 @@ package tags
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func Create() *cobra.Command {
+func Create(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create or update tags in bulk",
@@ -17,7 +18,9 @@ func Create() *cobra.Command {
 
   # Create several at once
   linkwarden tags create --label golang --label k8s --label architecture`,
-		RunE: executeCreate,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeCreate(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().StringSlice("label", nil, "Tag label (repeatable).")
@@ -29,7 +32,7 @@ func Create() *cobra.Command {
 	return cmd
 }
 
-func executeCreate(cmd *cobra.Command, _ []string) error {
+func executeCreate(app *app.App, cmd *cobra.Command, _ []string) error {
 	labels, err := cmd.Flags().GetStringSlice("label")
 	if err != nil {
 		return err
@@ -49,7 +52,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("create tags: %w", err)
 	}
 
-	renderTagsTable(createdTags, createdTags)
+	renderTagsTable(app, createdTags, createdTags)
 
 	return nil
 }

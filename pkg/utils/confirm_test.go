@@ -22,7 +22,7 @@ func TestConfirmWithYesSkipsPrompt(t *testing.T) {
 
 	for _, flag := range []string{"--yes", "-y"} {
 		called := false
-		ok, err := ConfirmWith(newConfirmCommand(t, flag), func() (string, error) {
+		ok, err := ConfirmWith(nil, newConfirmCommand(t, flag), func() (string, error) {
 			called = true
 
 			return "Delete?", nil
@@ -40,7 +40,7 @@ func TestConfirmWithoutTerminalRequiresYes(t *testing.T) {
 	assert := require.New(t)
 
 	called := false
-	ok, err := ConfirmWith(newConfirmCommand(t), func() (string, error) {
+	ok, err := ConfirmWith(nil, newConfirmCommand(t), func() (string, error) {
 		called = true
 
 		return "Delete?", nil
@@ -68,7 +68,7 @@ func TestConfirmNonInteractiveOverrideRequiresYes(t *testing.T) {
 	SetNonInteractive(true)
 	t.Cleanup(func() { SetNonInteractive(false) })
 
-	ok, err := Confirm(newConfirmCommand(t), "Delete?")
+	ok, err := Confirm(nil, newConfirmCommand(t), "Delete?")
 
 	assert.ErrorIs(err, ErrConfirmationRequired)
 	assert.False(ok)

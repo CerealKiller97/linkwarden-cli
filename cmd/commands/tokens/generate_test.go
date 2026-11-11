@@ -26,6 +26,6 @@ func TestExecuteFailsWithoutInteractiveTerminal(t *testing.T) {
 	// at least exercises that the command wires up without panicking.
 	utils.SetVars("test-token", "http://unused.invalid")
 
-	cmd := Generate()
+	cmd := Generate(nil)
 	assert.Error(cmd.Execute())
 }

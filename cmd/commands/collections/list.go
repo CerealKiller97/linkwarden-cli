@@ -3,12 +3,13 @@ package collections
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
-func List() *cobra.Command {
+func List(app *app.App) *cobra.Command {
 	return &cobra.Command{
 		Use:   "list",
 		Short: "List collections",
@@ -17,11 +18,13 @@ func List() *cobra.Command {
 
   # ID and name of each, tab-separated
   linkwarden collections list --json | jq -r '.[] | "\(.id)\t\(.name)"'`,
-		RunE: executeList,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeList(app, cmd, args)
+		},
 	}
 }
 
-func executeList(cmd *cobra.Command, _ []string) error {
+func executeList(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	spinner := utils.StartSpinner("Fetching collections…")
@@ -31,7 +34,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("list collections: %w", err)
 	}
 
-	renderCollectionsTable(collections, collections)
+	renderCollectionsTable(app, collections, collections)
 
 	// The list already holds the Unorganized collection, so refresh this
 	// instance's cached ID for "collections create" at no extra cost. A cache

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/choice"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
@@ -19,7 +20,7 @@ var importFormats = []choice.Option[linkwarden.ImportFormat]{
 	{Name: "pocket", Value: linkwarden.ImportFormatPocketJSON, Description: "Pocket JSON export"},
 }
 
-func Import() *cobra.Command {
+func Import(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import Linkwarden data from a data source",
@@ -31,7 +32,9 @@ func Import() *cobra.Command {
 
   # Pocket export
   linkwarden migrations import --file pocket.json --format pocket`,
-		RunE: executeImport,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeImport(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().String("file", "", "Path to the file containing the data to import.")
@@ -46,7 +49,7 @@ func Import() *cobra.Command {
 	return cmd
 }
 
-func executeImport(cmd *cobra.Command, _ []string) error {
+func executeImport(app *app.App, cmd *cobra.Command, _ []string) error {
 	filePath, err := cmd.Flags().GetString("file")
 	if err != nil {
 		return err

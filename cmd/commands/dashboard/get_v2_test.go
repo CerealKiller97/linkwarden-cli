@@ -21,7 +21,7 @@ func TestGetV2RendersStatsAndLinks(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := GetV2()
+	cmd := GetV2(nil)
 	assert.NoError(cmd.Execute())
 }
 
@@ -35,6 +35,6 @@ func TestGetV2PropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := GetV2()
+	cmd := GetV2(nil)
 	assert.Error(cmd.Execute())
 }

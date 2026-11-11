@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
-func Archive() *cobra.Command {
+func Archive(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "archive",
 		Short: "Trigger archiving of a link",
@@ -18,7 +19,9 @@ func Archive() *cobra.Command {
 
   # Pick the link from a list
   linkwarden links archive`,
-		RunE: executeArchive,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeArchive(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("id", 0, "Link ID.")
@@ -26,11 +29,11 @@ func Archive() *cobra.Command {
 	return cmd
 }
 
-func executeArchive(cmd *cobra.Command, _ []string) error {
+func executeArchive(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveIDPaged(
-		cmd,
+		app, cmd,
 		"id",
 		"Select Link to archive:",
 		pickers.Links(cmd.Context(), client),

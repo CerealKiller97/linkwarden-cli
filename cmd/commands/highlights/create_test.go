@@ -25,7 +25,7 @@ func TestCreateUsesLinkIDFlag(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{
 		"--link-id", "9",
 		"--text", "quoted",
@@ -48,7 +48,7 @@ func TestCreatePropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{
 		"--link-id", "9",
 		"--text", "quoted",

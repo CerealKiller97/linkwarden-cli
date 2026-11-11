@@ -27,7 +27,7 @@ func TestGetSavesToOutputFile(t *testing.T) {
 
 	outputPath := filepath.Join(t.TempDir(), "favicon.ico")
 
-	cmd := Get()
+	cmd := Get(nil)
 	cmd.SetArgs([]string{"--url", "https://example.com", "--output", outputPath})
 	assert.NoError(cmd.Execute())
 
@@ -47,7 +47,7 @@ func TestGetWithoutOutputPrintsSummary(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Get()
+	cmd := Get(nil)
 	cmd.SetArgs([]string{"--url", "https://example.com"})
 	assert.NoError(cmd.Execute())
 }
@@ -62,7 +62,7 @@ func TestGetPropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Get()
+	cmd := Get(nil)
 	cmd.SetArgs([]string{"--url", "not-a-url"})
 	assert.Error(cmd.Execute())
 }

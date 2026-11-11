@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"charm.land/lipgloss/v2"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
@@ -25,7 +26,7 @@ const (
 	NoExpiry   Expiry = 4
 )
 
-func Generate() *cobra.Command {
+func Generate(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate",
 		Short: "Create an API token",
@@ -36,14 +37,16 @@ prints the new token. On Linux and macOS it offers to add the token to your
 shell config. Needs an interactive terminal.`,
 		Example: `  # Asks for a name and an expiry, then prints the new token
   linkwarden tokens generate`,
-		RunE: execute,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return execute(app, cmd, args)
+		},
 	}
 
 	return cmd
 }
 
-func execute(cmd *cobra.Command, _ []string) error {
-	promptResult, err := utils.Input("Token name:", func(s string) error {
+func execute(app *app.App, cmd *cobra.Command, _ []string) error {
+	promptResult, err := utils.Input(app, "Token name:", func(s string) error {
 		if strings.TrimSpace(s) == "" {
 			return errors.New("token name is required")
 		}
@@ -54,7 +57,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("prompt for token name: %w", err)
 	}
 
-	_, expirationResult, err := utils.Select("Token expiration:",
+	_, expirationResult, err := utils.Select(app, "Token expiration:",
 		[]string{"7 days", "30 days", "60 days", "90 days", "no expiration"})
 	if err != nil {
 		return fmt.Errorf("prompt for token expiration: %w", err)
@@ -76,7 +79,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 	// Prompt do you want app to set ENV Variable on your system?
 	// Only in Linux / macOS
 	if runtime.GOOS == "linux" || runtime.GOOS == "darwin" {
-		_, result, err := utils.Select("Do you want the CLI to set the token in your shell config?",
+		_, result, err := utils.Select(app, "Do you want the CLI to set the token in your shell config?",
 			[]string{"Yes", "No"})
 		if err != nil {
 			return fmt.Errorf("prompt: %w", err)
@@ -134,7 +137,7 @@ func printManualSetupInstructions(token string) {
 		return style.Render(s)
 	}
 
-	printStep := func(n int, label, command string) {
+	printStep := func(n int, label string, command string) {
 		fmt.Printf("%s %s\n", c(step, fmt.Sprintf("%d.", n)), label)
 		fmt.Printf("   %s\n", c(cmdColor, command))
 	}

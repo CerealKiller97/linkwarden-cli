@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/choice"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
@@ -19,7 +20,7 @@ var sortOrders = []choice.Option[int]{
 	{Name: "description-desc", Value: 5, Description: "Description, Z to A"},
 }
 
-func Command() *cobra.Command {
+func Command(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "search",
 		Short: "Search links",
@@ -31,7 +32,9 @@ func Command() *cobra.Command {
 
   # IDs only, one per line
   linkwarden search --query golang -q`,
-		RunE: execute,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return execute(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().String("query", "", "Search query string.")
@@ -41,7 +44,7 @@ func Command() *cobra.Command {
 	return cmd
 }
 
-func execute(cmd *cobra.Command, _ []string) error {
+func execute(app *app.App, cmd *cobra.Command, _ []string) error {
 	query, err := cmd.Flags().GetString("query")
 	if err != nil {
 		return err
@@ -73,7 +76,7 @@ func execute(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("search links: %w", err)
 	}
 
-	renderSearchResultsTable(links)
+	renderSearchResultsTable(app, links)
 
 	return nil
 }

@@ -29,7 +29,7 @@ func TestUpdateSendsFlagsAsRequestBody(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Update()
+	cmd := Update(nil)
 	cmd.SetArgs([]string{"--id", "9", "--name", "Renamed"})
 	assert.NoError(cmd.Execute())
 	assert.Equal("Renamed", gotBody["name"])
@@ -46,7 +46,7 @@ func TestUpdatePropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Update()
+	cmd := Update(nil)
 	cmd.SetArgs([]string{"--id", "9"})
 	assert.Error(cmd.Execute())
 }

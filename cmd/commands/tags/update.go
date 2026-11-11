@@ -3,12 +3,13 @@ package tags
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
-func Update() *cobra.Command {
+func Update(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Rename a tag",
@@ -17,7 +18,9 @@ func Update() *cobra.Command {
 
   # Pick the tag from a list and rename it
   linkwarden tags update --name kubernetes`,
-		RunE: executeUpdate,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeUpdate(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("id", 0, "Tag ID.")
@@ -30,11 +33,11 @@ func Update() *cobra.Command {
 	return cmd
 }
 
-func executeUpdate(cmd *cobra.Command, _ []string) error {
+func executeUpdate(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveID(
-		cmd,
+		app, cmd,
 		"id",
 		"Select Tag to update:",
 		tagsPickerFetch(cmd.Context(), client),
@@ -52,5 +55,5 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 
 	log.Info().Int("id", tag.ID).Str("name", tag.Name).Msg("Tag updated successfully")
 
-	return utils.PrintRecord(tag, tag.ID)
+	return utils.PrintRecord(app, tag, tag.ID)
 }

@@ -21,7 +21,7 @@ func TestListRendersTokens(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := List()
+	cmd := List(nil)
 	assert.NoError(cmd.Execute())
 }
 
@@ -35,6 +35,6 @@ func TestListPropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := List()
+	cmd := List(nil)
 	assert.Error(cmd.Execute())
 }

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"charm.land/lipgloss/v2"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
@@ -75,11 +76,11 @@ func signInMethods(cfg *linkwarden.LoginConfig) []signInMethod {
 var openBrowser = utils.OpenBrowser
 
 // newClient builds an SDK client; a variable so tests can point it elsewhere.
-var newClient = func(baseURL, token string) *linkwarden.Client {
+var newClient = func(baseURL string, token string) *linkwarden.Client {
 	return linkwarden.New(baseURL, token)
 }
 
-func Command() *cobra.Command {
+func Command(app *app.App) *cobra.Command {
 	return &cobra.Command{
 		Use:   "init",
 		Short: "Set up the CLI with your Linkwarden account",
@@ -90,11 +91,13 @@ func Command() *cobra.Command {
   linkwarden init`,
 		Args:        cobra.NoArgs,
 		Annotations: map[string]string{SkipAuthAnnotation: "true"},
-		RunE:        run,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return run(app, cmd, args)
+		},
 	}
 }
 
-func run(cmd *cobra.Command, _ []string) error {
+func run(app *app.App, cmd *cobra.Command, _ []string) error {
 	ctx := cmd.Context()
 
 	existing, err := utils.LoadConfig()
@@ -107,7 +110,7 @@ func run(cmd *cobra.Command, _ []string) error {
 	fmt.Println()
 
 	if existing.Token != "" {
-		_, answer, err := utils.Select(
+		_, answer, err := utils.Select(app,
 			fmt.Sprintf("You're already set up for %s. Overwrite it?", existing.URL), []string{"No", "Yes"})
 		if err != nil {
 			return err
@@ -123,7 +126,7 @@ func run(cmd *cobra.Command, _ []string) error {
 		defaultURL = utils.DefaultInstanceURL
 	}
 
-	rawURL, err := utils.InputDefault("Linkwarden URL:", defaultURL, validateURL)
+	rawURL, err := utils.InputDefault(app, "Linkwarden URL:", defaultURL, validateURL)
 	if err != nil {
 		return err
 	}
@@ -141,7 +144,7 @@ func run(cmd *cobra.Command, _ []string) error {
 		labels[i] = m.Label
 	}
 
-	idx, _, err := utils.Select("How would you like to set up your account?", labels)
+	idx, _, err := utils.Select(app, "How would you like to set up your account?", labels)
 	if err != nil {
 		return err
 	}
@@ -149,9 +152,9 @@ func run(cmd *cobra.Command, _ []string) error {
 	var token string
 	switch method := methods[idx]; {
 	case method.Password:
-		token, err = passwordFlow(ctx, instanceURL)
+		token, err = passwordFlow(ctx, app, instanceURL)
 	default:
-		token, err = tokenFlow(instanceURL, method.Provider)
+		token, err = tokenFlow(app, instanceURL, method.Provider)
 	}
 	if err != nil {
 		return err
@@ -182,7 +185,7 @@ func run(cmd *cobra.Command, _ []string) error {
 // first. Linkwarden's Google/Apple/... sign-in is an OAuth redirect that only
 // ends in a browser session cookie, so the CLI can't receive a token from it
 // directly; instead the user signs in in the browser and creates a token there.
-func tokenFlow(instanceURL, provider string) (string, error) {
+func tokenFlow(app *app.App, instanceURL string, provider string) (string, error) {
 	pageURL := accessTokensURL(instanceURL)
 
 	fmt.Println()
@@ -195,7 +198,7 @@ func tokenFlow(instanceURL, provider string) (string, error) {
 		fmt.Println("Couldn't open a browser; open the URL above manually.")
 	}
 
-	token, err := utils.Password("Access token:", required("access token"))
+	token, err := utils.Password(app, "Access token:", required("access token"))
 	if err != nil {
 		return "", err
 	}
@@ -205,7 +208,7 @@ func tokenFlow(instanceURL, provider string) (string, error) {
 
 // tokenSteps is the numbered how-to tokenFlow prints, with an extra sign-in
 // step for an SSO provider.
-func tokenSteps(pageURL, provider string, colorOn bool) []string {
+func tokenSteps(pageURL string, provider string, colorOn bool) []string {
 	step := stepStyle
 	link := linkStyle
 	c := func(style lipgloss.Style, s string) string {
@@ -246,13 +249,13 @@ func tokenSteps(pageURL, provider string, colorOn bool) []string {
 
 // passwordFlow asks for email/username and password, then exchanges them for a
 // long-lived access token.
-func passwordFlow(ctx context.Context, instanceURL string) (string, error) {
-	username, err := utils.Input("Email or username:", required("email or username"))
+func passwordFlow(ctx context.Context, app *app.App, instanceURL string) (string, error) {
+	username, err := utils.Input(app, "Email or username:", required("email or username"))
 	if err != nil {
 		return "", err
 	}
 
-	password, err := utils.Password("Password:", required("password"))
+	password, err := utils.Password(app, "Password:", required("password"))
 	if err != nil {
 		return "", err
 	}
@@ -262,7 +265,7 @@ func passwordFlow(ctx context.Context, instanceURL string) (string, error) {
 
 // loginForToken signs in with a username and password, then uses that session to
 // mint a non-expiring access token for the CLI, so the password is never stored.
-func loginForToken(ctx context.Context, instanceURL, username, password string) (string, error) {
+func loginForToken(ctx context.Context, instanceURL string, username string, password string) (string, error) {
 	session, err := newClient(instanceURL, "").Session.Create(ctx, linkwarden.CreateSessionRequest{
 		Username:    username,
 		Password:    password,
@@ -286,7 +289,7 @@ func loginForToken(ctx context.Context, instanceURL, username, password string) 
 }
 
 // verify checks token against the instance and returns the signed-in user.
-func verify(ctx context.Context, instanceURL, token string) (*linkwarden.User, error) {
+func verify(ctx context.Context, instanceURL string, token string) (*linkwarden.User, error) {
 	user, err := newClient(instanceURL, token).Users.Me(ctx)
 	if err != nil {
 		if hasStatus(err, http.StatusUnauthorized) {

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
@@ -22,7 +23,7 @@ const (
 	unorganizedStateDir       = "unorganized"
 )
 
-func Create() *cobra.Command {
+func Create(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a collection",
@@ -35,7 +36,9 @@ func Create() *cobra.Command {
 
   # Create one and keep its ID for a script
   COLLECTION=$(linkwarden collections create --name Inbox -q)`,
-		RunE: executeCreate,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeCreate(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().String("name", "", "Collection name.")
@@ -52,7 +55,7 @@ func Create() *cobra.Command {
 	return cmd
 }
 
-func executeCreate(cmd *cobra.Command, _ []string) error {
+func executeCreate(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	name := cmd.Flag("name").Value.String()
@@ -113,7 +116,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		Int("id", collection.ID).
 		Msg("Collection created successfully")
 
-	return utils.PrintRecord(collection, collection.ID)
+	return utils.PrintRecord(app, collection, collection.ID)
 }
 
 // unorganizedParentID returns the ID of the Unorganized collection in

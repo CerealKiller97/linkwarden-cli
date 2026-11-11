@@ -32,7 +32,7 @@ func TestImportSendsFileContentsAndFormat(t *testing.T) {
 	filePath := filepath.Join(t.TempDir(), "bookmarks.html")
 	require.NoError(t, os.WriteFile(filePath, []byte("<html>bookmarks</html>"), 0o600))
 
-	cmd := Import()
+	cmd := Import(nil)
 	cmd.SetArgs([]string{"--file", filePath, "--format", "html"})
 	assert.NoError(cmd.Execute())
 	assert.Equal(1, gotBody.Format)
@@ -44,7 +44,7 @@ func TestImportMissingFileErrors(t *testing.T) {
 
 	utils.SetVars("test-token", "http://unused.invalid")
 
-	cmd := Import()
+	cmd := Import(nil)
 	cmd.SetArgs([]string{"--file", "/nonexistent/file.json", "--format", "linkwarden"})
 	assert.Error(cmd.Execute())
 }

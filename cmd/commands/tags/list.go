@@ -3,12 +3,13 @@ package tags
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func List() *cobra.Command {
+func List(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List tags",
@@ -20,7 +21,9 @@ func List() *cobra.Command {
 
   # Tag IDs only, one per line
   linkwarden tags list -q`,
-		RunE: executeList,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeList(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().String("search", "", "Search query string.")
@@ -29,7 +32,7 @@ func List() *cobra.Command {
 	return cmd
 }
 
-func executeList(cmd *cobra.Command, _ []string) error {
+func executeList(app *app.App, cmd *cobra.Command, _ []string) error {
 	search, err := cmd.Flags().GetString("search")
 	if err != nil {
 		return err
@@ -51,7 +54,7 @@ func executeList(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("list tags: %w", err)
 	}
 
-	renderTagsTable(tagList, tagList)
+	renderTagsTable(app, tagList, tagList)
 
 	return nil
 }

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -62,9 +64,7 @@ func TestPrintFileInfoByMode(t *testing.T) {
 }
 
 func newModeTable(out *bytes.Buffer, mode OutputMode) *Table {
-	tbl := NewTable("Example")
-	tbl.out = out
-	tbl.mode = &mode
+	tbl := NewTable(app.New(app.WithOutput(out), app.WithMode(mode)), "Example")
 	tbl.Header("ID", "Name")
 	tbl.Row(1, "first")
 	tbl.Row(2, nil)
@@ -106,10 +106,7 @@ func TestTableQuietWithoutIDColumnPrintsNothing(t *testing.T) {
 	assert := require.New(t)
 
 	var out bytes.Buffer
-	mode := OutputIDs
-	tbl := NewSummary("Totals")
-	tbl.out = &out
-	tbl.mode = &mode
+	tbl := NewSummary(app.New(app.WithOutput(&out), app.WithMode(OutputIDs)), "Totals")
 	tbl.Header("Total", "Failed")
 	tbl.Row(3, 0)
 	tbl.Render()

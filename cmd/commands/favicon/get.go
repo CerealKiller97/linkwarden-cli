@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
-func Get() *cobra.Command {
+func Get(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Fetch a favicon for a URL",
@@ -18,7 +19,9 @@ func Get() *cobra.Command {
 
   # Save it to a file
   linkwarden favicon get --url https://go.dev --output go.ico`,
-		RunE: executeGet,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeGet(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().String("url", "", "URL to fetch a favicon for.")
@@ -31,7 +34,7 @@ func Get() *cobra.Command {
 	return cmd
 }
 
-func executeGet(cmd *cobra.Command, _ []string) error {
+func executeGet(app *app.App, cmd *cobra.Command, _ []string) error {
 	targetURL, err := cmd.Flags().GetString("url")
 	if err != nil {
 		return err
@@ -51,7 +54,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 	}
 
 	if output == "" {
-		return utils.PrintFileInfo(favicon.ContentType, len(favicon.Data))
+		return utils.PrintFileInfo(app, favicon.ContentType, len(favicon.Data))
 	}
 
 	if err := os.WriteFile(output, favicon.Data, 0o600); err != nil {

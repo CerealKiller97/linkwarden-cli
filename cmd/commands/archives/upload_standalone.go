@@ -6,12 +6,13 @@ import (
 	"path/filepath"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/choice"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func UploadStandalone() *cobra.Command {
+func UploadStandalone(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upload-standalone",
 		Short: "Upload a local file as a new link's archive",
@@ -20,7 +21,9 @@ func UploadStandalone() *cobra.Command {
 
   # Same with a PDF
   linkwarden archives upload-standalone --url https://12factor.net --file twelve-factor.pdf --format pdf`,
-		RunE: executeUploadStandalone,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeUploadStandalone(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().String("file", "", "Local file to upload.")
@@ -37,7 +40,7 @@ func UploadStandalone() *cobra.Command {
 	return cmd
 }
 
-func executeUploadStandalone(cmd *cobra.Command, _ []string) error {
+func executeUploadStandalone(app *app.App, cmd *cobra.Command, _ []string) error {
 	filePath, err := cmd.Flags().GetString("file")
 	if err != nil {
 		return err
@@ -70,7 +73,7 @@ func executeUploadStandalone(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("upload standalone archive: %w", err)
 	}
 
-	renderLinkTable(*link)
+	renderLinkTable(app, *link)
 
 	return nil
 }

@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func Create() *cobra.Command {
+func Create(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create or update a highlight on a link",
@@ -20,7 +21,9 @@ func Create() *cobra.Command {
   # Pick the link from a list and add a comment
   linkwarden highlights create --text "Clear is better than clever." --color yellow \
     --start-offset 120 --end-offset 148 --comment "quote this"`,
-		RunE: executeCreate,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeCreate(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("link-id", 0, "Link ID.")
@@ -39,11 +42,11 @@ func Create() *cobra.Command {
 	return cmd
 }
 
-func executeCreate(cmd *cobra.Command, _ []string) error {
+func executeCreate(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	linkID, err := utils.ResolveIDPaged(
-		cmd,
+		app, cmd,
 		"link-id",
 		"Select Link to highlight:",
 		pickers.Links(cmd.Context(), client),
@@ -87,7 +90,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("create highlight: %w", err)
 	}
 
-	renderHighlightTable(*highlight)
+	renderHighlightTable(app, *highlight)
 
 	return nil
 }

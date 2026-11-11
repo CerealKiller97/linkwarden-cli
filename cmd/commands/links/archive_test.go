@@ -21,7 +21,7 @@ func TestArchiveUsesIDFlag(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Archive()
+	cmd := Archive(nil)
 	cmd.SetArgs([]string{"--id", "8"})
 	assert.NoError(cmd.Execute())
 }
@@ -36,7 +36,7 @@ func TestArchivePropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Archive()
+	cmd := Archive(nil)
 	cmd.SetArgs([]string{"--id", "8"})
 	assert.Error(cmd.Execute())
 }

@@ -24,7 +24,7 @@ func TestListRendersCollections(t *testing.T) {
 	utils.SetVars("test-token", server.URL)
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
-	cmd := List()
+	cmd := List(nil)
 	assert.NoError(cmd.Execute())
 }
 
@@ -36,7 +36,7 @@ func TestListCachesUnorganizedIDForCreate(t *testing.T) {
 	var listCalls, gotParentID int
 	newUnorganizedServer(t, 38899, &listCalls, &gotParentID)
 
-	assert.NoError(List().Execute())
+	assert.NoError(List(nil).Execute())
 	assert.Equal(1, listCalls)
 
 	file, err := utils.InstanceStateFile("unorganized", utils.GetInstanceURL())
@@ -46,7 +46,7 @@ func TestListCachesUnorganizedIDForCreate(t *testing.T) {
 	assert.Equal("38899", string(cached))
 
 	// create then uses the ID list cached, without listing again.
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"--name", "New Collection"})
 	assert.NoError(cmd.Execute())
 	assert.Equal(1, listCalls)
@@ -64,7 +64,7 @@ func TestListSucceedsWhenCacheCantBeWritten(t *testing.T) {
 	var listCalls, gotParentID int
 	newUnorganizedServer(t, 1, &listCalls, &gotParentID)
 
-	assert.NoError(List().Execute())
+	assert.NoError(List(nil).Execute())
 }
 
 func TestListPropagatesAPIError(t *testing.T) {
@@ -77,6 +77,6 @@ func TestListPropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := List()
+	cmd := List(nil)
 	assert.Error(cmd.Execute())
 }

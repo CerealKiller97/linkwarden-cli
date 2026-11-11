@@ -21,6 +21,7 @@ import (
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/search"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tags"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/tokens"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog"
@@ -28,20 +29,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func registerCommands(root *cobra.Command) {
-	root.AddCommand(initcmd.Command())
-	root.AddCommand(links.Command())
-	root.AddCommand(tokens.Command())
-	root.AddCommand(collections.Command())
-	root.AddCommand(migrations.Command())
-	root.AddCommand(tags.Command())
-	root.AddCommand(rss.Command())
-	root.AddCommand(search.Command())
-	root.AddCommand(dashboard.Command())
-	root.AddCommand(highlights.Command())
-	root.AddCommand(archives.Command())
-	root.AddCommand(config.Command())
-	root.AddCommand(favicon.Command())
+// registerCommands adds every command to root. They all share app, which
+// PersistentPreRunE fills in once flags are parsed and before any command runs.
+func registerCommands(root *cobra.Command, app *app.App) {
+	root.AddCommand(initcmd.Command(app))
+	root.AddCommand(links.Command(app))
+	root.AddCommand(tokens.Command(app))
+	root.AddCommand(collections.Command(app))
+	root.AddCommand(migrations.Command(app))
+	root.AddCommand(tags.Command(app))
+	root.AddCommand(rss.Command(app))
+	root.AddCommand(search.Command(app))
+	root.AddCommand(dashboard.Command(app))
+	root.AddCommand(highlights.Command(app))
+	root.AddCommand(archives.Command(app))
+	root.AddCommand(config.Command(app))
+	root.AddCommand(favicon.Command(app))
 
 	root.PersistentFlags().Bool("non-interactive", false, "Never prompt (e.g. for a picker); fail fast instead. "+
 		"On by default when stdin isn't a terminal.")
@@ -53,63 +56,88 @@ func registerCommands(root *cobra.Command) {
 		// failure, not a usage mistake: don't bury it under the help text.
 		cmd.SilenceUsage = true
 
-		nonInteractive, err := cmd.Flags().GetBool("non-interactive")
+		built, err := newApp(cmd)
 		if err != nil {
 			return err
 		}
-		utils.SetNonInteractive(nonInteractive)
+		// Every command was built holding this pointer; fill in what it points to.
+		*app = *built
 
-		if err := applyOutputFlags(cmd); err != nil {
-			return err
+		// Until every command reads the App, keep the legacy package
+		// variables in step with it.
+		utils.SetNonInteractive(app.NonInteractive)
+		utils.SetOutputMode(app.Mode)
+		if cmd.Annotations[initcmd.SkipAuthAnnotation] == "" {
+			utils.SetVars(app.Token, app.InstanceURL)
 		}
-
-		if cmd.Annotations[initcmd.SkipAuthAnnotation] != "" {
-			return nil
-		}
-
-		cfg, err := utils.LoadConfig()
-		if err != nil {
-			return fmt.Errorf("reading config file: %w", err)
-		}
-
-		token, instanceURL, err := resolveCredentials(os.Getenv("LINKWARDEN_TOKEN"), os.Getenv("LINKWARDEN_URL"), cfg)
-		if err != nil {
-			return err
-		}
-
-		utils.SetVars(token, instanceURL)
 
 		return nil
 	}
 }
 
+// newApp builds the App a command runs with from the global flags and, unless
+// the command skips auth (init), the credentials from the environment and the
+// config file.
+func newApp(cmd *cobra.Command) (*app.App, error) {
+	nonInteractive, err := cmd.Flags().GetBool("non-interactive")
+	if err != nil {
+		return nil, err
+	}
+
+	mode, err := applyOutputFlags(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := []app.Option{
+		app.WithMode(mode),
+		app.WithNonInteractive(nonInteractive),
+	}
+
+	if cmd.Annotations[initcmd.SkipAuthAnnotation] != "" {
+		return app.New(opts...), nil
+	}
+
+	cfg, err := utils.LoadConfig()
+	if err != nil {
+		return nil, fmt.Errorf("reading config file: %w", err)
+	}
+
+	token, instanceURL, err := resolveCredentials(os.Getenv("LINKWARDEN_TOKEN"), os.Getenv("LINKWARDEN_URL"), cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	opts = append(opts, app.WithCredentials(token, instanceURL))
+
+	return app.New(opts...), nil
+}
+
 var errJSONAndQuiet = errors.New("--json and --quiet can't be used together")
 
-// applyOutputFlags sets the output mode from --json and --quiet. --quiet also
-// hides info messages on stderr, leaving warnings and errors.
-func applyOutputFlags(cmd *cobra.Command) error {
+// applyOutputFlags returns the output mode --json and --quiet ask for. --quiet
+// also hides info messages on stderr, leaving warnings and errors.
+func applyOutputFlags(cmd *cobra.Command) (app.OutputMode, error) {
 	asJSON, err := cmd.Flags().GetBool("json")
 	if err != nil {
-		return err
+		return app.OutputTable, err
 	}
 	quiet, err := cmd.Flags().GetBool("quiet")
 	if err != nil {
-		return err
+		return app.OutputTable, err
 	}
 
 	switch {
 	case asJSON && quiet:
-		return errJSONAndQuiet
+		return app.OutputTable, errJSONAndQuiet
 	case asJSON:
-		utils.SetOutputMode(utils.OutputJSON)
+		return app.OutputJSON, nil
 	case quiet:
-		utils.SetOutputMode(utils.OutputIDs)
 		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+		return app.OutputIDs, nil
 	default:
-		utils.SetOutputMode(utils.OutputTable)
+		return app.OutputTable, nil
 	}
-
-	return nil
 }
 
 // errNotLoggedIn is returned when neither LINKWARDEN_TOKEN nor the config file
@@ -120,7 +148,7 @@ var errNotLoggedIn = errors.New(`not logged in: run "linkwarden init" or set LIN
 // wins over the config file; with it, the URL comes from LINKWARDEN_URL or the
 // default, as before the config file existed. Without it, the config file's token
 // is used, with its URL unless LINKWARDEN_URL overrides it.
-func resolveCredentials(envToken, envURL string, cfg utils.Config) (string, string, error) {
+func resolveCredentials(envToken string, envURL string, cfg utils.Config) (string, string, error) {
 	if envToken != "" {
 		return envToken, utils.NormalizeInstanceURL(envURL), nil
 	}
@@ -155,7 +183,7 @@ add --json for machine-readable output, or -q for bare IDs.`,
 		SilenceErrors: true,
 	}
 
-	registerCommands(rootCmd)
+	registerCommands(rootCmd, app.New())
 	removePowerShellCompletion(rootCmd)
 
 	return rootCmd

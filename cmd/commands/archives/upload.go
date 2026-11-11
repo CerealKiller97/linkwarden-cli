@@ -7,12 +7,13 @@ import (
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/choice"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func Upload() *cobra.Command {
+func Upload(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upload",
 		Short: "Upload a local file as a link's archive",
@@ -21,7 +22,9 @@ func Upload() *cobra.Command {
 
   # Use an image as the link's preview
   linkwarden archives upload --link-id 412 --file cover.png --format png --preview`,
-		RunE: executeUpload,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeUpload(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("link-id", 0, "Link ID.")
@@ -38,11 +41,11 @@ func Upload() *cobra.Command {
 	return cmd
 }
 
-func executeUpload(cmd *cobra.Command, _ []string) error {
+func executeUpload(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	linkID, err := utils.ResolveIDPaged(
-		cmd,
+		app, cmd,
 		"link-id",
 		"Select Link:",
 		pickers.Links(cmd.Context(), client),
@@ -77,7 +80,7 @@ func executeUpload(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("upload archive: %w", err)
 	}
 
-	renderLinkTable(*link)
+	renderLinkTable(app, *link)
 
 	return nil
 }

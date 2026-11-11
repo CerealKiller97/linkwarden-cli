@@ -114,7 +114,7 @@ func TestGenerateCreatesTokenAndWritesShellConfig(t *testing.T) {
 		prompttest.Answer{Label: "set the token in your shell config", Value: "Yes"},
 	)
 
-	assert.NoError(Generate().Execute())
+	assert.NoError(Generate(nil).Execute())
 
 	assert.Equal([]map[string]any{{"name": "laptop", "expires": float64(ThirtyDays)}}, api.created)
 
@@ -143,7 +143,7 @@ func TestGenerateDeclinedPrintsManualStepsAndLeavesShellConfigAlone(t *testing.T
 	)
 
 	var err error
-	out := captureStdout(t, func() { err = Generate().Execute() })
+	out := captureStdout(t, func() { err = Generate(nil).Execute() })
 	assert.NoError(err)
 
 	assert.Equal(float64(NoExpiry), api.created[0]["expires"])
@@ -165,7 +165,7 @@ func TestGenerateAPIErrorSkipsShellConfig(t *testing.T) {
 		prompttest.Answer{Label: "Token expiration", Value: "7 days"},
 	)
 
-	assert.Error(Generate().Execute())
+	assert.Error(Generate(nil).Execute())
 	assert.NoFileExists(zshenv)
 }
 
@@ -182,7 +182,7 @@ func TestGenerateRejectsBlankTokenName(t *testing.T) {
 	}})
 	defer restore()
 
-	_ = Generate().Execute()
+	_ = Generate(nil).Execute()
 	assert.EqualError(validationErr, "token name is required")
 	assert.Empty(api.created)
 }
@@ -211,7 +211,7 @@ func TestRevokeRevokesTheChosenTokenWhenNamesRepeat(t *testing.T) {
 		prompttest.Answer{Label: `Revoke token "CI"?`, Value: "Yes"},
 	)
 
-	assert.NoError(Revoke().Execute())
+	assert.NoError(Revoke(nil).Execute())
 	assert.Equal([]string{"13"}, api.revoked)
 }
 
@@ -226,7 +226,7 @@ func TestRevokeAnsweringNoRevokesNothing(t *testing.T) {
 		prompttest.Answer{Label: "Revoke token", Value: "No"},
 	)
 
-	assert.NoError(Revoke().Execute())
+	assert.NoError(Revoke(nil).Execute())
 	assert.Empty(api.revoked)
 }
 
@@ -239,7 +239,7 @@ func TestRevokeYesFlagSkipsConfirmation(t *testing.T) {
 	// Only the picker is answered: a confirmation prompt would fail the test.
 	prompttest.Use(t, prompttest.Answer{Label: "Select token to revoke", Value: "laptop"})
 
-	cmd := Revoke()
+	cmd := Revoke(nil)
 	cmd.SetArgs([]string{"--yes"})
 	assert.NoError(cmd.Execute())
 	assert.Equal([]string{"12"}, api.revoked)

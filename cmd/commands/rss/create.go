@@ -3,12 +3,13 @@ package rss
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/spf13/cobra"
 )
 
-func Create() *cobra.Command {
+func Create(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create an RSS subscription",
@@ -17,7 +18,9 @@ func Create() *cobra.Command {
 
   # Name the destination collection instead
   linkwarden rss create --name "The Go Blog" --url https://go.dev/blog/feed.atom --collection-name Go`,
-		RunE: executeCreate,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeCreate(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().String("name", "", "Subscription name.")
@@ -35,7 +38,7 @@ func Create() *cobra.Command {
 	return cmd
 }
 
-func executeCreate(cmd *cobra.Command, _ []string) error {
+func executeCreate(app *app.App, cmd *cobra.Command, _ []string) error {
 	name, err := cmd.Flags().GetString("name")
 	if err != nil {
 		return err
@@ -67,7 +70,7 @@ func executeCreate(cmd *cobra.Command, _ []string) error {
 		return fmt.Errorf("create RSS subscription: %w", err)
 	}
 
-	renderRSSTable([]linkwarden.RSSSubscription{*sub}, sub)
+	renderRSSTable(app, []linkwarden.RSSSubscription{*sub}, sub)
 
 	return nil
 }

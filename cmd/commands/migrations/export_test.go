@@ -25,7 +25,7 @@ func TestExportWritesOutputFile(t *testing.T) {
 
 	outputPath := filepath.Join(t.TempDir(), "export.json")
 
-	cmd := Export()
+	cmd := Export(nil)
 	cmd.SetArgs([]string{"--output", outputPath})
 	assert.NoError(cmd.Execute())
 
@@ -44,7 +44,7 @@ func TestExportPropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Export()
+	cmd := Export(nil)
 	cmd.SetArgs([]string{"--output", filepath.Join(t.TempDir(), "export.json")})
 	assert.Error(cmd.Execute())
 }

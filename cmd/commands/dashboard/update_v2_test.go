@@ -38,7 +38,7 @@ func TestUpdateV2SendsParsedLayout(t *testing.T) {
 
 	filePath := writeLayoutFile(t, `[{"type":"STATS","enabled":true,"order":0}]`)
 
-	cmd := UpdateV2()
+	cmd := UpdateV2(nil)
 	cmd.SetArgs([]string{"--file", filePath})
 	assert.NoError(cmd.Execute())
 	assert.Len(gotBody, 1)
@@ -50,7 +50,7 @@ func TestUpdateV2MissingFileErrors(t *testing.T) {
 
 	utils.SetVars("test-token", "http://unused.invalid")
 
-	cmd := UpdateV2()
+	cmd := UpdateV2(nil)
 	cmd.SetArgs([]string{"--file", "/nonexistent/layout.json"})
 	assert.Error(cmd.Execute())
 }

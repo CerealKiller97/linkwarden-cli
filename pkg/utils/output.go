@@ -4,32 +4,34 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"reflect"
+
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 )
 
-// OutputMode is how commands print their results on stdout. It is set from the
-// global --json and --quiet flags.
-type OutputMode int
+// OutputMode is how commands print their results; see app.OutputMode.
+type OutputMode = app.OutputMode
 
 const (
-	// OutputTable prints the CLI's usual tables (the default).
-	OutputTable OutputMode = iota
-	// OutputJSON prints results as indented JSON, using the API's field names.
-	OutputJSON
-	// OutputIDs prints only the ID of each result, one per line, for piping
-	// into another command. Tables without an ID column print nothing.
-	OutputIDs
+	OutputTable = app.OutputTable
+	OutputJSON  = app.OutputJSON
+	OutputIDs   = app.OutputIDs
 )
 
+// outputMode is the legacy output mode, used only when a command runs without
+// an *app.App.
 var outputMode = OutputTable
 
-// SetOutputMode sets how results are printed; see OutputMode.
+// SetOutputMode sets the legacy output mode.
+//
+// Legacy, removed once every command reads the App: run the command with an *app.App (app.WithMode in tests).
 func SetOutputMode(m OutputMode) {
 	outputMode = m
 }
 
-// GetOutputMode reports how results are printed; see OutputMode.
+// GetOutputMode reports the legacy output mode.
+//
+// Legacy, removed once every command reads the App: read the App's Mode.
 func GetOutputMode() OutputMode {
 	return outputMode
 }
@@ -51,8 +53,9 @@ func WriteJSON(w io.Writer, v any) error {
 // PrintRecord prints a single result of a command that otherwise only logs
 // what it did (create, update): as JSON with --json, its ID with --quiet, and
 // nothing in table mode, where the log line says it all.
-func PrintRecord(v any, id int) error {
-	return printRecord(os.Stdout, outputMode, v, id)
+func PrintRecord(app *app.App, v any, id int) error {
+	app = orLegacy(app)
+	return printRecord(app.Stdout(), app.Mode, v, id)
 }
 
 func printRecord(w io.Writer, mode OutputMode, v any, id int) error {
@@ -76,8 +79,9 @@ type fileInfo struct {
 // PrintFileInfo prints the content type and size of a file that was fetched
 // but not saved (no --output): a line of text, a JSON object with --json, and
 // nothing with --quiet.
-func PrintFileInfo(contentType string, size int) error {
-	return printFileInfo(os.Stdout, outputMode, contentType, size)
+func PrintFileInfo(app *app.App, contentType string, size int) error {
+	app = orLegacy(app)
+	return printFileInfo(app.Stdout(), app.Mode, contentType, size)
 }
 
 func printFileInfo(w io.Writer, mode OutputMode, contentType string, size int) error {

@@ -3,13 +3,14 @@ package collections
 import (
 	"fmt"
 
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
-func Update() *cobra.Command {
+func Update(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update a collection",
@@ -22,7 +23,9 @@ func Update() *cobra.Command {
 
   # Pick a collection from a list and move it inside collection 9
   linkwarden collections update --parent-id 9`,
-		RunE: executeUpdate,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeUpdate(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("id", 0, "Collection ID.")
@@ -37,11 +40,11 @@ func Update() *cobra.Command {
 	return cmd
 }
 
-func executeUpdate(cmd *cobra.Command, _ []string) error {
+func executeUpdate(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveID(
-		cmd,
+		app, cmd,
 		"id",
 		"Select Collection to update:",
 		collectionsPickerFetch(cmd.Context(), client),
@@ -80,5 +83,5 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 
 	log.Info().Int("id", collection.ID).Msg("Collection updated successfully")
 
-	return utils.PrintRecord(collection, collection.ID)
+	return utils.PrintRecord(app, collection, collection.ID)
 }

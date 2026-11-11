@@ -23,7 +23,7 @@ func TestListRendersLinks(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := List()
+	cmd := List(nil)
 	cmd.SetArgs([]string{"--collection-id", "2", "--pinned-only"})
 	assert.NoError(cmd.Execute())
 	assert.Equal("collectionId=2&pinnedOnly=true", gotQuery)
@@ -39,7 +39,7 @@ func TestListPropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := List()
+	cmd := List(nil)
 	cmd.SetArgs([]string{})
 	assert.Error(cmd.Execute())
 }

@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
-func Update() *cobra.Command {
+func Update(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update",
 		Short: "Update a link",
@@ -22,7 +23,9 @@ func Update() *cobra.Command {
 
   # Pick the link from a list and change its description
   linkwarden links update --description "The classic Go style guide"`,
-		RunE: executeUpdate,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeUpdate(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("id", 0, "Link ID.")
@@ -36,11 +39,11 @@ func Update() *cobra.Command {
 	return cmd
 }
 
-func executeUpdate(cmd *cobra.Command, _ []string) error {
+func executeUpdate(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	id, err := utils.ResolveIDPaged(
-		cmd,
+		app, cmd,
 		"id",
 		"Select Link to update:",
 		pickers.Links(cmd.Context(), client),
@@ -65,5 +68,5 @@ func executeUpdate(cmd *cobra.Command, _ []string) error {
 
 	log.Info().Int("id", link.ID).Msg("Link updated successfully")
 
-	return utils.PrintRecord(link, link.ID)
+	return utils.PrintRecord(app, link, link.ID)
 }

@@ -62,7 +62,7 @@ func (v *Value[T]) names() string {
 // Flag adds --<name> to cmd. It accepts only the names in options, lists them
 // after usage in --help, and completes them in the shell. def is the name of
 // the default option, or "" for no default.
-func Flag[T ~int](cmd *cobra.Command, name, def, usage string, options []Option[T]) {
+func Flag[T ~int](cmd *cobra.Command, name string, def string, usage string, options []Option[T]) {
 	v := &Value[T]{options: options}
 	if def != "" {
 		if err := v.Set(def); err != nil {

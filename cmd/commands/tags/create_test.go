@@ -28,7 +28,7 @@ func TestCreateSendsLabelsAsTags(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"--label", "Reading", "--label", "Tech"})
 	assert.NoError(cmd.Execute())
 	assert.Len(gotBody.Tags, 2)
@@ -45,7 +45,7 @@ func TestCreatePropagatesAPIError(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"--label", "Reading"})
 	assert.Error(cmd.Execute())
 }

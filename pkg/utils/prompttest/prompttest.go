@@ -35,10 +35,23 @@ type Script struct {
 	answers []Answer
 }
 
-// Use makes answers reply to the prompts the code under test shows, in order,
-// until the test ends. A prompt with no answer left, or a label that doesn't
-// match, fails the test and aborts the prompt. Answers left unused at the end
-// fail the test too.
+// New returns a Script that replies to the prompts the code under test shows,
+// in order. Pass it to testutils.WithPrompter. A prompt with no answer left, or
+// a label that doesn't match, fails the test and aborts the prompt. Answers
+// left unused at the end fail the test too.
+func New(t testing.TB, answers ...Answer) *Script {
+	t.Helper()
+
+	s := &Script{t: t, answers: answers}
+	t.Cleanup(s.checkUsed)
+
+	return s
+}
+
+// Use is New for tests that don't run with a testutils App yet: it makes the
+// script answer every prompt until the test ends.
+//
+// Legacy, removed once every command reads the App: pass New's Script to testutils.WithPrompter instead.
 func Use(t testing.TB, answers ...Answer) *Script {
 	t.Helper()
 
@@ -46,12 +59,16 @@ func Use(t testing.TB, answers ...Answer) *Script {
 	restore := utils.SetPrompter(s)
 	t.Cleanup(func() {
 		restore()
-		if len(s.answers) > 0 {
-			t.Errorf("prompttest: %d answer(s) never asked for, first %q", len(s.answers), s.answers[0].Label)
-		}
+		s.checkUsed()
 	})
 
 	return s
+}
+
+func (s *Script) checkUsed() {
+	if len(s.answers) > 0 {
+		s.t.Errorf("prompttest: %d answer(s) never asked for, first %q", len(s.answers), s.answers[0].Label)
+	}
 }
 
 func (s *Script) next(label string) (Answer, bool) {
@@ -104,7 +121,7 @@ func (s *Script) Input(label string, validate func(string) error) (string, error
 }
 
 // InputDefault types the next answer; an empty one accepts def.
-func (s *Script) InputDefault(label, def string, validate func(string) error) (string, error) {
+func (s *Script) InputDefault(label string, def string, validate func(string) error) (string, error) {
 	return s.text(label, def, validate)
 }
 
@@ -116,7 +133,7 @@ func (s *Script) Password(label string, validate func(string) error) (string, er
 // text types an answer the way the real prompt would take it: an empty answer
 // takes def, and an answer the prompt's validation rejects fails the test,
 // because the real prompt would keep asking.
-func (s *Script) text(label, def string, validate func(string) error) (string, error) {
+func (s *Script) text(label string, def string, validate func(string) error) (string, error) {
 	a, ok := s.next(label)
 	if !ok {
 		return "", tui.ErrAborted

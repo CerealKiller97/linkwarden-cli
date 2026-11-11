@@ -35,7 +35,7 @@ func TestCreateUsesParentIDFlagWithoutListing(t *testing.T) {
 	defer server.Close()
 	utils.SetVars("test-token", server.URL)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"--name", "New Collection", "--parent-id", "5"})
 	assert.NoError(cmd.Execute())
 	assert.False(listCalled)
@@ -65,7 +65,7 @@ func TestCreateLooksUpUnorganizedWhenParentIDOmitted(t *testing.T) {
 
 	t.Setenv("XDG_STATE_HOME", t.TempDir())
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"--name", "New Collection"})
 	assert.NoError(cmd.Execute())
 	assert.Equal(1, gotBody.ParentID)
@@ -105,7 +105,7 @@ func TestCreateCachesUnorganizedIDPerInstance(t *testing.T) {
 	t.Setenv("XDG_STATE_HOME", stateHome)
 
 	createIn := func(name string) {
-		cmd := Create()
+		cmd := Create(nil)
 		cmd.SetArgs([]string{"--name", name})
 		assert.NoError(cmd.Execute())
 	}
@@ -154,7 +154,7 @@ func TestCreateReplacesOldSingleCacheFile(t *testing.T) {
 	var listCalls, gotParentID int
 	newUnorganizedServer(t, 38899, &listCalls, &gotParentID)
 
-	cmd := Create()
+	cmd := Create(nil)
 	cmd.SetArgs([]string{"--name", "New Collection"})
 	assert.NoError(cmd.Execute())
 	assert.Equal(1, listCalls, "the old file is ignored, not trusted")

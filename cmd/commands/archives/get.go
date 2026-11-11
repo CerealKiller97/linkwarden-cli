@@ -7,6 +7,7 @@ import (
 
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/choice"
 	"github.com/CerealKiller97/linkwarden-cli/cmd/commands/internal/pickers"
+	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/CerealKiller97/linkwarden-go-sdk"
 	"github.com/rs/zerolog/log"
@@ -27,7 +28,7 @@ var getFormats = append(slices.Clone(uploadFormats),
 	choice.Option[linkwarden.ArchiveFormat]{Name: "readable", Value: linkwarden.ArchiveFormatReadabilityJSON, Description: "Readability article text (JSON)"},
 )
 
-func Get() *cobra.Command {
+func Get(app *app.App) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Retrieve a link's archive file",
@@ -39,7 +40,9 @@ func Get() *cobra.Command {
 
   # Pick the link from a list and save its screenshot (PNG is the default)
   linkwarden archives get --output screenshot.png`,
-		RunE: executeGet,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return executeGet(app, cmd, args)
+		},
 	}
 
 	cmd.Flags().Int("link-id", 0, "Link ID.")
@@ -50,11 +53,11 @@ func Get() *cobra.Command {
 	return cmd
 }
 
-func executeGet(cmd *cobra.Command, _ []string) error {
+func executeGet(app *app.App, cmd *cobra.Command, _ []string) error {
 	client := utils.NewLinkwardenClient()
 
 	linkID, err := utils.ResolveIDPaged(
-		cmd,
+		app, cmd,
 		"link-id",
 		"Select Link:",
 		pickers.Links(cmd.Context(), client),
@@ -85,7 +88,7 @@ func executeGet(cmd *cobra.Command, _ []string) error {
 	}
 
 	if output == "" {
-		return utils.PrintFileInfo(file.ContentType, len(file.Data))
+		return utils.PrintFileInfo(app, file.ContentType, len(file.Data))
 	}
 
 	if err := os.WriteFile(output, file.Data, 0o600); err != nil {
