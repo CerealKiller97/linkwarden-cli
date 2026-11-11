@@ -3,7 +3,6 @@ package utils
 import (
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -43,11 +42,9 @@ func TestSaveConfigRoundTripsWithOwnerOnlyPermissions(t *testing.T) {
 	assert.NoError(err)
 	assert.Equal(want, got)
 
-	if runtime.GOOS != "windows" {
-		info, err := os.Stat(path)
-		assert.NoError(err)
-		assert.Equal(os.FileMode(0o600), info.Mode().Perm())
-	}
+	info, err := os.Stat(path)
+	assert.NoError(err)
+	assert.Equal(os.FileMode(0o600), info.Mode().Perm())
 }
 
 func TestLoadConfigInvalidJSONErrors(t *testing.T) {

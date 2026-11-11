@@ -184,8 +184,27 @@ add --json for machine-readable output, or -q for bare IDs.`,
 	}
 
 	registerCommands(rootCmd, app.New())
+	removePowerShellCompletion(rootCmd)
 
 	return rootCmd
+}
+
+// removePowerShellCompletion drops Cobra's `completion powershell`. The CLI
+// supports Linux and macOS only, where bash, zsh and fish cover completion.
+// Cobra would add its completion command lazily on Execute; adding it now lets
+// us trim it, and Execute then keeps this one.
+func removePowerShellCompletion(root *cobra.Command) {
+	root.InitDefaultCompletionCmd()
+	for _, c := range root.Commands() {
+		if c.Name() != "completion" {
+			continue
+		}
+		for _, sub := range c.Commands() {
+			if sub.Name() == "powershell" {
+				c.RemoveCommand(sub)
+			}
+		}
+	}
 }
 
 func Execute() {

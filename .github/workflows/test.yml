@@ -10,12 +10,12 @@ permissions:
 
 jobs:
   test:
-    # Releases ship to Linux, macOS (Homebrew) and Windows (winget), and
-    # terminal, signal and home-directory handling differ on each.
+    # Releases ship to Linux and macOS, and terminal, signal and
+    # home-directory handling differ between them.
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7

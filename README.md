@@ -48,26 +48,6 @@ curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/
 
 ![The installer detecting the system, downloading and checking the release, and installing linkwarden](.github/assets/install.gif)
 
-It picks the right build for your OS and CPU, checks it against the release's `checksums.txt`, and
-installs `linkwarden` into `/usr/local/bin`, asking for `sudo` when needed. It also installs tab
-completions for your shell (`--no-completions` skips them). Pick `~/.local/bin` in its menu, or pass
-`--dir`, to install just for you without `sudo`. If that folder isn't on your `PATH`, it offers to add
-it. Pass options after `bash -s --`:
-
-```bash
-# Pin a version, pick the folder, and don't ask anything (handy in CI and Dockerfiles)
-curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh | bash -s -- --version 1.0.0 --dir ~/bin --yes
-```
-
-Run it with `--help` for every option, or `--uninstall` to remove it again. Prefer to read a script
-before you run it? Download it first:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh -o install.sh
-less install.sh
-bash install.sh
-```
-
 **🍺 Homebrew** (macOS and Linux):
 
 ```bash
@@ -78,13 +58,7 @@ brew install CerealKiller97/tap/linkwarden-cli
 because of malicious packages, so `linkwarden-cli-bin` isn't published yet. It will be once
 registrations reopen. Until then, use the install script, Docker or a prebuilt binary.
 
-**🪟 Windows** (winget):
-
-```powershell
-winget install CerealKiller97.LinkwardenCLI
-```
-
-Homebrew and winget install shell completions for bash, zsh and fish where the platform supports them.
+The install script and Homebrew set up tab completions for bash, zsh and fish.
 
 **🐳 Docker** (linux/amd64 and linux/arm64):
 
@@ -160,9 +134,9 @@ export LINKWARDEN_URL="https://links.example.com"   # only for self-hosted insta
 
 > [!NOTE]
 > 📁 The CLI follows the [XDG Base Directory spec](https://specifications.freedesktop.org/basedir-spec/latest/)
-> on **Linux, macOS and Windows** alike: `init` saves `$XDG_CONFIG_HOME/linkwarden/config.json`, and a small cache lives in `$XDG_STATE_HOME/linkwarden/`.
+> on **Linux and macOS** alike: `init` saves `$XDG_CONFIG_HOME/linkwarden/config.json`, and a small cache lives in `$XDG_STATE_HOME/linkwarden/`.
 > If a variable is unset, empty or not an absolute path, the default under your home directory is used
-> (`$HOME` on Linux/macOS, `%USERPROFILE%` on Windows, e.g. `C:\Users\you\.local\state\linkwarden`).
+> (`$HOME`, e.g. `~/.local/state/linkwarden`).
 
 > [!TIP]
 > Already authenticated? Run `linkwarden tokens generate` to create a new token for another machine or script.
@@ -461,7 +435,7 @@ Leave out `--id` on most commands to pick from a list instead.
 | [`config`](docs/cli/linkwarden_config.md) | The instance's public runtime config |
 | [`favicon`](docs/cli/linkwarden_favicon.md) | Fetch the favicon for any URL |
 | [`init`](docs/cli/linkwarden_init.md) | Guided sign-in |
-| [`completion`](docs/cli/linkwarden_completion.md) | Shell completion for bash, zsh, fish and PowerShell |
+| [`completion`](docs/cli/linkwarden_completion.md) | Shell completion for bash, zsh and fish |
 
 ---
 
@@ -638,23 +612,22 @@ The script shows the next version and a changelog preview, then triggers the
 1. Tests the code.
 2. Prepends the new version's section to `CHANGELOG.md`.
 3. Commits it and tags `vX.Y.Z`.
-4. Builds Linux, macOS and Windows binaries for x86_64 and ARM64 with [GoReleaser](.goreleaser.yaml).
+4. Builds Linux and macOS binaries for x86_64 and ARM64 with [GoReleaser](.goreleaser.yaml).
 5. Pushes the commit and tag, then publishes a GitHub Release with the changelog section as its notes.
-6. Publishes packages: opens PRs against
-   [CerealKiller97/homebrew-tap](https://github.com/CerealKiller97/homebrew-tap) and
-   [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs). The
+6. Publishes packages: opens a PR against
+   [CerealKiller97/homebrew-tap](https://github.com/CerealKiller97/homebrew-tap). The
    `linkwarden-cli-bin` AUR package is built but not pushed until AUR registrations reopen.
 7. Pushes a multi-arch image to `ghcr.io/cerealkiller97/linkwarden-cli`.
 
 Preview the changelog with `scripts/release.sh changelog 1.5.0`, and the binaries, Homebrew cask,
-AUR PKGBUILD, winget manifests and Docker images with `goreleaser release --snapshot --clean`
+AUR PKGBUILD and Docker images with `goreleaser release --snapshot --clean`
 (output in `dist/`, images tagged with an `-amd64`/`-arm64` suffix).
 
 The workflow uses these repository secrets:
 
 | Secret | What it is |
 |---|---|
-| `PACKAGES_GITHUB_TOKEN` | Classic PAT with the `public_repo` scope. It pushes to `homebrew-tap` and the `winget-pkgs` fork, and opens the PRs. |
+| `PACKAGES_GITHUB_TOKEN` | PAT from a repository admin, with write access to `linkwarden-cli` and `homebrew-tap` (fine-grained: Contents and Pull requests read/write). It pushes the release commit and tag to the protected `main` branch, pushes the cask to `homebrew-tap` and opens its PR. |
 | `AUR_KEY` | Private SSH key (no passphrase) whose public half is on your [AUR account](https://aur.archlinux.org/account). Not needed until AUR publishing is turned back on. |
 
 ---

@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-11
+
+### ✨ Added
+
+- **links:** Collection option added, if nothing passed show interactive prompt for collections.
+- **sdk:** Add Linkwarden API client and full CRUD commands for links, collections, tags, tokens.
+- **sdk:** Add Search/RSS/Highlights/Dashboard SDK services and CLI commands.
+- **sdk:** Add Archives/Config/Favicon SDK services, implement migrations import.
+- **ui:** Replace forced-color table style with adaptive rounded + cyan header.
+- **cli:** Add global --non-interactive flag to force fail-fast prompting.
+- **tokens:** Show colored manual setup steps when user skips auto env config.
+- SECURITY.md.
+- CODEOWNERS.
+- Update CODEOWNERS file.
+- **release:** Publish to Homebrew, AUR and winget with GoReleaser.
+- **release:** Publish multi-arch Docker image to GHCR.
+- **links:** Create links concurrently with --concurrency flag.
+- **links:** Skip existing links in create; restyle tables.
+- **ui:** Use Linkwarden's blue palette for every TUI component.
+- **init:** Add guided `linkwarden init` setup.
+- **ui:** Standardize every command's result table.
+- **ui:** Show a spinner while waiting on the Linkwarden API.
+- **cli:** Confirm before deleting or revoking, with --yes to skip.
+- **ui:** Make table URLs clickable, opening the full URL.
+- **ui:** Page the link picker and show each link's short URL.
+- **ui:** Keep the spinner up for at least a second once it appears.
+- **cli:** Add --json and --quiet output flags.
+- Add a one-line curl | bash installer.
+- **install:** Default to /usr/local/bin and always install completions.
+- **links:** Add links import and a single-link links create.
+- **links:** Drop --file from links create.
+- **cli:** Take names for --format and --sort.
+- **release:** Add a Docker section to the release notes.
+- **release:** Add missing winget manifest metadata.
+
+### ♻️ Changed
+
+- Binary/command name from linkwarden-cli to linkwarden.
+- Replace pkg/linkwarden with linkwarden-go-sdk.
+- Replace promptui with Bubble Tea for interactive prompts.
+- Move tables and progress bar to Bubbles/Lip Gloss.
+- **cli:** Use consistent int flags for IDs.
+- Order struct fields for tighter memory alignment.
+
+### 🐛 Fixed
+
+- **utils:** Correct shell config paths for token persistence, drop broken reload.
+- **utils:** Fail fast instead of prompting when stdin isn't interactive.
+- **xdg:** Resolve XDG base directories consistently on Linux, macOS and Windows.
+- **links:** Reject unknown --collection ID in links create.
+- **ui:** Style tables after Bubble Tea's table example.
+- **cli:** Trim trailing slashes from LINKWARDEN_URL.
+- **utils:** Validate URLs before opening the browser (gosec G204).
+- **cli:** Keep logs off stdout and report each error once.
+- **cli:** Log the final command error through zerolog.
+- **tui:** Pre-fill default inputs instead of using a placeholder.
+- **collections:** Cache the Unorganized collection ID per instance.
+- Exit quietly when a prompt is cancelled.
+- **links:** Update the Linkwarden SDK to v1.0.1 for the search route.
+- **links:** Exit non-zero when links create has failures.
+- **cli:** Cancel in-flight requests on Ctrl+C.
+- **cli:** Name the go install binary linkwarden.
+
 ### ♻️ Changed
 
 - **ui:** Replace promptui with Bubble Tea for all interactive prompts. Pickers can now be filtered by typing, scroll past 10 items, and cancel with Esc.
@@ -36,4 +99,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **cli:** Trim trailing slashes from `LINKWARDEN_URL`.
 - **tokens:** `tokens revoke` revokes the selected token even when several tokens share a name.
 
-[Unreleased]: https://github.com/CerealKiller97/linkwarden-cli/commits/main
+
+[Unreleased]: https://github.com/CerealKiller97/linkwarden-cli/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/CerealKiller97/linkwarden-cli/releases/tag/v1.0.0

@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Unix only: a test can't send its own process a console Ctrl+C on Windows.
 func TestInterruptContextCancelsOnSignal(t *testing.T) {
 	assert := require.New(t)
 

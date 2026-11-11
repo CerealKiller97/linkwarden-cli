@@ -7,12 +7,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// setHome points os.UserHomeDir at dir on every OS ($HOME on Unix, %USERPROFILE%
-// on Windows).
+// setHome points os.UserHomeDir ($HOME) at dir.
 func setHome(t *testing.T, dir string) {
 	t.Helper()
 	t.Setenv("HOME", dir)
-	t.Setenv("USERPROFILE", dir)
 }
 
 func TestStateHomeUsesAbsoluteEnvVar(t *testing.T) {

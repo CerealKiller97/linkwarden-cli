@@ -24,7 +24,7 @@ builds:
       - CGO_ENABLED=0
       - CFLAGS=-O3
       - CXXFLAGS=-O3
-    goos: [linux, darwin, windows]
+    goos: [linux, darwin]
     goarch: [amd64, arm64]
     flags:
       - -trimpath
@@ -37,9 +37,6 @@ archives:
     name_template: "linkwarden_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     wrap_in_directory: true
     formats: [tar.gz]
-    format_overrides:
-      - goos: windows
-        formats: [zip]
     files:
       - README.md
       - CHANGELOG.md
@@ -176,35 +173,3 @@ aurs:
       install -Dm644 "./completions/linkwarden.bash" "${pkgdir}/usr/share/bash-completion/completions/linkwarden"
       install -Dm644 "./completions/linkwarden.zsh" "${pkgdir}/usr/share/zsh/site-functions/_linkwarden"
       install -Dm644 "./completions/linkwarden.fish" "${pkgdir}/usr/share/fish/vendor_completions.d/linkwarden.fish"
-
-# 🪟 winget install CerealKiller97.LinkwardenCLI
-# Pushes the manifest to the CerealKiller97/winget-pkgs fork and opens a PR to microsoft/winget-pkgs.
-winget:
-  - name: linkwarden-cli
-    ids: [linkwarden]
-    package_identifier: CerealKiller97.LinkwardenCLI
-    package_name: Linkwarden CLI
-    publisher: CerealKiller97
-    publisher_url: https://github.com/CerealKiller97
-    short_description: CLI for the Linkwarden bookmark manager
-    homepage: https://github.com/CerealKiller97/linkwarden-cli
-    license: AGPL-3.0-only
-    license_url: https://github.com/CerealKiller97/linkwarden-cli/blob/main/LICENSE
-    release_notes_url: https://github.com/CerealKiller97/linkwarden-cli/releases/tag/{{ .Tag }}
-    tags: [linkwarden, bookmarks, cli]
-    commit_msg_template: "New version: {{ .PackageIdentifier }} {{ .Version }}"
-    commit_author:
-      name: Stefan Bogdanović
-      email: stefan@stefanbogdanovic.dev
-    skip_upload: auto
-    repository:
-      owner: CerealKiller97
-      name: winget-pkgs
-      branch: "{{ .ProjectName }}-{{ .Version }}"
-      token: "{{ .Env.PACKAGES_GITHUB_TOKEN }}"
-      pull_request:
-        enabled: true
-        base:
-          owner: microsoft
-          name: winget-pkgs
-          branch: master

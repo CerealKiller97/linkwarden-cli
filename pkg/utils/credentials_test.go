@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"runtime"
 	"testing"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
@@ -97,9 +96,6 @@ func TestNonInteractiveFlagWinsOverAvailablePrompter(t *testing.T) {
 }
 
 func TestSaveConfigTightensExistingLoosePermissions(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("Unix file modes")
-	}
 	assert := require.New(t)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 
@@ -121,9 +117,6 @@ func TestSaveConfigTightensExistingLoosePermissions(t *testing.T) {
 }
 
 func TestSaveConfigCreatesOwnerOnlyDirectory(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("Unix file modes")
-	}
 	assert := require.New(t)
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 
@@ -136,9 +129,6 @@ func TestSaveConfigCreatesOwnerOnlyDirectory(t *testing.T) {
 }
 
 func TestAppendTokenToShellFileCreatesOwnerOnlyFile(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("Unix file modes")
-	}
 	assert := require.New(t)
 	t.Setenv("SHELL", "/bin/zsh")
 	setHome(t, t.TempDir())

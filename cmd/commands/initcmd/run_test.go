@@ -3,7 +3,6 @@ package initcmd
 import (
 	"errors"
 	"os"
-	"runtime"
 	"testing"
 
 	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
@@ -66,13 +65,11 @@ func TestRunTokenFlowSavesVerifiedToken(t *testing.T) {
 		"URL without its trailing slash, token trimmed")
 	assert.Equal([]string{srv.URL + "/settings/access-tokens"}, *opened)
 
-	if runtime.GOOS != "windows" {
-		path, err := utils.ConfigFile()
-		assert.NoError(err)
-		info, err := os.Stat(path)
-		assert.NoError(err)
-		assert.Equal(os.FileMode(0o600), info.Mode().Perm(), "the config file holds a secret")
-	}
+	path, err := utils.ConfigFile()
+	assert.NoError(err)
+	info, err := os.Stat(path)
+	assert.NoError(err)
+	assert.Equal(os.FileMode(0o600), info.Mode().Perm(), "the config file holds a secret")
 }
 
 func TestRunPasswordFlowSavesMintedTokenNotPassword(t *testing.T) {

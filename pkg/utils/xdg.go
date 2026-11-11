@@ -47,7 +47,7 @@ func InstanceStateFile(name string, instanceURL string) (string, error) {
 }
 
 // unsafeFileNameChars matches anything that isn't safe in a file name on every
-// OS (":" isn't allowed on Windows, "/" separates directories).
+// OS ("/" separates directories, and some file systems reject ":").
 var unsafeFileNameChars = regexp.MustCompile(`[^a-z0-9.-]+`)
 
 // instanceKey turns an instance URL into a file name: its host, port and path,
@@ -70,10 +70,10 @@ func instanceKey(instanceURL string) string {
 	return key
 }
 
-// xdgBaseDir resolves an XDG base directory the same way on every OS, Windows
-// included: the env var's value when it is an absolute path, otherwise (unset,
-// empty or relative, all of which the XDG spec says to ignore) the default under
-// the user's home directory ($HOME on Unix, %USERPROFILE% on Windows).
+// xdgBaseDir resolves an XDG base directory the same way on Linux and macOS:
+// the env var's value when it is an absolute path, otherwise (unset, empty or
+// relative, all of which the XDG spec says to ignore) the default under the
+// user's home directory ($HOME).
 func xdgBaseDir(envVar string, defaultUnderHome ...string) (string, error) {
 	if dir := os.Getenv(envVar); dir != "" && filepath.IsAbs(dir) {
 		return dir, nil
