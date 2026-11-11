@@ -69,8 +69,18 @@ docker run --rm -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/lin
 
 Image tags are `latest` and each release version without the `v`, for example `1.0.0`.
 
+**Arch Linux (AUR): coming soon**
+
+```bash
+yay -S linkwarden-cli-bin   # available once the AUR reopens registrations
+```
+
+The `linkwarden-cli-bin` package is built and ready. It will go up on the AUR as soon as the AUR re-enables new
+account registrations, which it closed for now because of malicious packages. Until then, use the install script,
+Docker or a prebuilt binary.
+
 <details>
-<summary><b>Prebuilt binary, from source, or Arch Linux</b></summary>
+<summary><b>Prebuilt binary or from source</b></summary>
 
 **Prebuilt binary:** grab the archive for your OS and CPU from
 [Releases](https://github.com/CerealKiller97/linkwarden-cli/releases/latest):
@@ -90,10 +100,6 @@ linkwarden --version
 ```bash
 go install github.com/CerealKiller97/linkwarden-cli/cmd/linkwarden@latest
 ```
-
-**Arch Linux:** a `linkwarden-cli-bin` AUR package is ready, but the AUR has temporarily closed new account
-registrations, so it will be published once they reopen. Until then, use the install script, Docker or a
-prebuilt binary.
 
 </details>
 
