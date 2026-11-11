@@ -8,7 +8,7 @@ import (
 )
 
 // ShellConfigPath returns the absolute path to the file the current shell reads
-// environment variables from, or "" if the shell isn't recognized (e.g. on Windows).
+// environment variables from, or "" if the shell isn't recognized.
 func ShellConfigPath() string {
 	var base string
 	var err error
@@ -32,7 +32,7 @@ func ShellConfigPath() string {
 		base, err = ConfigHome()
 		rel = []string{"fish", "config.fish"}
 	default:
-		return "" // Windows, or an unrecognized shell. Not supported.
+		return "" // An unrecognized shell. Not supported.
 	}
 
 	if err != nil {

@@ -58,25 +58,7 @@ brew install CerealKiller97/tap/linkwarden-cli
 because of malicious packages, so `linkwarden-cli-bin` isn't published yet. It will be once
 registrations reopen. Until then, use the install script, Docker or a prebuilt binary.
 
-**🪟 Windows** (PowerShell 5.1 or 7+, x86_64 and ARM64):
-
-```powershell
-irm https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.ps1 | iex
-```
-
-It checks the download against the release's `checksums.txt`, installs `linkwarden.exe` into
-`%LOCALAPPDATA%\Programs\linkwarden` (no admin needed), and offers to add that folder to your
-PATH and load tab completions from your PowerShell profile. Pass options through a script block:
-
-```powershell
-& ([scriptblock]::Create((irm https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.ps1))) -Version 1.0.0 -Yes
-```
-
-Options are `-Version`, `-Dir`, `-Yes`, `-Force`, `-NoCompletions`, `-NoModifyPath`, `-Plain`,
-`-Quiet` and `-Uninstall`; `-Help` lists them. Each release also has a copy pinned to that version
-at `releases/download/vX.Y.Z/install.ps1`.
-
-The install scripts and Homebrew set up tab completions (bash, zsh and fish; PowerShell on Windows).
+The install script and Homebrew set up tab completions for bash, zsh and fish.
 
 **🐳 Docker** (linux/amd64 and linux/arm64):
 
@@ -152,9 +134,9 @@ export LINKWARDEN_URL="https://links.example.com"   # only for self-hosted insta
 
 > [!NOTE]
 > 📁 The CLI follows the [XDG Base Directory spec](https://specifications.freedesktop.org/basedir-spec/latest/)
-> on **Linux, macOS and Windows** alike: `init` saves `$XDG_CONFIG_HOME/linkwarden/config.json`, and a small cache lives in `$XDG_STATE_HOME/linkwarden/`.
+> on **Linux and macOS** alike: `init` saves `$XDG_CONFIG_HOME/linkwarden/config.json`, and a small cache lives in `$XDG_STATE_HOME/linkwarden/`.
 > If a variable is unset, empty or not an absolute path, the default under your home directory is used
-> (`$HOME` on Linux/macOS, `%USERPROFILE%` on Windows, e.g. `C:\Users\you\.local\state\linkwarden`).
+> (`$HOME`, e.g. `~/.local/state/linkwarden`).
 
 > [!TIP]
 > Already authenticated? Run `linkwarden tokens generate` to create a new token for another machine or script.
@@ -453,7 +435,7 @@ Leave out `--id` on most commands to pick from a list instead.
 | [`config`](docs/cli/linkwarden_config.md) | The instance's public runtime config |
 | [`favicon`](docs/cli/linkwarden_favicon.md) | Fetch the favicon for any URL |
 | [`init`](docs/cli/linkwarden_init.md) | Guided sign-in |
-| [`completion`](docs/cli/linkwarden_completion.md) | Shell completion for bash, zsh, fish and PowerShell |
+| [`completion`](docs/cli/linkwarden_completion.md) | Shell completion for bash, zsh and fish |
 
 ---
 
@@ -609,9 +591,7 @@ go build -o bin/linkwarden ./cmd/linkwarden
 ```
 
 CI runs tests, checks that `docs/cli/` is up to date (the same check as the hook), `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus
-[ShellCheck](https://www.shellcheck.net) on the scripts in `examples/` when they change. When
-`install.ps1` changes, CI lints it with PSScriptAnalyzer and runs it on Windows in both Windows
-PowerShell 5.1 and PowerShell 7.
+[ShellCheck](https://www.shellcheck.net) on the scripts in `examples/` when they change.
 
 ### 🚀 Releasing
 
@@ -632,7 +612,7 @@ The script shows the next version and a changelog preview, then triggers the
 1. Tests the code.
 2. Prepends the new version's section to `CHANGELOG.md`.
 3. Commits it and tags `vX.Y.Z`.
-4. Builds Linux, macOS and Windows binaries for x86_64 and ARM64 with [GoReleaser](.goreleaser.yaml).
+4. Builds Linux and macOS binaries for x86_64 and ARM64 with [GoReleaser](.goreleaser.yaml).
 5. Pushes the commit and tag, then publishes a GitHub Release with the changelog section as its notes.
 6. Publishes packages: opens a PR against
    [CerealKiller97/homebrew-tap](https://github.com/CerealKiller97/homebrew-tap). The
