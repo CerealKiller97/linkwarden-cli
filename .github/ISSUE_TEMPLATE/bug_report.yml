@@ -79,8 +79,6 @@ body:
       options:
         - macOS
         - Linux
-        - Windows
-        - Other
     validations:
       required: true
 
