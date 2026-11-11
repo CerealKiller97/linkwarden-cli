@@ -26,12 +26,13 @@ jobs:
       run:
         shell: bash
     steps:
-      # main requires pull requests, which github.token can't bypass. The release commit and tag
-      # are pushed with the maintainer's PAT instead, since admins are exempt from that rule.
+      # Nobody, admins included, can push to main: every change lands through a pull request.
+      # So the release never commits. The version's CHANGELOG.md section is merged beforehand
+      # (scripts/release.sh prepare), and this job only tags main's HEAD and pushes the tag.
+      # Tags aren't covered by main's rulesets, so github.token can push it.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.PACKAGES_GITHUB_TOKEN }}
 
       - uses: actions/setup-go@v7
         with:
@@ -55,28 +56,24 @@ jobs:
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "🏷️ Releasing v${version}" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: 📝 Update CHANGELOG.md
+      # Reads the section merged by `scripts/release.sh prepare`, and fails when it's missing.
+      - name: 📝 Read CHANGELOG.md section
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          scripts/release.sh changelog "$VERSION" --write | tail -n +3 > "$RUNNER_TEMP/notes.md"
+          scripts/release.sh changelog "$VERSION" --existing | tail -n +3 > "$RUNNER_TEMP/notes.md"
           cat "$RUNNER_TEMP/notes.md" >> "$GITHUB_STEP_SUMMARY"
 
-      - name: 🔖 Commit and tag
+      - name: 🔖 Tag
         env:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          # Nothing to commit when CHANGELOG.md already had this version's section.
-          if ! git diff --cached --quiet; then
-            git commit -m "chore(release): v${VERSION}"
-          fi
           git tag -a "v${VERSION}" -m "v${VERSION}"
 
       # Build and render the Homebrew cask and AUR PKGBUILD before pushing,
-      # so a failed build leaves no orphan tag or commit behind. Docker images are only built
+      # so a failed build leaves no orphan tag behind. Docker images are only built
       # at publish time (dockers_v2), so the Dockerfile is checked in test.yml instead.
       - name: 🔨 Build (dry run)
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
@@ -85,10 +82,10 @@ jobs:
           version: v2.18.3
           args: release --clean --skip=publish,announce
 
-      - name: ⬆️ Push commit and tag
+      - name: ⬆️ Push tag
         env:
           VERSION: ${{ steps.version.outputs.version }}
-        run: git push --atomic origin HEAD:main "v${VERSION}"
+        run: git push origin "refs/tags/v${VERSION}"
 
       # QEMU builds the linux/arm64 image on the amd64 runner.
       - name: 🐳 Set up QEMU
