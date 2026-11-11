@@ -22,8 +22,6 @@ func OpenBrowser(rawURL string) error {
 	switch runtime.GOOS {
 	case "darwin":
 		cmd = exec.Command("open", target) // #nosec G204 -- validated http(s) URL
-	case "windows":
-		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", target) // #nosec G204 -- validated http(s) URL
 	default:
 		cmd = exec.Command("xdg-open", target) // #nosec G204 -- validated http(s) URL
 	}
