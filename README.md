@@ -64,7 +64,8 @@ registrations reopen. Until then, use the install script, Docker or a prebuilt b
 winget install CerealKiller97.LinkwardenCLI
 ```
 
-Homebrew and winget install shell completions for bash, zsh and fish where the platform supports them.
+Homebrew installs shell completions for bash, zsh and fish. winget installs only the `linkwarden`
+command; the completion scripts are in the release zip.
 
 **🐳 Docker** (linux/amd64 and linux/arm64):
 
