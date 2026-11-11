@@ -179,6 +179,8 @@ aurs:
 
 # 🪟 winget install CerealKiller97.LinkwardenCLI
 # Pushes the manifest to the CerealKiller97/winget-pkgs fork and opens a PR to microsoft/winget-pkgs.
+# GoReleaser syncs the fork with upstream before branching. The winget validation pipeline fetches
+# every URL below anonymously, so the repository and its release must be public.
 winget:
   - name: linkwarden-cli
     ids: [linkwarden]
@@ -186,12 +188,19 @@ winget:
     package_name: Linkwarden CLI
     publisher: CerealKiller97
     publisher_url: https://github.com/CerealKiller97
+    publisher_support_url: https://github.com/CerealKiller97/linkwarden-cli/issues
+    author: Stefan Bogdanović
+    copyright: Copyright (c) Stefan Bogdanović
     short_description: CLI for the Linkwarden bookmark manager
+    description: |-
+      A fast, scriptable CLI for managing Linkwarden links, collections, tags, archives,
+      RSS feeds, highlights and backups on Linkwarden Cloud or a self-hosted instance.
     homepage: https://github.com/CerealKiller97/linkwarden-cli
     license: AGPL-3.0-only
-    license_url: https://github.com/CerealKiller97/linkwarden-cli/blob/main/LICENSE
+    license_url: https://github.com/CerealKiller97/linkwarden-cli/blob/{{ .Tag }}/LICENSE
+    release_notes: "{{ .Changelog }}"
     release_notes_url: https://github.com/CerealKiller97/linkwarden-cli/releases/tag/{{ .Tag }}
-    tags: [linkwarden, bookmarks, cli]
+    tags: [linkwarden, bookmarks, bookmark-manager, cli]
     commit_msg_template: "New version: {{ .PackageIdentifier }} {{ .Version }}"
     commit_author:
       name: Stefan Bogdanović
