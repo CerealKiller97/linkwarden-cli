@@ -1,0 +1,70 @@
+name: ✨ Feature request
+description: Suggest a new command, flag or improvement for linkwarden-cli.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Please check that it hasn't
+        [already been requested](https://github.com/CerealKiller97/linkwarden-cli/issues?q=is%3Aissue+label%3Aenhancement).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the need, not the solution yet. What are you trying to do, and what gets in the way today?
+      placeholder: I back up my library every night from cron, but I have to export everything even when only a few links changed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: What would you like to happen?
+      description: How you picture it working. Example commands and flags help a lot.
+      placeholder: linkwarden export --since 2026-01-01 --output backup.json
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: Workarounds you use now, or other ways this could be solved.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does this touch?
+      multiple: true
+      options:
+        - Links
+        - Collections
+        - Tags
+        - Search
+        - Archives
+        - Highlights
+        - RSS feeds
+        - Dashboard
+        - API tokens
+        - Import and export
+        - Config and authentication
+        - Interactive mode (pickers, prompts, tables)
+        - Scripted mode (JSON output, exit codes)
+        - Installation and packaging
+        - Other
+
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Would you like to work on this?
+      options:
+        - "Yes, I'd like to open a pull request"
+        - "Maybe, with some guidance"
+        - "No"
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: Screenshots, links to the Linkwarden API docs, or related issues.

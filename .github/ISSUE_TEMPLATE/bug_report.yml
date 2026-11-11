@@ -1,0 +1,118 @@
+name: 🐛 Bug report
+description: Something in linkwarden-cli doesn't work the way it should.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug!
+
+        **Security problems don't belong here.** Please report them privately as described in the
+        [security policy](https://github.com/CerealKiller97/linkwarden-cli/security/policy).
+
+        Before you open a new issue, please check that it hasn't
+        [already been reported](https://github.com/CerealKiller97/linkwarden-cli/issues?q=is%3Aissue).
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+      placeholder: Running `linkwarden links list --collection-id 3` prints an empty table, but the collection has links.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: The exact commands you ran, in order. Remove any tokens or private URLs.
+      placeholder: |
+        1. linkwarden collections list
+        2. linkwarden links list --collection-id 3
+        3. See the empty table
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Output and error messages
+      description: Paste the full output. It's formatted as code automatically, so no backticks are needed.
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: linkwarden-cli version
+      description: The output of `linkwarden --version`.
+      placeholder: linkwarden version 1.2.3
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: How did you install it?
+      options:
+        - Install script
+        - Homebrew
+        - go install
+        - Docker
+        - Release binary download
+        - Built from source
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Linux
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: instance
+    attributes:
+      label: Linkwarden instance
+      options:
+        - Linkwarden Cloud
+        - Self-hosted
+    validations:
+      required: true
+
+  - type: input
+    id: server-version
+    attributes:
+      label: Linkwarden server version (self-hosted only)
+      placeholder: v2.10.0
+
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Where did it happen?
+      description: The CLI behaves differently in a terminal and in scripts.
+      options:
+        - Interactive terminal
+        - Script, pipe, cron or CI
+        - Both
+        - Not sure
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else?
+      description: Screenshots, config details (without tokens), workarounds you found, or links to related issues.
