@@ -17,6 +17,8 @@
 #       Prints a Keep a Changelog (https://keepachangelog.com/en/1.1.0/) section built from
 #       the Conventional Commits in <latest tag>..REF (REF defaults to HEAD). --write also
 #       inserts it into CHANGELOG.md below "## [Unreleased]" and updates the compare links.
+#       If CHANGELOG.md already has a <version> section (written or edited by hand), --write
+#       keeps the file as it is and prints that section instead.
 #
 #   Binaries and packages are built by GoReleaser (.goreleaser.yaml). Preview them with:
 #       goreleaser release --snapshot --clean
@@ -163,6 +165,25 @@ render_changelog() {
 	fi
 }
 
+# has_section reports whether CHANGELOG.md already has a "## [<version>]" section.
+has_section() {
+	[[ -f "$CHANGELOG" ]] && grep -qF "## [${1}]" "$CHANGELOG"
+}
+
+# existing_section prints the "## [<version>]" section of CHANGELOG.md, from its heading up
+# to the next "## [" heading or the link definitions, without trailing blank lines.
+existing_section() {
+	awk -v heading="## [${1}]" '
+		index($0, heading) == 1 { found = 1; print; next }
+		found && (/^## \[/ || /^\[[^]]+\]: /) { exit }
+		found { lines[++n] = $0 }
+		END {
+			while (n > 0 && lines[n] ~ /^[[:space:]]*$/) n--
+			for (i = 1; i <= n; i++) print lines[i]
+		}
+	' "$CHANGELOG"
+}
+
 # write_changelog inserts the rendered section below "## [Unreleased]" in CHANGELOG.md
 # and rewrites the [Unreleased] compare link plus a link for the new version.
 write_changelog() {
@@ -234,6 +255,12 @@ cmd_changelog() {
 	done
 	[[ -n "$version" ]] || usage
 
+	if $write && has_section "$version"; then
+		echo "📝 ${CHANGELOG} already has a ${version} section; using it as is." >&2
+		existing_section "$version"
+		return
+	fi
+
 	collect_changes "$ref"
 	render_changelog "$version"
 	if $write; then
@@ -269,7 +296,11 @@ cmd_trigger() {
 		echo "⚠️  ${unpushed} local commit(s) aren't on origin/main and won't be in this release."
 	fi
 
-	preview="$(collect_changes origin/main && render_changelog "$next")"
+	if has_section "$next"; then
+		preview="$(existing_section "$next")"
+	else
+		preview="$(collect_changes origin/main && render_changelog "$next")"
+	fi
 
 	echo
 	echo "🏷️  ${current:-no releases yet} → v${next} (${bump})"

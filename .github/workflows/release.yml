@@ -21,6 +21,10 @@ jobs:
   release:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # An explicit bash shell runs with -o pipefail, so a failing command in a pipeline fails its step.
+    defaults:
+      run:
+        shell: bash
     steps:
       # main requires pull requests, which github.token can't bypass. The release commit and tag
       # are pushed with the maintainer's PAT instead, since admins are exempt from that rule.
@@ -65,7 +69,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md
-          git commit -m "chore(release): v${VERSION}"
+          # Nothing to commit when CHANGELOG.md already had this version's section.
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(release): v${VERSION}"
+          fi
           git tag -a "v${VERSION}" -m "v${VERSION}"
 
       # Build and render the Homebrew cask, AUR PKGBUILD and winget manifest before pushing,
