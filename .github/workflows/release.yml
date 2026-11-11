@@ -75,7 +75,7 @@ jobs:
           fi
           git tag -a "v${VERSION}" -m "v${VERSION}"
 
-      # Build and render the Homebrew cask, AUR PKGBUILD and winget manifest before pushing,
+      # Build and render the Homebrew cask and AUR PKGBUILD before pushing,
       # so a failed build leaves no orphan tag or commit behind. Docker images are only built
       # at publish time (dockers_v2), so the Dockerfile is checked in test.yml instead.
       - name: 🔨 Build (dry run)
@@ -105,7 +105,7 @@ jobs:
           password: ${{ github.token }}
 
       # Publishes the GitHub release and the ghcr.io image, and opens
-      # PRs against CerealKiller97/homebrew-tap and microsoft/winget-pkgs.
+      # a PR against CerealKiller97/homebrew-tap.
       - name: 🚀 Release and publish packages
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
@@ -115,5 +115,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PACKAGES_GITHUB_TOKEN: ${{ secrets.PACKAGES_GITHUB_TOKEN }}
-          WINGET_GITHUB_TOKEN: ${{ secrets.WINGET_GITHUB_TOKEN }}
           AUR_KEY: ${{ secrets.AUR_KEY }}

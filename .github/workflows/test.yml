@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   test:
-    # Releases ship to Linux, macOS (Homebrew) and Windows (winget), and
+    # Releases ship to Linux, macOS and Windows, and
     # terminal, signal and home-directory handling differ on each.
     strategy:
       fail-fast: false
