@@ -635,7 +635,7 @@ The workflow uses these repository secrets:
 
 | Secret | What it is |
 |---|---|
-| `PACKAGES_GITHUB_TOKEN` | Classic PAT with the `public_repo` scope. It pushes to `homebrew-tap` and the `winget-pkgs` fork, and opens the PRs. |
+| `PACKAGES_GITHUB_TOKEN` | Classic PAT with the `public_repo` scope, from a repository admin. It pushes the release commit and tag to the protected `main` branch, pushes to `homebrew-tap` and the `winget-pkgs` fork, and opens the PRs. |
 | `AUR_KEY` | Private SSH key (no passphrase) whose public half is on your [AUR account](https://aur.archlinux.org/account). Not needed until AUR publishing is turned back on. |
 
 ---

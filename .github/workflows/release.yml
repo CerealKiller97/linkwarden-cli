@@ -22,9 +22,12 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
+      # main requires pull requests, which github.token can't bypass. The release commit and tag
+      # are pushed with the maintainer's PAT instead, since admins are exempt from that rule.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          token: ${{ secrets.PACKAGES_GITHUB_TOKEN }}
 
       - uses: actions/setup-go@v7
         with:
