@@ -16,12 +16,19 @@ Friendly pickers when you're at the keyboard, clean JSON and fail-fast errors wh
 [![Go Version](https://img.shields.io/github/go-mod/go-version/CerealKiller97/linkwarden-cli?logo=go&logoColor=white)](go.mod)
 [![Go Reference](https://pkg.go.dev/badge/github.com/CerealKiller97/linkwarden-go-sdk.svg)](https://pkg.go.dev/github.com/CerealKiller97/linkwarden-go-sdk)
 [![Go Report Card](https://goreportcard.com/badge/github.com/CerealKiller97/linkwarden-cli)](https://goreportcard.com/report/github.com/CerealKiller97/linkwarden-cli)
+[![Community driven](https://img.shields.io/badge/community-driven-8b5cf6)](#community-driven)
 
 [Install](#installation) · [Get started](#getting-started) · [Two modes](#two-modes-interactive-and-scripted) · [Examples](#examples) · [Commands](#command-reference) · [Go SDK](#go-sdk)
 
 <img src=".github/assets/interactive.gif" alt="linkwarden listing collections, picking a link from a filterable list, and cancelling a delete at the No / Yes prompt" width="900">
 
 </div>
+
+> [!NOTE]
+> <a id="community-driven"></a>**Community-driven, not official.** linkwarden-cli is an independent project. It isn't made or
+> endorsed by the Linkwarden team, so please don't send questions about the CLI to Linkwarden support. It is actively
+> maintained and supported here, and it works with both Linkwarden Cloud and self-hosted instances. Bugs, questions
+> and feature requests go to [this repository's issues](https://github.com/CerealKiller97/linkwarden-cli/issues).
 
 ## Features
 
@@ -606,6 +613,7 @@ The workflow uses these repository secrets:
 
 Built with [Cobra](https://github.com/spf13/cobra) · [Bubble Tea](https://github.com/charmbracelet/bubbletea) · [Bubbles](https://github.com/charmbracelet/bubbles) · [Lip Gloss](https://github.com/charmbracelet/lipgloss) · Demos recorded with [VHS](https://github.com/charmbracelet/vhs)
 
-Not affiliated with the Linkwarden project.
+A community-driven project, not affiliated with or endorsed by Linkwarden.<br>
+Found a bug or missing a feature? [Open an issue](https://github.com/CerealKiller97/linkwarden-cli/issues/new).
 
 </div>
