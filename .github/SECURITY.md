@@ -14,8 +14,12 @@ Only the latest release of linkwarden-cli receives security fixes. Please upgrad
 
 **Please do not open a public issue, discussion or pull request for security problems.**
 
-Report vulnerabilities privately through GitHub's
-[private vulnerability reporting](https://github.com/CerealKiller97/linkwarden-cli/security/advisories/new).
+Report vulnerabilities privately in one of two ways:
+
+- Through GitHub's
+  [private vulnerability reporting](https://github.com/CerealKiller97/linkwarden-cli/security/advisories/new).
+- By email to [stefan@stefanbogdanovic.dev](mailto:stefan@stefanbogdanovic.dev?subject=Linkwarden%20CLI%20Vulnerability),
+  with the subject **Linkwarden CLI Vulnerability**.
 
 Please include:
 
