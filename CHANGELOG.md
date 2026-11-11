@@ -7,12 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.0] - 2026-11-11
-
-### ♻️ Changed
-
-- 🧹 Maintenance release with no user-facing changes.
-
 ### ♻️ Changed
 
 - **ui:** Replace promptui with Bubble Tea for all interactive prompts. Pickers can now be filtered by typing, scroll past 10 items, and cancel with Esc.
@@ -42,6 +36,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **cli:** Trim trailing slashes from `LINKWARDEN_URL`.
 - **tokens:** `tokens revoke` revokes the selected token even when several tokens share a name.
 
-
-[Unreleased]: https://github.com/CerealKiller97/linkwarden-cli/compare/v2.0.0...HEAD
-[2.0.0]: https://github.com/CerealKiller97/linkwarden-cli/compare/v1.0.0...v2.0.0
+[Unreleased]: https://github.com/CerealKiller97/linkwarden-cli/commits/main
