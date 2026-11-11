@@ -111,8 +111,21 @@ function Install-LinkwardenCli {
     Write-Host -NoNewline $Text
   }
 
+  # Warnings and errors. On a console, Write-Host: Windows PowerShell 5.1
+  # encodes [Console]::Error in the OEM code page, which turns every icon into
+  # a "?". Only when stderr is redirected does the text go to the stream.
   function Write-Err([string]$Text) {
-    [Console]::Error.WriteLine($Text)
+    $toStream = $true
+    try {
+      $toStream = [Console]::IsErrorRedirected
+    } catch {
+      $toStream = $true
+    }
+    if ($toStream) {
+      [Console]::Error.WriteLine($Text)
+    } else {
+      Write-Host $Text
+    }
   }
 
   function Stop-Install([string]$Message) {
@@ -907,7 +920,7 @@ Environment:
     $scopeLabel = $(if ($scope -eq 'Machine') { 'the system PATH' } else { 'your PATH' })
     $manual = "[Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', '$scope') + ';$folder', '$scope')"
     Write-Warn "$(Format-Path $folder) isn't on your PATH yet"
-    if ($Opt.NoModifyPath -or -not $S.Interactive -or -not (Confirm-Choice "Add it to $scopeLabel?" $true)) {
+    if ($Opt.NoModifyPath -or -not $S.Interactive -or -not (Confirm-Choice "Add it to ${scopeLabel}?" $true)) {
       Write-Info "   Add it yourself with:  $($C.Cyan)$manual$($C.Reset)"
       return
     }
