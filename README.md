@@ -58,14 +58,25 @@ brew install CerealKiller97/tap/linkwarden-cli
 because of malicious packages, so `linkwarden-cli-bin` isn't published yet. It will be once
 registrations reopen. Until then, use the install script, Docker or a prebuilt binary.
 
-**🪟 Windows** (winget):
+**🪟 Windows** (PowerShell 5.1 or 7+, x86_64 and ARM64):
 
 ```powershell
-winget install CerealKiller97.LinkwardenCLI
+irm https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.ps1 | iex
 ```
 
-Homebrew installs shell completions for bash, zsh and fish. winget installs only the `linkwarden`
-command; the completion scripts are in the release zip.
+It checks the download against the release's `checksums.txt`, installs `linkwarden.exe` into
+`%LOCALAPPDATA%\Programs\linkwarden` (no admin needed), and offers to add that folder to your
+PATH and load tab completions from your PowerShell profile. Pass options through a script block:
+
+```powershell
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.ps1))) -Version 1.0.0 -Yes
+```
+
+Options are `-Version`, `-Dir`, `-Yes`, `-Force`, `-NoCompletions`, `-NoModifyPath`, `-Plain`,
+`-Quiet` and `-Uninstall`; `-Help` lists them. Each release also has a copy pinned to that version
+at `releases/download/vX.Y.Z/install.ps1`.
+
+The install scripts and Homebrew set up tab completions (bash, zsh and fish; PowerShell on Windows).
 
 **🐳 Docker** (linux/amd64 and linux/arm64):
 
@@ -598,7 +609,9 @@ go build -o bin/linkwarden ./cmd/linkwarden
 ```
 
 CI runs tests, checks that `docs/cli/` is up to date (the same check as the hook), `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus
-[ShellCheck](https://www.shellcheck.net) on the scripts in `examples/` when they change.
+[ShellCheck](https://www.shellcheck.net) on the scripts in `examples/` when they change. When
+`install.ps1` changes, CI lints it with PSScriptAnalyzer and runs it on Windows in both Windows
+PowerShell 5.1 and PowerShell 7.
 
 ### 🚀 Releasing
 

@@ -525,7 +525,7 @@ detect_platform() {
     Linux) OS="linux" ;;
     Darwin) OS="darwin" ;;
     MINGW* | MSYS* | CYGWIN* | Windows_NT)
-      die "On Windows, install with winget instead:  winget install CerealKiller97.LinkwardenCLI"
+      die "On Windows, run this in PowerShell instead:  irm https://raw.githubusercontent.com/${REPO}/main/install.ps1 | iex"
       ;;
     *) die "no prebuilt linkwarden for ${os}. Try: go install github.com/${REPO}/cmd/linkwarden@latest" ;;
   esac

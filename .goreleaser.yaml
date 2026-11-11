@@ -74,9 +74,11 @@ release:
   prerelease: auto
   skip_upload: false
   include_meta: true
-  # A copy of the installer pinned to this release, at releases/download/vX.Y.Z/install.sh.
+  # Copies of the installers pinned to this release, at releases/download/vX.Y.Z/install.sh
+  # and releases/download/vX.Y.Z/install.ps1.
   extra_files:
     - glob: ./install.sh
+    - glob: ./install.ps1
   # Appended after the CHANGELOG.md notes passed with --release-notes.
   footer: |
 
