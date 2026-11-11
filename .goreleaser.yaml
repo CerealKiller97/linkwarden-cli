@@ -181,6 +181,8 @@ aurs:
 # Pushes the manifest to the CerealKiller97/winget-pkgs fork and opens a PR to microsoft/winget-pkgs.
 # GoReleaser syncs the fork with upstream before branching. The winget validation pipeline fetches
 # every URL below anonymously, so the repository and its release must be public.
+# Opening a PR on microsoft/winget-pkgs needs a classic PAT: a fine-grained one only reaches
+# repositories its owner controls, so GitHub answers 403 when it tries to open the PR.
 winget:
   - name: linkwarden-cli
     ids: [linkwarden]
@@ -210,7 +212,7 @@ winget:
       owner: CerealKiller97
       name: winget-pkgs
       branch: "{{ .ProjectName }}-{{ .Version }}"
-      token: "{{ .Env.PACKAGES_GITHUB_TOKEN }}"
+      token: "{{ .Env.WINGET_GITHUB_TOKEN }}"
       pull_request:
         enabled: true
         base:

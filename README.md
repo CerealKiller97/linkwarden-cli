@@ -635,7 +635,8 @@ The workflow uses these repository secrets:
 
 | Secret | What it is |
 |---|---|
-| `PACKAGES_GITHUB_TOKEN` | Classic PAT with the `public_repo` scope, from a repository admin. It pushes the release commit and tag to the protected `main` branch, pushes to `homebrew-tap` and the `winget-pkgs` fork, and opens the PRs. |
+| `PACKAGES_GITHUB_TOKEN` | PAT from a repository admin, with write access to `linkwarden-cli` and `homebrew-tap` (fine-grained: Contents and Pull requests read/write). It pushes the release commit and tag to the protected `main` branch, pushes the cask to `homebrew-tap` and opens its PR. |
+| `WINGET_GITHUB_TOKEN` | Classic PAT with the `public_repo` and `workflow` scopes, from the owner of the `winget-pkgs` fork. It syncs the fork with upstream, pushes the manifests and opens the PR on `microsoft/winget-pkgs`. It must be classic: a fine-grained PAT can't open a PR on a repository its owner doesn't control, and GitHub answers 403. |
 | `AUR_KEY` | Private SSH key (no passphrase) whose public half is on your [AUR account](https://aur.archlinux.org/account). Not needed until AUR publishing is turned back on. |
 
 ---
