@@ -1,78 +1,92 @@
 <div align="center">
 
-# 🔗 linkwarden-cli
+# linkwarden-cli
 
 **Your [Linkwarden](https://linkwarden.app) bookmarks, from the terminal.**
 
-A fast, scriptable CLI and a standalone Go SDK for managing links, collections, tags,
-archives, RSS feeds, highlights and backups on Linkwarden Cloud or your own self-hosted instance.
+Save, find, organize, archive and back up links on Linkwarden Cloud or your own instance.<br>
+Friendly pickers when you're at the keyboard, clean JSON and fail-fast errors when a script is.
 
 [![test](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/test.yml/badge.svg)](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/test.yml)
 [![lint](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/lint.yml/badge.svg)](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/lint.yml)
 [![gosec](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/gosec.yml/badge.svg)](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/gosec.yml)
 [![govulncheck](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/govulncheck.yml/badge.svg)](https://github.com/CerealKiller97/linkwarden-cli/actions/workflows/govulncheck.yml)
 <br>
+[![Latest release](https://img.shields.io/github/v/release/CerealKiller97/linkwarden-cli?logo=github)](https://github.com/CerealKiller97/linkwarden-cli/releases/latest)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/CerealKiller97/linkwarden-cli?logo=go&logoColor=white)](go.mod)
 [![Go Reference](https://pkg.go.dev/badge/github.com/CerealKiller97/linkwarden-go-sdk.svg)](https://pkg.go.dev/github.com/CerealKiller97/linkwarden-go-sdk)
 [![Go Report Card](https://goreportcard.com/badge/github.com/CerealKiller97/linkwarden-cli)](https://goreportcard.com/report/github.com/CerealKiller97/linkwarden-cli)
+[![Community driven](https://img.shields.io/badge/community-driven-8b5cf6)](#community-driven)
 
-[Quick start](#-quick-start) · [Recipes](#-recipes) · [Command reference](#-command-reference) · [Go SDK](#-go-sdk)
+[Install](#installation) · [Get started](#getting-started) · [Two modes](#two-modes-interactive-and-scripted) · [Examples](#examples) · [Commands](#command-reference) · [Go SDK](#go-sdk)
+
+<img src=".github/assets/interactive.gif" alt="linkwarden listing collections, picking a link from a filterable list, and cancelling a delete at the No / Yes prompt" width="900">
 
 </div>
 
----
+> [!NOTE]
+> <a id="community-driven"></a>**A community-driven CLI.** linkwarden-cli is built and maintained by the community, separately
+> from the Linkwarden team, and it's actively supported here. It works with both Linkwarden Cloud and self-hosted
+> instances. Bugs, questions and feature requests go to
+> [this repository's issues](https://github.com/CerealKiller97/linkwarden-cli/issues).
 
-## ✨ Highlights
+## Features
 
-|                          |                                                                                                   |
-| ------------------------ | ------------------------------------------------------------------------------------------------- |
-| 🧭 **Interactive pickers** | Leave out `--id` and pick the link, collection, tag or feed from a list right in your terminal.     |
-| 🤖 **Script-safe**         | `--json` for machine-readable output, `-q` for bare IDs. Without a TTY (cron, CI, pipes) it fails fast instead of hanging on a prompt. |
-| 📦 **Bulk operations**     | Import hundreds of links with a progress bar; retag, move or delete many links in one call.       |
-| 🗄️ **Archives & backups**  | Download PDF, screenshot or HTML snapshots; export and import your whole library.                 |
-| 🔄 **Easy migration**      | Import from browser bookmarks, Pocket, Wallabag, Omnivore or another Linkwarden instance.         |
-| 🎨 **Readable output**     | Colorful rounded tables; long ones open as an interactive, scrollable table. Plain text when piped or `NO_COLOR` is set. |
-| 🧰 **Go SDK**              | Every command is backed by [`linkwarden-go-sdk`](https://github.com/CerealKiller97/linkwarden-go-sdk), a typed API client you can use in your own code. |
+- **Everything Linkwarden does:** links, collections (nested), tags, search, archives, highlights, RSS feeds,
+  dashboard, API tokens, import and export.
+- **Two modes in one binary:** pickers, readable tables and confirmations in a terminal; JSON, bare IDs and
+  fail-fast errors in scripts, cron and CI. [See both](#two-modes-interactive-and-scripted).
+- **Bulk operations:** import hundreds of links behind a progress bar, retag, move or delete many links in one call.
+- **Archives and backups:** download PDF, screenshot or HTML snapshots, and export your whole library.
+- **Easy migration:** bring links over from browser bookmarks, Pocket, Wallabag, Omnivore or another Linkwarden.
+- **Shell completion** for bash, zsh and fish, including flag values such as `--format` and `--sort`.
+- **A typed Go SDK** behind every command, [`linkwarden-go-sdk`](https://github.com/CerealKiller97/linkwarden-go-sdk),
+  that you can use in your own tools.
 
----
+## Installation
 
-## 🚀 Quick start
-
-### 1. Install
-
-**⚡ One-liner** (macOS and Linux, x86_64 and ARM64):
+Install script for **macOS and Linux** (x86_64 and ARM64). It sets up tab completions too:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/CerealKiller97/linkwarden-cli/main/install.sh | bash
 ```
 
-![The installer detecting the system, downloading and checking the release, and installing linkwarden](.github/assets/install.gif)
+<p align="center">
+  <img src=".github/assets/install.gif" alt="The installer detecting the system, downloading and checking the release, and installing linkwarden" width="720">
+</p>
 
-**🍺 Homebrew** (macOS and Linux):
+**Homebrew** (macOS and Linux):
 
 ```bash
 brew install CerealKiller97/tap/linkwarden-cli
 ```
 
-**🐧 Arch Linux** (AUR, coming soon): the AUR has temporarily closed new account registrations
-because of malicious packages, so `linkwarden-cli-bin` isn't published yet. It will be once
-registrations reopen. Until then, use the install script, Docker or a prebuilt binary.
-
-The install script and Homebrew set up tab completions for bash, zsh and fish.
-
-**🐳 Docker** (linux/amd64 and linux/arm64):
+**Docker** (linux/amd64 and linux/arm64). Add `-it` for pickers and prompts:
 
 ```bash
 docker run --rm -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/linkwarden-cli links list
 ```
 
-Add `-it` for interactive prompts. Tags are `latest` and each release version without the `v`, e.g. `1.0.0`.
+Image tags are `latest` and each release version without the `v`, for example `1.0.0`.
 
-**📦 Prebuilt binary:** grab the archive for your OS and CPU (x86_64 or ARM64) from
+**Arch Linux (AUR): coming soon**
+
+```bash
+yay -S linkwarden-cli-bin   # available once the AUR reopens registrations
+```
+
+The `linkwarden-cli-bin` package is built and ready. It will go up on the AUR as soon as the AUR re-enables new
+account registrations, which it closed for now because of malicious packages. Until then, use the install script,
+Docker or a prebuilt binary.
+
+<details>
+<summary><b>Prebuilt binary or from source</b></summary>
+
+**Prebuilt binary:** grab the archive for your OS and CPU from
 [Releases](https://github.com/CerealKiller97/linkwarden-cli/releases/latest):
 
 ```bash
-# macOS on Apple Silicon. Swap darwin_arm64 for linux_amd64, linux_arm64, darwin_amd64…
+# macOS on Apple Silicon. Swap darwin_arm64 for linux_amd64, linux_arm64 or darwin_amd64.
 # VERSION resolves to the latest release; set it yourself (e.g. VERSION=1.0.0) to pin one.
 VERSION=$(curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/CerealKiller97/linkwarden-cli/releases/latest)
 VERSION=${VERSION##*/v}
@@ -81,255 +95,312 @@ sudo mv "linkwarden_${VERSION}_darwin_arm64/linkwarden" /usr/local/bin/
 linkwarden --version
 ```
 
-**🛠️ From source** (requires **Go 1.27+**):
-
-```bash
-git clone https://github.com/CerealKiller97/linkwarden-cli.git
-cd linkwarden-cli
-go build -o linkwarden ./cmd/linkwarden
-sudo mv linkwarden /usr/local/bin/
-```
-
-Or install straight from the module path:
+**From source** (requires Go 1.27+):
 
 ```bash
 go install github.com/CerealKiller97/linkwarden-cli/cmd/linkwarden@latest
 ```
 
-### 2. Authenticate
+</details>
 
-Run the guided setup:
+## Getting started
+
+### 1. Sign in
 
 ```bash
 linkwarden init
 ```
 
-After a welcome banner with the Linkwarden logo, it asks for your instance URL (defaults to `https://cloud.linkwarden.app`) and how you'd like to sign in:
+`init` asks for your instance URL (defaults to `https://cloud.linkwarden.app`) and how to sign in:
 
-- **Access Token (Recommended):** opens **Settings → Access Tokens** in your browser, walks you through
-  creating a token, and asks you to paste it.
-- **Email / Password:** signs in once, creates a `linkwarden-cli` access token with that session, and
-  saves the token. Your password is never stored. Hidden if your instance turned password sign-in off.
-- **Sign in with Google / Apple / …:** listed for each single sign-on provider your instance has
-  enabled. Sign-in happens in your browser (the CLI can't take part in that OAuth redirect), then you
-  create an access token there and paste it back.
+| Method | What happens |
+| --- | --- |
+| **Access token** (recommended) | Opens **Settings → Access Tokens** in your browser and asks you to paste the new token. |
+| **Email / password** | Signs in once and creates a `linkwarden-cli` access token. Your password is never stored. |
+| **Google, Apple, …** | Listed for each single sign-on provider your instance enables. You sign in in the browser, then paste a token. |
 
-The token is checked against your instance, then saved to `$XDG_CONFIG_HOME/linkwarden/config.json`
-(readable only by you). Run `linkwarden init` again any time to switch accounts or instances.
+The token is checked against your instance, then saved to `$XDG_CONFIG_HOME/linkwarden/config.json`, readable only
+by you. Run `init` again any time to switch accounts or instances.
 
-Prefer environment variables (CI, scripts, containers)? They override the config file:
+### 2. Save your first link
+
+```bash
+linkwarden links create https://go.dev/doc/effective_go --tag golang --tag docs
+linkwarden links list
+```
+
+### Configuration
+
+Environment variables override the saved config, which suits CI, containers and scripts:
 
 ```bash
 export LINKWARDEN_TOKEN="eyJhbGciOi..."
 export LINKWARDEN_URL="https://links.example.com"   # only for self-hosted instances
 ```
 
-| Variable           | Required | Default                        | Description                                  |
-| ------------------ | :------: | ------------------------------ | -------------------------------------------- |
-| `LINKWARDEN_TOKEN` |          | token from `linkwarden init`   | API token used as a `Bearer` token           |
-| `LINKWARDEN_URL`   |          | URL from `linkwarden init`, else `https://cloud.linkwarden.app` | Base URL of your Linkwarden instance |
-| `NO_COLOR`         |          | —                              | Set to any value to disable colored output   |
-| `XDG_STATE_HOME`   |          | `~/.local/state`               | Where the CLI keeps its cache (see below)    |
-| `XDG_CONFIG_HOME`  |          | `~/.config`                    | Where `init` saves its config (and `tokens generate` finds fish's config) |
-
-> [!NOTE]
-> 📁 The CLI follows the [XDG Base Directory spec](https://specifications.freedesktop.org/basedir-spec/latest/)
-> on **Linux and macOS** alike: `init` saves `$XDG_CONFIG_HOME/linkwarden/config.json`, and a small cache lives in `$XDG_STATE_HOME/linkwarden/`.
-> If a variable is unset, empty or not an absolute path, the default under your home directory is used
-> (`$HOME`, e.g. `~/.local/state/linkwarden`).
+| Variable | Default | Description |
+| --- | --- | --- |
+| `LINKWARDEN_TOKEN` | token from `linkwarden init` | API token, sent as a `Bearer` token |
+| `LINKWARDEN_URL` | URL from `linkwarden init`, else `https://cloud.linkwarden.app` | Base URL of your instance |
+| `NO_COLOR` | unset | Set to any value to turn off colors |
+| `XDG_CONFIG_HOME` | `~/.config` | Where `init` saves its config |
+| `XDG_STATE_HOME` | `~/.local/state` | Where the CLI keeps a small cache |
 
 > [!TIP]
-> Already authenticated? Run `linkwarden tokens generate` to create a new token for another machine or script.
-> On macOS and Linux it offers to append `export LINKWARDEN_TOKEN=...` to your shell config
-> (`~/.zshenv`, `~/.bashrc` or `~/.config/fish/config.fish`). If you decline, it prints the manual steps.
+> Need a token for another machine or a CI job? `linkwarden tokens generate` creates one and offers to add
+> `export LINKWARDEN_TOKEN=...` to your shell config (`~/.zshenv`, `~/.bashrc` or `~/.config/fish/config.fish`).
 
-### 3. Go
+## Two modes: interactive and scripted
+
+The same commands work at your keyboard and inside a script. The CLI checks whether stdin is a terminal and
+behaves accordingly, and the global `--non-interactive` flag forces script behavior anywhere.
+
+|  | Interactive (a terminal) | Non-interactive (scripts, cron, CI, pipes) |
+| --- | --- | --- |
+| No `--id` given | Opens a picker to choose from | Fails fast and names the flag to pass |
+| Deleting something | Asks **No / Yes**, with **No** selected | Refuses unless you pass `--yes` |
+| List output | Colored table; scrollable when taller than the screen | Plain-text table, or `--json` / `-q` |
+| Errors and info | stderr | stderr, so stdout stays clean |
+
+### Interactive
+
+Leave out `--id` on almost any command and pick the item from a list instead: type to filter, ↑/↓ to move,
+←/→ to change page, Enter to select and Esc to cancel. The link picker shows each link's URL next to its name
+and loads more links as you page or filter.
 
 ```bash
-linkwarden links create https://go.dev/doc/effective_go --tag go
+linkwarden links get              # pick a link, then print it
+linkwarden collections update     # pick a collection, then change it
+linkwarden highlights delete      # pick a link, then one of its highlights
+linkwarden links import --file reading-list.json   # pick the target collection
 ```
+
+Lists taller than your terminal open as a scrollable table (↑/↓ or j/k, PgUp/PgDn, g/G, `q` to quit) that stays
+on screen when you quit.
+
+Anything that deletes or revokes asks first. **No** is selected, so a stray Enter after a picker cancels.
+`collections delete` also tells you how many links go with the collection.
+
+### Non-interactive, for scripts
+
+<p align="center">
+  <img src=".github/assets/scripting.gif" alt="Piping --json into jq, capturing a new collection ID with -q, and two commands failing fast with exit code 1 when there's no terminal" width="900">
+</p>
+
+Three global flags make the CLI easy to drive from bash:
+
+| Flag | Effect |
+| --- | --- |
+| `--json` | Prints results as JSON: every field, named as in the API. Lists are arrays, a single `get`, `create` or `update` is an object. |
+| `-q`, `--quiet` | Prints only the ID of each result, one per line, and hides info messages. |
+| `--non-interactive` | Never prompts, even in a terminal. On by default when stdin isn't a terminal. |
+
+```bash
+# Every URL in a collection
+linkwarden links list --collection-id 3 --json | jq -r '.[].url'
+
+# Capture the ID of something you create
+COL=$(linkwarden collections create --name "Reading List" -q)
+linkwarden links create https://12factor.net --collection-id "$COL" -q
+
+# Re-archive every link in a collection
+linkwarden links list --collection-id "$COL" -q | xargs -n1 linkwarden links archive --id
+```
+
+Without a terminal, a missing ID or an unconfirmed delete is an error, not a prompt that hangs your job:
 
 ```console
-$ linkwarden links list --collection-id 3
-╭─────────────────────────────────────────────────────────────────────────────────────────────╮
-│ Links                                                                                       │
-├─────┬───────────────────────┬─────────────────────────────────┬──────────────┬──────────────┤
-│  ID │ NAME                  │ URL                             │ COLLECTION   │ TAGS         │
-├─────┼───────────────────────┼─────────────────────────────────┼──────────────┼──────────────┤
-│ 412 │ Effective Go          │ https://go.dev/doc/effective_go │ Go           │ golang, docs │
-│ 418 │ Kubernetes Patterns   │ https://k8spatterns.io          │ Infra        │ k8s, books   │
-│ 421 │ The Twelve-Factor App │ https://12factor.net            │ Architecture │ design       │
-╰─────┴───────────────────────┴─────────────────────────────────┴──────────────┴──────────────╯
+$ linkwarden collections get < /dev/null
+ERR resolve collection ID: no --id given and no interactive terminal available; pass --id explicitly for non-interactive use
+
+$ linkwarden --non-interactive links delete --id 412
+ERR this can't be undone and needs confirmation, but there's no interactive terminal: pass --yes (-y) to go ahead
 ```
 
----
+> [!IMPORTANT]
+> In scripts, always pass IDs explicitly and add `--yes` to deletes you mean to run. The exit code is non-zero on
+> any failure, including a `links import` where only some links failed, so `set -e` works as you'd expect.
 
-## 🍳 Recipes
+`--json` and `-q` can't be combined. Commands with nothing to print, such as `delete`, print nothing either way;
+check the exit code.
 
-Real-world workflows built from the commands below.
+<details>
+<summary><b>A complete script: export a collection to CSV</b></summary>
 
-### 📥 Bulk-import links from a JSON file
+```bash
+#!/usr/bin/env bash
+# Usage: ./export-csv.sh <collection-id> [output.csv]
+set -euo pipefail
+
+collection_id="${1:?usage: $0 <collection-id> [output.csv]}"
+output="${2:-links.csv}"
+
+{
+  echo '"id","name","url","tags"'
+  linkwarden --non-interactive links list --collection-id "$collection_id" --json \
+    | jq -r '.[] | [.id, .name, .url, ([.tags[].name] | join(" "))] | @csv'
+} > "$output"
+
+echo "Wrote $(( $(wc -l < "$output") - 1 )) links to $output" >&2
+```
+
+</details>
+
+More ready-to-run scripts (CSV export, import with a failure report for cron, re-archiving a collection) are in
+[`examples/`](examples/README.md).
+
+## Examples
+
+### Organize with collections
+
+<p align="center">
+  <img src=".github/assets/collections.gif" alt="Creating a Rust collection, nesting an Async collection inside it, renaming it through a picker, listing collections, and deleting Rust after confirming" width="900">
+</p>
+
+```bash
+# Create one, and nest another inside it
+linkwarden collections create --name "Rust" --description "The book, std and crates" --color "#f74c00"
+linkwarden collections create --name "Async" --parent-id 5 --icon "cube"
+
+# Change one: name it with --id, or leave --id out to pick it
+linkwarden collections update --id 6 --name "Async Rust"
+linkwarden collections update --public          # picker, then make it public
+
+linkwarden collections list
+linkwarden collections get --id 5 --json | jq .name
+
+# Delete: asks first and says how many links go with it; --yes skips that
+linkwarden collections delete --id 5
+```
+
+New collections go under **Unorganized** unless you pass `--parent-id`. The default color is `#00bba7`.
+
+### Save, find and tidy up links
+
+<p align="center">
+  <img src=".github/assets/links.gif" alt="Saving a link that takes its name from the page title, searching for kubernetes, tagging two links at once, and renaming a link picked from a list" width="900">
+</p>
+
+```bash
+# Save: the name comes from the page's title unless you pass --name
+linkwarden links create https://doc.rust-lang.org/book/ --collection-id 2 --tag rust --tag books
+
+# List, filter and search
+linkwarden links list --collection-id 2
+linkwarden links list --tag-id 4 --pinned-only
+linkwarden search --query kubernetes --sort newest
+
+# Many at once: add tags, move, or replace tags with --remove-previous-tags
+linkwarden links bulk-update --ids 6,7 --tag weekend
+linkwarden links bulk-update --ids 412,418,421 --collection-id 7 --tag reading --remove-previous-tags
+
+# One at a time, by ID or through the picker
+linkwarden links update --name "Kubernetes: the overview"
+linkwarden links delete --id 17
+linkwarden links bulk-delete --ids 301,302 --yes
+```
+
+Tags are created as you use them. To manage them directly:
+
+```bash
+linkwarden tags create --label golang --label k8s --label architecture
+linkwarden tags update --name kubernetes   # picker, then rename
+linkwarden tags bulk-delete --ids 14,15,22
+```
+
+`--ids` takes a comma-separated list, repeated flags, or both.
+
+### Bulk-import links from a JSON file
+
+<p align="center">
+  <img src=".github/assets/import.gif" alt="Importing a JSON reading list into a collection chosen from a picker, with a progress bar and a results table" width="900">
+</p>
 
 ```jsonc
 // reading-list.json
 [
   { "url": "https://go.dev/doc/effective_go", "title": "Effective Go" },
-  { "url": "https://12factor.net",            "title": "The Twelve-Factor App" },
-  { "url": "https://k8spatterns.io",          "title": "Kubernetes Patterns" }
+  { "url": "https://12factor.net", "title": "The Twelve-Factor App" }
 ]
 ```
 
 ```bash
-# Pick the target collection interactively…
-linkwarden links import --file reading-list.json
-
-# …or name it up front (handy in scripts)
-linkwarden links import --file reading-list.json --collection-id 3
+linkwarden links import --file reading-list.json                    # pick the collection
+linkwarden links import --file reading-list.json --collection-id 3  # or name it, for scripts
 ```
 
-Links already in the target collection are skipped (URLs are compared ignoring case in the scheme and host and any
-trailing `/`), as are URLs repeated within the file. The rest are imported behind a progress bar, followed by a
-**Total / Success / Already exists / Failed** summary table.
+Links already in the collection, and URLs repeated in the file, are skipped. URLs are compared ignoring case in
+the scheme and host and any trailing `/`.
 
-### 🚚 Migrate from Pocket, your browser or Wallabag
+### Migrate from your browser, Pocket or Wallabag
 
 ```bash
-# Browser bookmarks exported as HTML (Chrome, Firefox, Safari…)
-linkwarden migrations import --file bookmarks.html --format html
-
-# Pocket export
+linkwarden migrations import --file bookmarks.html --format html      # Chrome, Firefox, Safari…
 linkwarden migrations import --file pocket.json --format pocket
-
-# Wallabag export
 linkwarden migrations import --file wallabag.json --format wallabag
 ```
 
-| `--format`   | Source          |
-| ------------ | --------------- |
-| `linkwarden` | Linkwarden JSON |
-| `html`       | Bookmarks HTML  |
-| `wallabag`   | Wallabag JSON   |
-| `omnivore`   | Omnivore JSON   |
-| `pocket`     | Pocket JSON     |
+`--format` accepts `linkwarden`, `html`, `wallabag`, `omnivore` and `pocket`.
 
-### 💾 Nightly backups with cron
-
-```bash
-linkwarden --non-interactive migrations export --output ~/backups/linkwarden-$(date +%F).json
-```
+### Back up every night with cron
 
 ```cron
-# crontab -e: back up every night at 03:00
+# crontab -e: export the whole library at 03:00
 0 3 * * * LINKWARDEN_TOKEN=eyJhbGciOi... /usr/local/bin/linkwarden --non-interactive migrations export --output "$HOME/backups/linkwarden-$(date +\%F).json"
 ```
 
-Restoring into a fresh instance is the same file in reverse:
+Restore into another instance with the same file:
 
 ```bash
 LINKWARDEN_URL=https://new.example.com linkwarden migrations import --file linkwarden-2026-10-06.json --format linkwarden
 ```
 
-### 🏷️ Retag and reorganize in bulk
-
-```bash
-# Move three links into "Reading List" (collection 7) and replace their tags
-linkwarden links bulk-update \
-  --ids 412,418,421 \
-  --collection-id 7 \
-  --tag reading --tag weekend \
-  --remove-previous-tags
-
-# Create several tags at once
-linkwarden tags create --label golang --label k8s --label architecture
-
-# Rename a tag (no --id given, so it opens a picker)
-linkwarden tags update --name kubernetes
-
-# Clean up (asks before deleting; --yes skips the question).
-# --ids takes a comma-separated list, repeated flags, or both.
-linkwarden tags bulk-delete --ids 14,15,22
-linkwarden links bulk-delete --ids 301 --ids 302 --yes
-```
-
-### 📄 Find an article and save it as a PDF
+### Find an article and save it as a PDF
 
 ```bash
 linkwarden search --query "kubernetes operators"
 linkwarden archives get --link-id 418 --format pdf --output k8s-patterns.pdf
 ```
 
-Leave out `--output` to print only the content type and size, which is a quick way to check whether a snapshot exists.
+| `--format` | Archive |
+| --- | --- |
+| `png` | Screenshot (the default) |
+| `jpeg` | Screenshot as JPEG |
+| `pdf` | PDF |
+| `html` | Single-file HTML page |
+| `readable` | Readability article text as JSON |
 
-| `--format` | Archive                                      |
-| ---------- | -------------------------------------------- |
-| `png`      | PNG screenshot (the default for `get`)       |
-| `jpeg`     | JPEG screenshot                              |
-| `pdf`      | PDF                                          |
-| `html`     | Single-file HTML page (Monolith)             |
-| `readable` | Readability article text as JSON (get only) |
+Leave out `--output` to only check whether a snapshot exists. Need a fresh one? Run `linkwarden links archive --id 418`.
 
-Shell completion suggests these names, as it does for `migrations import --format` and `search --sort`.
-
-Need a fresh snapshot? Trigger re-archiving first:
+### Follow a blog with RSS
 
 ```bash
-linkwarden links archive --id 418
-```
-
-### 📡 Follow a blog with RSS
-
-```bash
-linkwarden rss create \
-  --name "The Go Blog" \
-  --url https://go.dev/blog/feed.atom \
-  --collection-name Go
-
+linkwarden rss create --name "The Go Blog" --url https://go.dev/blog/feed.atom --collection-name Go
 linkwarden rss list
 ```
 
-New posts show up in the `Go` collection automatically.
+New posts land in the `Go` collection on their own.
 
-### 🗂️ Organize with nested collections
+<details>
+<summary><b>Highlights and dashboard layout</b></summary>
 
-```bash
-linkwarden collections create --name "Infra" --color "#6366f1"
-linkwarden collections create --name "Kubernetes" --parent-id 9 --icon "cube"
-linkwarden collections update --id 9 --public
-```
-
-```console
-$ linkwarden collections list
-╭──────────────────────────────────────────────────────────────────╮
-│ Collections                                                      │
-├────┬──────────────┬────────────────────────────────────┬─────────┤
-│ ID │ NAME         │ DESCRIPTION                        │ COLOR   │
-├────┼──────────────┼────────────────────────────────────┼─────────┤
-│  3 │ Go           │ Managed by: Linkwarden CLI         │ #00bba7 │
-│  7 │ Reading List │ Long-form articles for the weekend │ #f59e0b │
-╰────┴──────────────┴────────────────────────────────────┴─────────╯
-```
-
-### 🖍️ Highlight passages
+**Highlight a passage:**
 
 ```bash
-linkwarden highlights create \
-  --link-id 412 \
+linkwarden highlights create --link-id 412 \
   --text "Don't communicate by sharing memory; share memory by communicating." \
-  --color yellow \
-  --start-offset 1840 --end-offset 1907 \
-  --comment "classic"
+  --color yellow --start-offset 1840 --end-offset 1907 --comment "classic"
 
 linkwarden links get-highlights --id 412
-linkwarden highlights delete            # link picker → highlight picker
 ```
 
-### 📊 Customize the dashboard
+**Lay out the dashboard** from a JSON file:
 
 ```json
 [
-  { "type": "STATS",        "enabled": true, "order": 0 },
+  { "type": "STATS", "enabled": true, "order": 0 },
   { "type": "RECENT_LINKS", "enabled": true, "order": 1 },
-  { "type": "COLLECTION",   "collectionId": 7, "enabled": true, "order": 2 }
+  { "type": "COLLECTION", "collectionId": 7, "enabled": true, "order": 2 }
 ]
 ```
 
@@ -338,90 +409,15 @@ linkwarden dashboard update-v2 --file layout.json
 linkwarden dashboard get-v2
 ```
 
----
+</details>
 
-## 🤖 Interactive vs. non-interactive
+## Command reference
 
-Any command that takes a resource ID opens a **picker** when you leave the ID out and stdin is a terminal.
-Type to filter the list, use ↑/↓ to move, ←/→ (or PgUp/PgDn) to change page, Enter to select and Esc to cancel.
-The link picker shows each link's shortened URL next to its name (you can filter on either) and loads more
-links as you page past the ones loaded so far, or as you filter for one that isn't loaded yet.
-
-List output that's taller than your terminal opens as an interactive table (↑/↓ or j/k, PgUp/PgDn, g/G, `q` to quit),
-based on Bubble Tea's [table example](https://github.com/charmbracelet/bubbletea/blob/main/examples/table/main.go).
-It renders inline and stays on screen when you quit. Tables that fit on screen, piped output and `--non-interactive`
-print the same table as plain text.
-When stdin isn't a terminal (scripts, CI, pipes), it **fails fast** and tells you which flag to pass:
-
-```console
-$ linkwarden collections get < /dev/null
-Error: no --id given and no interactive terminal available; pass --id explicitly for non-interactive use
-```
-
-Use the global `--non-interactive` flag to force that behavior even inside a real terminal. It's useful for
-testing scripts locally or for CI runners that allocate a pty:
-
-```bash
-linkwarden collections get                         # picker (real terminal)
-linkwarden collections get --id 42                 # never prompts
-linkwarden --non-interactive collections get       # fails fast, even in a terminal
-```
-
-### 🧾 JSON and IDs for scripts
-
-Add the global `--json` flag to get results as JSON instead of a table. Field names are the API's own, and you
-get every field, not only the columns the table shows. Lists print as an array, a single `get`, `create` or
-`update` as an object:
-
-```bash
-linkwarden links list --collection-id 3 --json | jq -r '.[] | "\(.id)\t\(.url)"'
-linkwarden collections get --id 7 --json | jq .name
-```
-
-`-q` / `--quiet` prints only the ID of each result, one per line, and hides info messages, so it pipes
-straight into another command:
-
-```bash
-# Delete every link that matches a search
-linkwarden links list --search "old draft" -q | paste -sd, - | xargs -I{} linkwarden links bulk-delete --ids {} --yes
-
-# Capture the ID of a new collection
-COLLECTION=$(linkwarden collections create --name "Reading List" -q)
-```
-
-Commands with nothing to list, such as `delete`, print nothing on stdout either way; check the exit code.
-`--json` and `--quiet` can't be combined. Errors and info messages always go to stderr, so stdout stays clean.
-
-Ready-to-run scripts built on these flags (CSV export, import with a failure report for cron, and more) are in
-[`examples/`](examples/README.md).
-
-### 🛑 Confirming deletes
-
-Commands that delete or revoke something ask **No / Yes** first, with **No** selected, so a stray Enter
-(for example right after a picker) cancels. `collections delete` names the collection and how many links go
-with it. Pass `--yes` (`-y`) to skip the question.
-
-Without a terminal, or with `--non-interactive`, there's no one to ask, so these commands refuse to run unless
-you pass `--yes`:
-
-```console
-$ linkwarden links delete --id 412 < /dev/null
-Error: this can't be undone and needs confirmation, but there's no interactive terminal: pass --yes (-y) to go ahead
-```
-
-This applies to `links delete`, `links bulk-delete`, `links delete-archive`, `collections delete`, `tags delete`,
-`tags bulk-delete`, `rss delete`, `highlights delete` and `tokens revoke`.
-
----
-
-## 📚 Command reference
-
-The full reference, with every flag, is generated from the commands themselves and lives in
-[`docs/cli/`](docs/cli/linkwarden.md). `linkwarden <command> <subcommand> --help` prints the same thing.
-Leave out `--id` on most commands to pick from a list instead.
+Every command and flag is documented in [`docs/cli/`](docs/cli/linkwarden.md), generated from the code.
+`linkwarden <command> --help` prints the same thing, with examples.
 
 | Command | What it does |
-|---|---|
+| --- | --- |
 | [`links`](docs/cli/linkwarden_links.md) | Create, import, list, update, archive and delete bookmarks |
 | [`collections`](docs/cli/linkwarden_collections.md) | Group links, optionally nested |
 | [`tags`](docs/cli/linkwarden_tags.md) | Label links |
@@ -437,62 +433,40 @@ Leave out `--id` on most commands to pick from a list instead.
 | [`init`](docs/cli/linkwarden_init.md) | Guided sign-in |
 | [`completion`](docs/cli/linkwarden_completion.md) | Shell completion for bash, zsh and fish |
 
----
+## Go SDK
 
-## 🧰 Go SDK
-
-Every command goes through [`linkwarden-go-sdk`](https://github.com/CerealKiller97/linkwarden-go-sdk), a typed client for the Linkwarden API
-maintained as its own module. You can use it in your own tools:
+Every command goes through [`linkwarden-go-sdk`](https://github.com/CerealKiller97/linkwarden-go-sdk), a typed
+client for the Linkwarden API that lives in its own module:
 
 ```bash
 go get github.com/CerealKiller97/linkwarden-go-sdk
 ```
 
 ```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"time"
-
-	"github.com/CerealKiller97/linkwarden-go-sdk"
+client := linkwarden.New(
+	"https://cloud.linkwarden.app",
+	os.Getenv("LINKWARDEN_TOKEN"),
+	linkwarden.WithHTTPClient(&http.Client{Timeout: 15 * time.Second}),
 )
 
-func main() {
-	ctx := context.Background()
-
-	client := linkwarden.New(
-		"https://cloud.linkwarden.app",
-		os.Getenv("LINKWARDEN_TOKEN"),
-		linkwarden.WithHTTPClient(&http.Client{Timeout: 15 * time.Second}),
-	)
-
-	// Create a collection…
-	col, err := client.Collections.Create(ctx, linkwarden.CreateCollectionRequest{
-		Name:  "Reading List",
-		Color: "#f59e0b",
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// …and save a tagged link into it.
-	link, err := client.Links.Create(ctx, linkwarden.CreateLinkRequest{
-		Name:       "Effective Go",
-		URL:        "https://go.dev/doc/effective_go",
-		Collection: linkwarden.Collection{ID: col.ID},
-		Tags:       []linkwarden.Tag{{Name: "golang"}, {Name: "docs"}},
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("saved #%d → %s\n", link.ID, link.URL)
+col, err := client.Collections.Create(ctx, linkwarden.CreateCollectionRequest{
+	Name:  "Reading List",
+	Color: "#f59e0b",
+})
+if err != nil {
+	log.Fatal(err)
 }
+
+link, err := client.Links.Create(ctx, linkwarden.CreateLinkRequest{
+	Name:       "Effective Go",
+	URL:        "https://go.dev/doc/effective_go",
+	Collection: linkwarden.Collection{ID: col.ID},
+	Tags:       []linkwarden.Tag{{Name: "golang"}, {Name: "docs"}},
+})
+if err != nil {
+	log.Fatal(err)
+}
+fmt.Printf("saved #%d → %s\n", link.ID, link.URL)
 ```
 
 <details>
@@ -559,83 +533,93 @@ case err != nil:
 }
 ```
 
+| Service | What it covers |
+| --- | --- |
+| `client.Links` | CRUD, bulk update/delete, archive, highlights |
+| `client.Collections` | CRUD, nesting, sharing |
+| `client.Tags` | List, bulk create, rename, delete |
+| `client.Search` | Full-text link search |
+| `client.Archives` | Get and upload PNG / JPEG / PDF / Readability / HTML |
+| `client.Migrations` | Export and import (Linkwarden, HTML, Pocket, …) |
+| `client.RSS` | Feed subscriptions |
+| `client.Highlights` | Create and delete highlights |
+| `client.Tokens` | Create, list, revoke API tokens |
+| `client.Dashboard` | v1/v2 dashboard data and layout |
+| `client.Config` | Public instance configuration |
+| `client.Favicon` | Favicon lookup for any URL |
+
+Options: `WithHTTPClient(*http.Client)` for timeouts, proxies or custom transports, and `WithLogger(zerolog.Logger)`
+for internal diagnostics (off by default).
+
 </details>
 
-| Service              | What it covers                                        |
-| -------------------- | ----------------------------------------------------- |
-| `client.Links`       | CRUD, bulk update/delete, archive, highlights         |
-| `client.Collections` | CRUD, nesting, sharing                                |
-| `client.Tags`        | List, bulk create, rename, delete                     |
-| `client.Search`      | Full-text link search                                 |
-| `client.Archives`    | Get and upload PNG / JPEG / PDF / Readability / HTML  |
-| `client.Migrations`  | Export and import (Linkwarden, HTML, Pocket, …)       |
-| `client.RSS`         | Feed subscriptions                                    |
-| `client.Highlights`  | Create and delete highlights                          |
-| `client.Tokens`      | Create, list, revoke API tokens                       |
-| `client.Dashboard`   | v1/v2 dashboard data and layout                       |
-| `client.Config`      | Public instance configuration                         |
-| `client.Favicon`     | Favicon lookup for any URL                            |
-
-Options: `WithHTTPClient(*http.Client)` for timeouts, proxies or custom transports, and `WithLogger(zerolog.Logger)` for internal diagnostics (no-op by default).
-
----
-
-## 🛠️ Development
+## Development
 
 ```bash
-git config core.hooksPath .githooks  # once per clone: the pre-commit hook keeps docs/cli/ in sync
-go run ./scripts/gendocs             # regenerate docs/cli/ after changing a command or flag
-go test ./...                        # unit tests
-golangci-lint run                    # lint (config in .golangci.yml)
-go build -o bin/linkwarden ./cmd/linkwarden
+git config core.hooksPath .githooks   # once per clone: keeps docs/cli/ in sync on commit
+scripts/dev-linkwarden.sh up          # a throwaway Linkwarden in Docker to test against
+go test ./...                         # unit tests
+golangci-lint run                     # lint (config in .golangci.yml)
+go run ./scripts/gendocs              # regenerate docs/cli/ after changing a command or flag
 ```
 
-CI runs tests, checks that `docs/cli/` is up to date (the same check as the hook), `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull requests, plus
-[ShellCheck](https://www.shellcheck.net) on the scripts in `examples/` when they change.
+CI runs the tests, the `docs/cli/` check, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull
+requests, plus [ShellCheck](https://www.shellcheck.net) on `examples/`.
 
-### 🚀 Releasing
+The GIFs above are recorded with [VHS](https://github.com/charmbracelet/vhs) against a throwaway, seeded Linkwarden.
+After changing a command's output, re-record them with one script (it needs Docker and Go):
+
+```bash
+.github/assets/demo/record.sh                    # every demo
+.github/assets/demo/record.sh collections links  # only these
+```
+
+See [`.github/assets/demo/`](.github/assets/demo/README.md) for how it works and how to write a new tape.
+
+<details>
+<summary><b>Releasing</b></summary>
 
 Versions follow [SemVer](https://semver.org), and [CHANGELOG.md](CHANGELOG.md) follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Both are generated from
-[Conventional Commits](https://www.conventionalcommits.org), so write commit messages like
-`feat(links): …`, `fix: …` or `feat!: …` for breaking changes.
+[Conventional Commits](https://www.conventionalcommits.org), so write commit messages like `feat(links): …`,
+`fix: …` or `feat!: …` for breaking changes.
 
 ```bash
-scripts/release.sh patch   # 1.4.2 → 1.4.3  🐛 bug fixes
-scripts/release.sh minor   # 1.4.2 → 1.5.0  ✨ new features
-scripts/release.sh major   # 1.4.2 → 2.0.0  💥 breaking changes
+scripts/release.sh patch   # 1.4.2 → 1.4.3  bug fixes
+scripts/release.sh minor   # 1.4.2 → 1.5.0  new features
+scripts/release.sh major   # 1.4.2 → 2.0.0  breaking changes
 ```
 
 The script shows the next version and a changelog preview, then triggers the
-[release workflow](.github/workflows/release.yml). The workflow:
+[release workflow](.github/workflows/release.yml), which:
 
 1. Tests the code.
-2. Prepends the new version's section to `CHANGELOG.md`.
-3. Commits it and tags `vX.Y.Z`.
-4. Builds Linux and macOS binaries for x86_64 and ARM64 with [GoReleaser](.goreleaser.yaml).
-5. Pushes the commit and tag, then publishes a GitHub Release with the changelog section as its notes.
-6. Publishes packages: opens a PR against
-   [CerealKiller97/homebrew-tap](https://github.com/CerealKiller97/homebrew-tap). The
+2. Prepends the new version's section to `CHANGELOG.md`, commits it and tags `vX.Y.Z`.
+3. Builds Linux and macOS binaries for x86_64 and ARM64 with [GoReleaser](.goreleaser.yaml).
+4. Pushes the commit and tag, then publishes a GitHub Release with the changelog section as its notes.
+5. Opens a PR against [CerealKiller97/homebrew-tap](https://github.com/CerealKiller97/homebrew-tap). The
    `linkwarden-cli-bin` AUR package is built but not pushed until AUR registrations reopen.
-7. Pushes a multi-arch image to `ghcr.io/cerealkiller97/linkwarden-cli`.
+6. Pushes a multi-arch image to `ghcr.io/cerealkiller97/linkwarden-cli`.
 
-Preview the changelog with `scripts/release.sh changelog 1.5.0`, and the binaries, Homebrew cask,
-AUR PKGBUILD and Docker images with `goreleaser release --snapshot --clean`
-(output in `dist/`, images tagged with an `-amd64`/`-arm64` suffix).
+Preview the changelog with `scripts/release.sh changelog 1.5.0`, and the binaries, Homebrew cask, AUR PKGBUILD and
+Docker images with `goreleaser release --snapshot --clean` (output in `dist/`).
 
 The workflow uses these repository secrets:
 
 | Secret | What it is |
-|---|---|
+| --- | --- |
 | `PACKAGES_GITHUB_TOKEN` | PAT from a repository admin, with write access to `linkwarden-cli` and `homebrew-tap` (fine-grained: Contents and Pull requests read/write). It pushes the release commit and tag to the protected `main` branch, pushes the cask to `homebrew-tap` and opens its PR. |
 | `AUR_KEY` | Private SSH key (no passphrase) whose public half is on your [AUR account](https://aur.archlinux.org/account). Not needed until AUR publishing is turned back on. |
+
+</details>
 
 ---
 
 <div align="center">
 
-Built with [Cobra](https://github.com/spf13/cobra) · [Bubble Tea](https://github.com/charmbracelet/bubbletea) · [Bubbles](https://github.com/charmbracelet/bubbles) · [Lip Gloss](https://github.com/charmbracelet/lipgloss)
+Built with [Cobra](https://github.com/spf13/cobra) · [Bubble Tea](https://github.com/charmbracelet/bubbletea) · [Bubbles](https://github.com/charmbracelet/bubbles) · [Lip Gloss](https://github.com/charmbracelet/lipgloss) · Demos recorded with [VHS](https://github.com/charmbracelet/vhs)
 
-Not affiliated with the Linkwarden project.
+A community-driven CLI for Linkwarden.<br>
+Found a bug or missing a feature? [Open an issue](https://github.com/CerealKiller97/linkwarden-cli/issues/new).
 
 </div>
