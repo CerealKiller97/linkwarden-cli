@@ -238,6 +238,65 @@ More ready-to-run scripts (CSV export, import with a failure report for cron, re
 
 ## Examples
 
+### Organize with collections
+
+<p align="center">
+  <img src=".github/assets/collections.gif" alt="Creating a Rust collection, nesting an Async collection inside it, renaming it through a picker, listing collections, and deleting Rust after confirming" width="900">
+</p>
+
+```bash
+# Create one, and nest another inside it
+linkwarden collections create --name "Rust" --description "The book, std and crates" --color "#f74c00"
+linkwarden collections create --name "Async" --parent-id 5 --icon "cube"
+
+# Change one: name it with --id, or leave --id out to pick it
+linkwarden collections update --id 6 --name "Async Rust"
+linkwarden collections update --public          # picker, then make it public
+
+linkwarden collections list
+linkwarden collections get --id 5 --json | jq .name
+
+# Delete: asks first and says how many links go with it; --yes skips that
+linkwarden collections delete --id 5
+```
+
+New collections go under **Unorganized** unless you pass `--parent-id`. The default color is `#00bba7`.
+
+### Save, find and tidy up links
+
+<p align="center">
+  <img src=".github/assets/links.gif" alt="Saving a link that takes its name from the page title, searching for kubernetes, tagging two links at once, and renaming a link picked from a list" width="900">
+</p>
+
+```bash
+# Save: the name comes from the page's title unless you pass --name
+linkwarden links create https://doc.rust-lang.org/book/ --collection-id 2 --tag rust --tag books
+
+# List, filter and search
+linkwarden links list --collection-id 2
+linkwarden links list --tag-id 4 --pinned-only
+linkwarden search --query kubernetes --sort newest
+
+# Many at once: add tags, move, or replace tags with --remove-previous-tags
+linkwarden links bulk-update --ids 6,7 --tag weekend
+linkwarden links bulk-update --ids 412,418,421 --collection-id 7 --tag reading --remove-previous-tags
+
+# One at a time, by ID or through the picker
+linkwarden links update --name "Kubernetes: the overview"
+linkwarden links delete --id 17
+linkwarden links bulk-delete --ids 301,302 --yes
+```
+
+Tags are created as you use them. To manage them directly:
+
+```bash
+linkwarden tags create --label golang --label k8s --label architecture
+linkwarden tags update --name kubernetes   # picker, then rename
+linkwarden tags bulk-delete --ids 14,15,22
+```
+
+`--ids` takes a comma-separated list, repeated flags, or both.
+
 ### Bulk-import links from a JSON file
 
 <p align="center">
@@ -282,25 +341,6 @@ Restore into another instance with the same file:
 ```bash
 LINKWARDEN_URL=https://new.example.com linkwarden migrations import --file linkwarden-2026-10-06.json --format linkwarden
 ```
-
-### Organize with collections and tags
-
-```bash
-# Nested collections
-linkwarden collections create --name "Infra" --color "#6366f1"
-linkwarden collections create --name "Kubernetes" --parent-id 9 --icon "cube"
-
-# Move three links into collection 7 and replace their tags
-linkwarden links bulk-update --ids 412,418,421 --collection-id 7 \
-  --tag reading --tag weekend --remove-previous-tags
-
-# Create tags in one go, rename one through a picker, clean up
-linkwarden tags create --label golang --label k8s --label architecture
-linkwarden tags update --name kubernetes
-linkwarden tags bulk-delete --ids 14,15,22
-```
-
-`--ids` takes a comma-separated list, repeated flags, or both.
 
 ### Find an article and save it as a PDF
 
@@ -511,8 +551,17 @@ go run ./scripts/gendocs              # regenerate docs/cli/ after changing a co
 ```
 
 CI runs the tests, the `docs/cli/` check, `golangci-lint`, `gosec` and `govulncheck` on pushes to `main` and on pull
-requests, plus [ShellCheck](https://www.shellcheck.net) on `examples/`. The GIFs above are recorded with
-[VHS](https://github.com/charmbracelet/vhs); see [`.github/assets/demo/`](.github/assets/demo/README.md) to re-record them.
+requests, plus [ShellCheck](https://www.shellcheck.net) on `examples/`.
+
+The GIFs above are recorded with [VHS](https://github.com/charmbracelet/vhs) against a throwaway, seeded Linkwarden.
+After changing a command's output, re-record them with one script (it needs Docker and Go):
+
+```bash
+.github/assets/demo/record.sh                    # every demo
+.github/assets/demo/record.sh collections links  # only these
+```
+
+See [`.github/assets/demo/`](.github/assets/demo/README.md) for how it works and how to write a new tape.
 
 <details>
 <summary><b>Releasing</b></summary>

@@ -33,6 +33,7 @@ Wait+Screen@60s /Failed/
 Sleep 4s
 
 Hide
+Sleep 500ms
 Type `linkwarden collections delete --id "$WEEKEND" --yes`
 Enter
 Sleep 2s

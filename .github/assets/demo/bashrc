@@ -4,5 +4,5 @@ export COLORTERM=truecolor
 export XDG_STATE_HOME=/tmp/lw-state
 cd /vhs/.github/assets/demo
 PS1='\[\e[1;35m\]$\[\e[0m\] '
-linkwarden() { linkwarden-linux-amd64 "$@"; }
+linkwarden() { linkwarden-demo "$@"; }
 export -f linkwarden

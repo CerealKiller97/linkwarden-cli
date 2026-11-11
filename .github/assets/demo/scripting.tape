@@ -37,6 +37,7 @@ Enter
 Sleep 4s
 
 Hide
+Sleep 500ms
 Type `linkwarden collections delete --id "$COL" --yes`
 Enter
 Sleep 2s

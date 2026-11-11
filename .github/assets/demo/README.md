@@ -1,49 +1,47 @@
 # Demo recordings
 
-The GIFs in the main README are recorded with [VHS](https://github.com/charmbracelet/vhs) from the tapes here:
+The GIFs in the main README are recorded with [VHS](https://github.com/charmbracelet/vhs) from the tapes in this folder.
 
-| Tape | GIF | Shows |
-| --- | --- | --- |
-| [`interactive.tape`](interactive.tape) | [`interactive.gif`](../interactive.gif) | Tables, pickers and the delete confirmation |
-| [`import.tape`](import.tape) | [`import.gif`](../import.gif) | `links import` with a collection picker and progress bar |
-| [`scripting.tape`](scripting.tape) | [`scripting.gif`](../scripting.gif) | `--json`, `-q` and failing fast without a terminal |
-| [`../install.tape`](../install.tape) | [`install.gif`](../install.gif) | The install script (see the tape for its own setup) |
+| Tape | Shows |
+| --- | --- |
+| [`interactive.tape`](interactive.tape) | Tables, the link picker and the delete confirmation |
+| [`collections.tape`](collections.tape) | Creating and nesting collections, updating one through a picker, deleting with confirmation |
+| [`links.tape`](links.tape) | Saving, listing, searching, bulk-tagging and renaming links |
+| [`import.tape`](import.tape) | `links import` with a collection picker, progress bar and results table |
+| [`scripting.tape`](scripting.tape) | `--json`, `-q` and failing fast without a terminal |
+| [`../install.tape`](../install.tape) | The install script (it has its own setup; see the tape) |
 
-[`setup.tape`](setup.tape) holds the shared look, and [`bashrc`](bashrc) the hidden shell setup.
+Each tape writes `.github/assets/<name>.gif`.
 
 ## Recording
 
-1. Point `LINKWARDEN_URL` and `LINKWARDEN_TOKEN` at an **empty** throwaway account. The demos create and
-   delete data, so don't use your real one. [`scripts/dev-linkwarden.sh`](../../../scripts/dev-linkwarden.sh)
-   starts a local instance:
+```bash
+.github/assets/demo/record.sh                    # every tape
+.github/assets/demo/record.sh collections links  # only these
+```
 
-   ```bash
-   scripts/dev-linkwarden.sh up
-   eval "$(scripts/dev-linkwarden.sh env)"
-   ```
+[`record.sh`](record.sh) needs Docker, Go, `curl`, `jq` and `openssl`. It never touches your own account:
 
-2. Seed it, while it's still empty, so the IDs match the tapes:
+1. Starts a throwaway Linkwarden on port 3200 from [`compose.yml`](compose.yml), with fresh volumes.
+2. Creates a demo user and API token, and fills the account with [`seed.sh`](seed.sh).
+3. Builds the CLI for Linux into `bin/` (git-ignored), plus a VHS image that adds `curl` and `jq`.
+4. Records each tape into `.github/assets/`.
+5. Removes the Linkwarden containers and volumes.
 
-   ```bash
-   .github/assets/demo/seed.sh
-   ```
+| Variable | Default | Effect |
+| --- | --- | --- |
+| `DEMO_PORT` | `3200` | Port for the throwaway Linkwarden |
+| `LINKWARDEN_VERSION` | `latest` | Linkwarden image tag |
+| `KEEP` | unset | Set to leave Linkwarden running afterwards, to try commands against the demo data |
 
-3. Build a Linux binary into `bin/` (git-ignored), where the tapes look for it:
+## Writing a tape
 
-   ```bash
-   CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o bin/linkwarden-linux-amd64 ./cmd/linkwarden
-   ```
-
-4. Build a VHS image with `curl` and `jq`, and record from the repo root. Inside the container, a local
-   instance is reached through `host.docker.internal` instead of `localhost`:
-
-   ```bash
-   printf 'FROM ghcr.io/charmbracelet/vhs\nRUN apt-get update && apt-get install -y --no-install-recommends curl jq\n' | docker build -t lw-vhs -
-   for tape in interactive import scripting; do
-     docker run --rm --shm-size=1g -v "$PWD:/vhs" \
-       -e LINKWARDEN_URL="${LINKWARDEN_URL/localhost/host.docker.internal}" -e LINKWARDEN_TOKEN \
-       lw-vhs ".github/assets/demo/$tape.tape"
-   done
-   ```
-
-Each tape cleans up what it creates, so you can re-record without re-seeding.
+- Start with `Source .github/assets/demo/setup.tape`. It sets the theme, size and font, and hides the shell setup in
+  [`bashrc`](bashrc) (prompt, `linkwarden` on `PATH`, working directory). Override `Set Width`, `Set Height` or
+  `Set FontSize` after it when a table needs more room.
+- Type a short `# comment` before each step. Bash ignores it, and it tells the viewer what's coming.
+- The tapes rely on the IDs that `seed.sh` produces on an empty account (collection `Go` is 1, link
+  `Go Concurrency Patterns: Pipelines` is 2) and run in the order listed in `record.sh`.
+- Clean up between `Hide` and the end of the tape: delete what you created and undo what you changed, so the next
+  tape sees the seed data. Inside `xargs`, call `linkwarden-demo`: `linkwarden` is a shell function there.
+- To check a frame without watching the GIF, add `Screenshot bin/check.png` at that point while you work on it.
