@@ -1,7 +1,7 @@
 // Package tui holds the CLI's interactive terminal prompts, built on Bubble Tea.
 //
 // The prompts here don't decide whether a terminal is available; callers (see
-// pkg/utils) are expected to check that before running one.
+// internal/utils) are expected to check that before running one.
 package tui
 
 import (

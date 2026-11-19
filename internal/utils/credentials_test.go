@@ -11,7 +11,7 @@ import (
 )
 
 // answerSelect is a Prompter whose Select picks the option named answer (or
-// returns err). pkg/utils/prompttest can't be used here: it imports this package.
+// returns err). internal/utils/prompttest can't be used here: it imports this package.
 type answerSelect struct {
 	Prompter
 	answer string
