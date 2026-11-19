@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"charm.land/lipgloss/v2"
+	"github.com/CerealKiller97/linkwarden-cli/internal/utils"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/app"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
