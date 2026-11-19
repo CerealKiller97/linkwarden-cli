@@ -2,7 +2,7 @@
 // token to talk to, how to print results, and whether prompts may be shown.
 // The root command builds an App from its flags, the environment and the
 // config file, and passes it to every command, which hands it on to the
-// helpers in pkg/utils.
+// helpers in internal/utils.
 //
 // Keeping this out of package variables lets tests build their own App per
 // test (see pkg/testutils) and run in parallel.

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/CerealKiller97/linkwarden-cli/internal/utils"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/require"
 )

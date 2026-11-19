@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/CerealKiller97/linkwarden-cli/internal/utils"
 	"github.com/CerealKiller97/linkwarden-cli/pkg/tui"
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
 )
 
 // Answer is the reply to one prompt. Label must appear in the prompt's label,

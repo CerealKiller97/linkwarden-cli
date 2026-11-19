@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
+	"github.com/CerealKiller97/linkwarden-cli/internal/utils"
 	"github.com/stretchr/testify/require"
 )
 

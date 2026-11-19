@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils"
-	"github.com/CerealKiller97/linkwarden-cli/pkg/utils/prompttest"
+	"github.com/CerealKiller97/linkwarden-cli/internal/utils"
+	"github.com/CerealKiller97/linkwarden-cli/internal/utils/prompttest"
 	"github.com/stretchr/testify/require"
 )
 
