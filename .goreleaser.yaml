@@ -138,9 +138,9 @@ homebrew_casks:
     # The binary isn't signed or notarized, so clear the quarantine flag Gatekeeper would block it on.
     hooks:
       post:
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/linkwarden"]
+        install_steps: |
+          on_macos do
+            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/linkwarden"]
           end
 
 # 🐧 yay -S linkwarden-cli-bin
