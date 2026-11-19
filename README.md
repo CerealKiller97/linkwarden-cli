@@ -584,22 +584,33 @@ Versions follow [SemVer](https://semver.org), and [CHANGELOG.md](CHANGELOG.md) f
 [Conventional Commits](https://www.conventionalcommits.org), so write commit messages like `feat(links): …`,
 `fix: …` or `feat!: …` for breaking changes.
 
+Nobody, admins included, can push to `main`, so a release takes two steps. First, open a pull request that adds the
+new version's section to `CHANGELOG.md`:
+
 ```bash
-scripts/release.sh patch   # 1.4.2 → 1.4.3  bug fixes
-scripts/release.sh minor   # 1.4.2 → 1.5.0  new features
-scripts/release.sh major   # 1.4.2 → 2.0.0  breaking changes
+scripts/release.sh prepare patch   # 1.4.2 → 1.4.3  bug fixes
+scripts/release.sh prepare minor   # 1.4.2 → 1.5.0  new features
+scripts/release.sh prepare major   # 1.4.2 → 2.0.0  breaking changes
 ```
 
-The script shows the next version and a changelog preview, then triggers the
+It shows the next version and a changelog preview, then pushes a `release/vX.Y.Z` branch and opens the PR. Edit the
+section on that branch if it needs it, and merge the PR. Then release with the same bump:
+
+```bash
+scripts/release.sh patch
+```
+
+The script checks that `main` has the version's changelog section, then triggers the
 [release workflow](.github/workflows/release.yml), which:
 
 1. Tests the code.
-2. Prepends the new version's section to `CHANGELOG.md`, commits it and tags `vX.Y.Z`.
-3. Builds Linux and macOS binaries for x86_64 and ARM64 with [GoReleaser](.goreleaser.yaml).
-4. Pushes the commit and tag, then publishes a GitHub Release with the changelog section as its notes.
-5. Opens a PR against [CerealKiller97/homebrew-tap](https://github.com/CerealKiller97/homebrew-tap). The
+2. Reads the version's section from `CHANGELOG.md`, and fails if it's missing. The workflow never commits to `main`.
+3. Tags `main`'s HEAD as `vX.Y.Z`.
+4. Builds Linux and macOS binaries for x86_64 and ARM64 with [GoReleaser](.goreleaser.yaml).
+5. Pushes the tag, then publishes a GitHub Release with the changelog section as its notes.
+6. Opens a PR against [CerealKiller97/homebrew-tap](https://github.com/CerealKiller97/homebrew-tap). The
    `linkwarden-cli-bin` AUR package is built but not pushed until AUR registrations reopen.
-6. Pushes a multi-arch image to `ghcr.io/cerealkiller97/linkwarden-cli`.
+7. Pushes a multi-arch image to `ghcr.io/cerealkiller97/linkwarden-cli`.
 
 Preview the changelog with `scripts/release.sh changelog 1.5.0`, and the binaries, Homebrew cask, AUR PKGBUILD and
 Docker images with `goreleaser release --snapshot --clean` (output in `dist/`).
@@ -608,7 +619,7 @@ The workflow uses these repository secrets:
 
 | Secret | What it is |
 | --- | --- |
-| `PACKAGES_GITHUB_TOKEN` | PAT from a repository admin, with write access to `linkwarden-cli` and `homebrew-tap` (fine-grained: Contents and Pull requests read/write). It pushes the release commit and tag to the protected `main` branch, pushes the cask to `homebrew-tap` and opens its PR. |
+| `PACKAGES_GITHUB_TOKEN` | PAT with write access to `homebrew-tap` (fine-grained: Contents and Pull requests read/write). It pushes the cask to `homebrew-tap` and opens its PR. The release tag is pushed with the workflow's own `github.token`. |
 | `AUR_KEY` | Private SSH key (no passphrase) whose public half is on your [AUR account](https://aur.archlinux.org/account). Not needed until AUR publishing is turned back on. |
 
 </details>
