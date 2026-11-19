@@ -16,7 +16,7 @@ Friendly pickers when you're at the keyboard, clean JSON and fail-fast errors wh
 [![Go Version](https://img.shields.io/github/go-mod/go-version/CerealKiller97/linkwarden-cli?logo=go&logoColor=white)](go.mod)
 [![Go Reference](https://pkg.go.dev/badge/github.com/CerealKiller97/linkwarden-go-sdk.svg)](https://pkg.go.dev/github.com/CerealKiller97/linkwarden-go-sdk)
 [![Go Report Card](https://goreportcard.com/badge/github.com/CerealKiller97/linkwarden-cli)](https://goreportcard.com/report/github.com/CerealKiller97/linkwarden-cli)
-[![Community driven](https://img.shields.io/badge/community-driven-8b5cf6)](#community-driven)
+[![Official Linkwarden CLI](https://img.shields.io/badge/linkwarden-official%20CLI-8b5cf6)](#official-cli)
 
 [Install](#installation) · [Get started](#getting-started) · [Two modes](#two-modes-interactive-and-scripted) · [Examples](#examples) · [Commands](#command-reference) · [Go SDK](#go-sdk)
 
@@ -25,9 +25,9 @@ Friendly pickers when you're at the keyboard, clean JSON and fail-fast errors wh
 </div>
 
 > [!NOTE]
-> <a id="community-driven"></a>**A community-driven CLI.** linkwarden-cli is built and maintained by the community, separately
-> from the Linkwarden team, and it's actively supported here. It works with both Linkwarden Cloud and self-hosted
-> instances. Bugs, questions and feature requests go to
+> <a id="official-cli"></a>**The official Linkwarden CLI.** linkwarden-cli is the official command-line client for
+> [Linkwarden](https://linkwarden.app), endorsed by the Linkwarden team and actively maintained here. It works with both
+> Linkwarden Cloud and self-hosted instances. Bugs, questions and feature requests go to
 > [this repository's issues](https://github.com/CerealKiller97/linkwarden-cli/issues).
 
 ## Features
@@ -619,7 +619,7 @@ The workflow uses these repository secrets:
 
 Built with [Cobra](https://github.com/spf13/cobra) · [Bubble Tea](https://github.com/charmbracelet/bubbletea) · [Bubbles](https://github.com/charmbracelet/bubbles) · [Lip Gloss](https://github.com/charmbracelet/lipgloss) · Demos recorded with [VHS](https://github.com/charmbracelet/vhs)
 
-A community-driven CLI for Linkwarden.<br>
+The official CLI for Linkwarden.<br>
 Found a bug or missing a feature? [Open an issue](https://github.com/CerealKiller97/linkwarden-cli/issues/new).
 
 </div>
