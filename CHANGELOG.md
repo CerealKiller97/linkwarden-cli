@@ -39,7 +39,7 @@ with Linkwarden Cloud and self-hosted instances, on macOS and Linux (amd64 and a
   cancels in-flight requests and exits with status 130.
 - **install:** Install with a one-line `curl | bash` script (with shell completions), Homebrew
   (`brew install linkwarden/tap/linkwarden-cli`), `go install`, a release archive, or the multi-arch Docker
-  image `ghcr.io/cerealkiller97/linkwarden-cli`.
+  image `ghcr.io/linkwarden/linkwarden-cli`.
 - **completions:** Shell completions for bash, zsh and fish.
 
 [Unreleased]: https://github.com/CerealKiller97/linkwarden-cli/compare/v1.0.0...HEAD

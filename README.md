@@ -64,7 +64,7 @@ brew install linkwarden/tap/linkwarden-cli
 **Docker** (linux/amd64 and linux/arm64). Add `-it` for pickers and prompts:
 
 ```bash
-docker run --rm -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/cerealkiller97/linkwarden-cli links list
+docker run --rm -e LINKWARDEN_TOKEN -e LINKWARDEN_URL ghcr.io/linkwarden/linkwarden-cli links list
 ```
 
 Image tags are `latest` and each release version without the `v`, for example `1.0.0`.
@@ -599,7 +599,7 @@ The script shows the next version and a changelog preview, then triggers the
 4. Pushes the commit and tag, then publishes a GitHub Release with the changelog section as its notes.
 5. Opens a PR against [linkwarden/homebrew-tap](https://github.com/linkwarden/homebrew-tap). The
    `linkwarden-cli-bin` AUR package is built but not pushed until AUR registrations reopen.
-6. Pushes a multi-arch image to `ghcr.io/cerealkiller97/linkwarden-cli`.
+6. Pushes a multi-arch image to `ghcr.io/linkwarden/linkwarden-cli`.
 
 Preview the changelog with `scripts/release.sh changelog 1.5.0`, and the binaries, Homebrew cask, AUR PKGBUILD and
 Docker images with `goreleaser release --snapshot --clean` (output in `dist/`).
