@@ -105,7 +105,7 @@ jobs:
           password: ${{ github.token }}
 
       # Publishes the GitHub release and the ghcr.io image, and opens
-      # a PR against CerealKiller97/homebrew-tap.
+      # a PR against linkwarden/homebrew-tap.
       - name: 🚀 Release and publish packages
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
         with:
