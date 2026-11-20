@@ -107,8 +107,8 @@ dockers_v2:
       org.opencontainers.image.revision: "{{ .FullCommit }}"
       org.opencontainers.image.version: "{{ .Version }}"
 
-# 🍺 brew install CerealKiller97/tap/linkwarden-cli
-# Pushes the cask to a branch of CerealKiller97/homebrew-tap and opens a PR to its main branch.
+# 🍺 brew install linkwarden/tap/linkwarden-cli
+# Pushes the cask to a branch of linkwarden/homebrew-tap and opens a PR to its main branch.
 homebrew_casks:
   - name: linkwarden-cli
     ids: [linkwarden]
@@ -120,14 +120,14 @@ homebrew_casks:
       zsh: completions/linkwarden.zsh
       fish: completions/linkwarden.fish
     repository:
-      owner: CerealKiller97
+      owner: linkwarden
       name: homebrew-tap
       branch: "{{ .ProjectName }}-{{ .Version }}"
       token: "{{ .Env.PACKAGES_GITHUB_TOKEN }}"
       pull_request:
         enabled: true
         base:
-          owner: CerealKiller97
+          owner: linkwarden
           name: homebrew-tap
           branch: main
     commit_msg_template: "chore(linkwarden-cli): update to {{ .Tag }}"
